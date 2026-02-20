@@ -1,0 +1,77 @@
+export const badges = {
+  "carbon-conscious": {
+    id: "carbon-conscious",
+    name: "Carbon Conscious",
+    description: "Berhasil menghitung dan memahami jejak karbon pribadimu",
+    icon: "🌡️",
+    rarity: "common",
+    category: "climate",
+  },
+  "waste-warrior": {
+    id: "waste-warrior",
+    name: "Waste Warrior",
+    description: "Maestro pemilah sampah — tahu bedanya organik, anorganik, dan B3",
+    icon: "♻️",
+    rarity: "common",
+    category: "waste",
+  },
+  "species-guardian": {
+    id: "species-guardian",
+    name: "Species Guardian",
+    description: "Penjaga satwa liar — hafal nama dan ancaman terhadap spesies langka",
+    icon: "🦏",
+    rarity: "uncommon",
+    category: "biodiversity",
+  },
+  "mangrove-hero": {
+    id: "mangrove-hero",
+    name: "Mangrove Hero",
+    description: "Berhasil memulihkan ekosistem mangrove secara virtual",
+    icon: "🌊",
+    rarity: "uncommon",
+    category: "coastal",
+  },
+  "water-saver": {
+    id: "water-saver",
+    name: "Water Saver",
+    description: "Pahlawan air — tahu cara menghemat air setiap hari",
+    icon: "💧",
+    rarity: "common",
+    category: "water",
+  },
+  "eco-explorer": {
+    id: "eco-explorer",
+    name: "Eco Explorer",
+    description: "Telah menjelajahi 5 provinsi Indonesia",
+    icon: "🗺️",
+    rarity: "uncommon",
+    category: "exploration",
+  },
+  "province-conqueror": {
+    id: "province-conqueror",
+    name: "Province Conqueror",
+    description: "Menyelesaikan semua misi di satu provinsi",
+    icon: "⭐",
+    rarity: "rare",
+    category: "exploration",
+  },
+  "eco-warrior": {
+    id: "eco-warrior",
+    name: "Eco Warrior",
+    description: "Menyelesaikan 10 misi lingkungan",
+    icon: "🏆",
+    rarity: "epic",
+    category: "milestone",
+  },
+  "indonesian-hero": {
+    id: "indonesian-hero",
+    name: "Indonesian Hero",
+    description: "Menjelajahi lebih dari 10 provinsi Indonesia",
+    icon: "🇮🇩",
+    rarity: "legendary",
+    category: "milestone",
+  },
+};
+
+export const getBadgeById = (id) => badges[id];
+export const badgeList = Object.values(badges);

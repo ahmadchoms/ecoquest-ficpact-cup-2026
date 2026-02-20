@@ -1,8 +1,9 @@
 @import "tailwindcss";
+@plugin "daisyui";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f0fdf4;
+  --foreground: #14532d;
 }
 
 @theme inline {
@@ -10,17 +11,181 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --color-eco-primary: #10b981;
+  --color-eco-secondary: #059669;
+  --color-eco-accent: #34d399;
+  --color-eco-dark: #064e3b;
+  --color-eco-light: #d1fae5;
+}
+
+/* DaisyUI Custom Theme */
+[data-theme="ecoquest"] {
+  --fallback-p: #10b981;
+  --fallback-pc: #ffffff;
+  --fallback-s: #059669;
+  --fallback-sc: #ffffff;
+  --fallback-a: #34d399;
+  --fallback-ac: #064e3b;
+  --fallback-n: #064e3b;
+  --fallback-nc: #ffffff;
+  --fallback-b1: #f0fdf4;
+  --fallback-b2: #dcfce7;
+  --fallback-b3: #bbf7d0;
+  --fallback-bc: #064e3b;
+  --fallback-in: #0ea5e9;
+  --fallback-inc: #ffffff;
+  --fallback-su: #10b981;
+  --fallback-suc: #ffffff;
+  --fallback-wa: #f59e0b;
+  --fallback-wac: #ffffff;
+  --fallback-er: #ef4444;
+  --fallback-erc: #ffffff;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #064e3b;
+    --foreground: #d1fae5;
+  }
+  
+  [data-theme="ecoquest"] {
+    --fallback-p: #34d399;
+    --fallback-pc: #064e3b;
+    --fallback-s: #10b981;
+    --fallback-sc: #ffffff;
+    --fallback-a: #6ee7b7;
+    --fallback-ac: #064e3b;
+    --fallback-n: #022c22;
+    --fallback-nc: #d1fae5;
+    --fallback-b1: #064e3b;
+    --fallback-b2: #065f46;
+    --fallback-b3: #047857;
+    --fallback-bc: #d1fae5;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Leaflet Map Styles */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.leaflet-pane {
+  z-index: 10;
+}
+
+.leaflet-tile-pane {
+  z-index: 20;
+}
+
+.leaflet-marker-pane {
+  z-index: 30;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #d1fae5;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #10b981;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #059669;
+}
+
+/* Animation Utilities */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(16, 185, 129, 0.8);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Glass Effect */
+.glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Gradient Text */
+.gradient-text {
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Card Hover Effects */
+.card-hover {
+  transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(16, 185, 129, 0.2);
+}
+
+/* Loading Spinner */
+.loading-spinner {
+  border: 3px solid #d1fae5;
+  border-top: 3px solid #10b981;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Three.js Canvas Container */
+.three-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+/* Responsive Utilities */
+@media (max-width: 640px) {
+  .mobile-nav-spacer {
+    height: 80px;
+  }
 }
