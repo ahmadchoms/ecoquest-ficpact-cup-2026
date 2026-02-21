@@ -7,23 +7,26 @@ import XPBar from "@/components/ui/XPBar";
 import LevelBadge from "@/components/ui/LevelBadge";
 import { motion, AnimatePresence } from "framer-motion";
 import { Leaf, User, Map, LogOut, Award, Menu, X } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useTransition } from "react";
 
 export default function Navbar() {
   const { totalXP, level, explorerName, resetProgress } = useUserStore();
   const pathname = usePathname();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [, startTransition] = useTransition();
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    startTransition(() => {
+      setMobileOpen(false);
+      setDropdownOpen(false);
+    });
+  }, [pathname]);
 
   // Hide navbar on landing page and auth pages
   const hiddenRoutes = ["/", "/login", "/register"];
   if (hiddenRoutes.includes(pathname)) return null;
-
-  // Close mobile menu on route change
-  useEffect(() => {
-    setMobileOpen(false);
-    setDropdownOpen(false);
-  }, [pathname]);
 
   const navLinks = [
     { href: "/map", icon: <Map size={18} />, label: "Peta" },
@@ -65,7 +68,7 @@ export default function Navbar() {
             <div className="w-9 h-9 md:w-10 md:h-10 bg-gradient-to-br from-emerald-400 to-teal-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-transform">
               <Leaf size={18} />
             </div>
-            <span className="font-heading font-bold text-lg md:text-xl text-slate-800 hidden sm:block">
+            <span className="font-display font-bold text-lg md:text-xl text-slate-800 hidden sm:block">
               EcoQuest
             </span>
           </Link>

@@ -1,15 +1,20 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+const API_KEY = process.env.VITE_GEMINI_API_KEY;
 let genAI = null;
 
 if (API_KEY) {
   genAI = new GoogleGenerativeAI(API_KEY);
 } else {
-  console.warn("Gemini API Key is missing! AI features will use fallback content.");
+  console.warn(
+    "Gemini API Key is missing! AI features will use fallback content.",
+  );
 }
 
-export const generateQuizQuestions = async (topic = "Indonesian wildlife", count = 5) => {
+export const generateQuizQuestions = async (
+  topic = "Indonesian wildlife",
+  count = 5,
+) => {
   if (!genAI) return null;
 
   try {
@@ -23,10 +28,13 @@ export const generateQuizQuestions = async (topic = "Indonesian wildlife", count
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
-    
+
     // Clean up if the model adds markdown ticks despite instructions
-    const jsonStr = text.replace(/```json/g, "").replace(/```/g, "").trim();
-    
+    const jsonStr = text
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
+
     return JSON.parse(jsonStr);
   } catch (error) {
     console.error("AI Generation Error:", error);
@@ -40,7 +48,7 @@ export const getMissionTip = async (missionContext) => {
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
     const prompt = `Give a short, inspiring, one-sentence tip about ${missionContext} in Indonesian.`;
-    
+
     const result = await model.generateContent(prompt);
     return result.response.text();
   } catch (error) {

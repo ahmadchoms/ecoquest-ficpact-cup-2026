@@ -12,14 +12,17 @@ export default function TrophyScene() {
 
     // SCENE SETUP
     const scene = new THREE.Scene();
+
+    // CAMERA
     const camera = new THREE.PerspectiveCamera(
-      45,
+      40,
       mountRef.current.clientWidth / mountRef.current.clientHeight,
       0.1,
-      100,
+      1000,
     );
-    camera.position.set(0, 1, 9);
+    camera.position.set(0, -0.5, 8);
 
+    // RENDERER
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
       alpha: true,
@@ -30,191 +33,229 @@ export default function TrophyScene() {
       mountRef.current.clientHeight,
     );
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.2;
-    mountRef.current.appendChild(renderer.domElement);
 
-    // --- MATERIALS ---
-    const goldMaterial = new THREE.MeshStandardMaterial({
-      color: 0xffaa00,
-      metalness: 1,
-      roughness: 0.15,
-      emissive: 0xffaa00,
-      emissiveIntensity: 0.1,
+    // Peningkatan Tone Mapping untuk warna emas yang lebih kaya
+    renderer.toneMapping = THREE.ReinhardToneMapping;
+    renderer.toneMappingExposure = 2.3;
+
+    const container = mountRef.current;
+    container.appendChild(renderer.domElement);
+
+    // --- MATERIALS (DI-UPGRADE) ---
+    const goldMaterial = new THREE.MeshPhysicalMaterial({
+      color: 0xffaa00, // Warna emas dibuat sedikit lebih hangat
+      metalness: 1.0,
+      roughness: 0.15, // Sedikit dinaikkan agar cahaya menyebar lebih halus
+      emissive: 0x331a00, // Emissive hangat untuk mencegah bayangan terlalu hitam pekat
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.1,
     });
 
-    const glassMaterial = new THREE.MeshPhysicalMaterial({
-      color: 0xffffff,
-      metalness: 0,
+    // Material baru untuk dudukan (Base) - Hitam mengkilap/Marmer
+    const baseMaterial = new THREE.MeshPhysicalMaterial({
+      color: 0x111111,
+      metalness: 0.6,
+      roughness: 0.1,
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.2,
+    });
+
+    const gemMaterial = new THREE.MeshPhysicalMaterial({
+      color: 0x00f2ff,
+      metalness: 0.1,
       roughness: 0.05,
-      transmission: 0.9, // Glass effect
+      transmission: 0.95,
       transparent: true,
-      thickness: 0.5,
+      thickness: 1.5,
+      ior: 2.4,
     });
 
-    // --- GEOMETRY (Procedural Trophy) ---
+    // --- GEOMETRY (DI-UPGRADE) ---
     const trophyGroup = new THREE.Group();
 
-    // Base
-    const baseGeo = new THREE.CylinderGeometry(1.5, 1.8, 0.5, 32);
-    const base = new THREE.Mesh(baseGeo, goldMaterial);
-    base.position.y = -2;
-    trophyGroup.add(base);
+    // 1. Base (Dibuat lebih berat dan menggunakan material gelap)
+    const baseBottomGeo = new THREE.CylinderGeometry(1.6, 1.8, 0.3, 32);
+    const baseBottom = new THREE.Mesh(baseBottomGeo, baseMaterial);
+    baseBottom.position.y = -2.5;
+    trophyGroup.add(baseBottom);
 
-    // Stem
-    const stemGeo = new THREE.CylinderGeometry(0.3, 0.5, 2, 16);
+    const baseTopGeo = new THREE.CylinderGeometry(1.2, 1.5, 0.4, 32);
+    const baseTop = new THREE.Mesh(baseTopGeo, baseMaterial);
+    baseTop.position.y = -2.15;
+    trophyGroup.add(baseTop);
+
+    // 2. Stem (Lebih ramping dan panjang, seperti trofi modern)
+    const stemGeo = new THREE.CylinderGeometry(0.15, 0.4, 1.8, 32);
     const stem = new THREE.Mesh(stemGeo, goldMaterial);
-    stem.position.y = -0.8;
+    stem.position.y = -1.05;
     trophyGroup.add(stem);
 
-    // Cup Body (Bot half)
+    // [BARU] Cincin Leher (Penyambung mulus antara batang dan piala)
+    const neckRingGeo = new THREE.TorusGeometry(0.25, 0.08, 16, 32);
+    const neckRing = new THREE.Mesh(neckRingGeo, goldMaterial);
+    neckRing.position.y = -0.15;
+    neckRing.rotation.x = Math.PI / 2;
+    trophyGroup.add(neckRing);
+
+    // 3. Cup Body (Diubah dari mangkuk menjadi bentuk piala/chalice)
     const cupBaseGeo = new THREE.SphereGeometry(
-      1.4,
+      1.2, // Radius sedikit dikecilkan
       32,
       32,
       0,
       Math.PI * 2,
       0,
-      Math.PI * 0.5,
+      Math.PI * 0.55, // Sedikit lebih dalam dari setengah bola
     );
     const cupBase = new THREE.Mesh(cupBaseGeo, goldMaterial);
-    cupBase.position.y = 0.5;
-    cupBase.rotation.x = Math.PI;
+    cupBase.position.y = -0.15;
+    cupBase.rotation.x = Math.PI; // Balik ke atas
+    cupBase.scale.y = 1.4; // [KUNCI] Ditarik ke atas agar berbentuk piala elegan, bukan mangkuk
     trophyGroup.add(cupBase);
 
-    // Cup Rim (Top half)
-    const cupRimGeo = new THREE.TorusGeometry(1.4, 0.1, 16, 32);
-    const cupRim = new THREE.Mesh(cupRimGeo, goldMaterial);
-    cupRim.position.y = 1.9;
-    cupRim.rotation.x = Math.PI / 2;
-    trophyGroup.add(cupRim);
+    // 4. Handles (Lebih ramping dan menyatu dengan kurva piala)
+    const handleGeo = new THREE.TorusGeometry(0.7, 0.08, 16, 32, Math.PI); // Torus setengah lingkaran
 
-    // Floating Gem/Star inside
-    const starGeo = new THREE.IcosahedronGeometry(0.8, 0);
-    const star = new THREE.Mesh(starGeo, glassMaterial);
-    star.position.y = 2.5;
+    const handleLeft = new THREE.Mesh(handleGeo, goldMaterial);
+    handleLeft.position.set(-1.1, 0.6, 0);
+    handleLeft.rotation.z = Math.PI / 2 + 0.2; // Dimiringkan agar mengikuti lengkungan piala
+    trophyGroup.add(handleLeft);
+
+    const handleRight = new THREE.Mesh(handleGeo, goldMaterial);
+    handleRight.position.set(1.1, 0.6, 0);
+    handleRight.rotation.z = -Math.PI / 2 - 0.2;
+    trophyGroup.add(handleRight);
+
+    // 5. Gem (Pusat perhatian diletakkan di dalam piala)
+    const starGeo = new THREE.OctahedronGeometry(0.5, 0);
+    const star = new THREE.Mesh(starGeo, gemMaterial);
+    star.position.y = 1.4; // Melayang pas di atas bibir piala
     trophyGroup.add(star);
 
-    // Floating particles (Confetti)
+    // 6. Confetti (Tetap sama, efek partikel)
     const particlesGeo = new THREE.BufferGeometry();
-    const particleCount = 50;
+    const particleCount = 80;
     const posArray = new Float32Array(particleCount * 3);
-    const colorsArray = new Float32Array(particleCount * 3);
-    const colorPalette = [
-      new THREE.Color(0xfbbf24),
-      new THREE.Color(0x34d399),
-      new THREE.Color(0xf472b6),
-    ];
-
     for (let i = 0; i < particleCount; i++) {
-      posArray[i * 3] = (Math.random() - 0.5) * 6;
-      posArray[i * 3 + 1] = (Math.random() - 0.5) * 6;
-      posArray[i * 3 + 2] = (Math.random() - 0.5) * 4;
-
-      const color =
-        colorPalette[Math.floor(Math.random() * colorPalette.length)];
-      colorsArray[i * 3] = color.r;
-      colorsArray[i * 3 + 1] = color.g;
-      colorsArray[i * 3 + 2] = color.b;
+      posArray[i * 3] = (Math.random() - 0.5) * 10;
+      posArray[i * 3 + 1] = (Math.random() - 0.5) * 10 + 2; // Mulai lebih tinggi
+      posArray[i * 3 + 2] = (Math.random() - 0.5) * 5;
     }
     particlesGeo.setAttribute(
       "position",
       new THREE.BufferAttribute(posArray, 3),
     );
-    particlesGeo.setAttribute(
-      "color",
-      new THREE.BufferAttribute(colorsArray, 3),
-    );
-
     const particlesMat = new THREE.PointsMaterial({
-      size: 0.15,
-      vertexColors: true,
+      size: 0.08,
+      color: 0xffd700,
       transparent: true,
       opacity: 0.8,
     });
     const confetti = new THREE.Points(particlesGeo, particlesMat);
-    trophyGroup.add(confetti);
+    scene.add(confetti);
 
     scene.add(trophyGroup);
 
-    // --- LIGHTING ---
-    const ambLight = new THREE.AmbientLight(0xffffff, 0.5);
+    // --- LIGHTING (DI-UPGRADE) ---
+    const ambLight = new THREE.AmbientLight(0xffffff, 0.8);
     scene.add(ambLight);
 
-    const spotLight = new THREE.SpotLight(0xffaa00, 5);
-    spotLight.position.set(5, 5, 5);
-    spotLight.angle = 0.5;
-    spotLight.penumbra = 0.5;
-    scene.add(spotLight);
+    const mainLight = new THREE.DirectionalLight(0xffffff, 2);
+    mainLight.position.set(2, 5, 5);
+    scene.add(mainLight);
 
-    const rimLight = new THREE.PointLight(0xffffff, 2);
-    rimLight.position.set(-5, 5, -5);
-    scene.add(rimLight);
+    const blueLight = new THREE.PointLight(0x00f2ff, 3, 10);
+    blueLight.position.set(0, 1.2, 1);
+    scene.add(blueLight);
+
+    const goldBacklight = new THREE.PointLight(0xffaa00, 2, 10);
+    goldBacklight.position.set(-2, -2, -2);
+    scene.add(goldBacklight);
 
     // ANIMATION
     let requestID;
+    let hasSetLoaded = false;
+
     const animate = (time) => {
+      // Set loaded state inside animation frame (not synchronously in effect)
+      if (!hasSetLoaded) {
+        setIsLoaded(true);
+        hasSetLoaded = true;
+      }
+
       requestID = requestAnimationFrame(animate);
 
-      // Trophy float & rotate
-      trophyGroup.rotation.y = Math.sin(time * 0.0005) * 0.2;
-      trophyGroup.position.y = Math.sin(time * 0.001) * 0.2;
+      const t = time * 0.001;
 
-      // Star spin
-      star.rotation.y += 0.01;
-      star.rotation.z += 0.005;
+      // Floating motion
+      trophyGroup.position.y = Math.sin(t) * 0.15;
+      trophyGroup.rotation.y = t * 0.3;
 
-      // Confetti slow drift
-      confetti.rotation.y -= 0.001;
+      // Gem pulse & spin
+      star.rotation.y -= 0.02;
+      star.scale.setScalar(1 + Math.sin(t * 2) * 0.1);
+
+      // Slow particles drift
+      confetti.rotation.y += 0.002;
+      confetti.position.y = Math.sin(t * 0.5) * 0.2;
 
       renderer.render(scene, camera);
     };
 
-    setIsLoaded(true);
     animate(0);
 
-    // RESIZE
     const handleResize = () => {
-      if (!mountRef.current) return;
-      const w = mountRef.current.clientWidth;
-      const h = mountRef.current.clientHeight;
+      if (!container) return;
+      const w = container.clientWidth;
+      const h = container.clientHeight;
       renderer.setSize(w, h);
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
     };
+
     window.addEventListener("resize", handleResize);
 
-    // CLEANUP
     return () => {
       window.removeEventListener("resize", handleResize);
       cancelAnimationFrame(requestID);
-      if (mountRef.current && renderer.domElement) {
-        mountRef.current.removeChild(renderer.domElement);
-      }
-      baseGeo.dispose();
-      stemGeo.dispose();
-      cupBaseGeo.dispose();
-      cupRimGeo.dispose();
-      starGeo.dispose();
-      particlesGeo.dispose();
-      goldMaterial.dispose();
-      glassMaterial.dispose();
-      particlesMat.dispose();
       renderer.dispose();
+      // Dispose Geometries
+      [
+        baseBottomGeo,
+        baseTopGeo,
+        stemGeo,
+        cupBaseGeo,
+        handleGeo,
+        starGeo,
+        particlesGeo,
+      ].forEach((g) => g.dispose());
+      // Dispose Materials
+      [goldMaterial, gemMaterial, particlesMat].forEach((m) => m.dispose());
+      if (container.contains(renderer.domElement)) {
+        container.removeChild(renderer.domElement);
+      }
     };
   }, []);
 
   return (
-    <div className="w-full h-full relative" style={{ minHeight: 180 }}>
-      {/* Container */}
-      <div ref={mountRef} className="w-full h-full absolute inset-0 z-0" />
+    <div className="w-full h-full relative group" style={{ minHeight: 50 }}>
+      {/* Background Glow */}
+      <div className="absolute inset-0 bg-gradient-to-b from-amber-500/5 to-transparent rounded-full blur-3xl" />
 
-      {/* Loading */}
+      <div ref={mountRef} className="w-full h-full absolute inset-0 z-10" />
+
       {!isLoaded && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-10 h-10 rounded-full border-4 border-amber-200 border-t-amber-500 animate-spin" />
+        <div className="absolute inset-0 flex items-center justify-center z-20">
+          <div className="w-12 h-12 rounded-full border-4 border-amber-500/20 border-t-amber-500 animate-spin" />
         </div>
       )}
+
+      {/* UI Overlay */}
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+        <div className="px-4 py-1.5 bg-black/50 backdrop-blur-md border border-white/10 rounded-full text-[10px] text-amber-200 uppercase tracking-widest font-bold">
+          Master Guardian Trophy
+        </div>
+      </div>
     </div>
   );
 }

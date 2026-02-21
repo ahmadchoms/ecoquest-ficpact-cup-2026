@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import PageWrapper from "@/components/layout/PageWrapper";
 import { useUserStore } from "@/store/useUserStore";
 import { badgeList } from "@/data/badges";
 import { IMPACT_LABELS } from "@/utils/constants";
@@ -15,7 +14,6 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { Map, RotateCcw, Award, TreePine } from "lucide-react";
 import { staggerContainer, fadeIn, zoomIn } from "@/utils/motion-variants";
 
-// Design System
 import EcoCard from "@/components/design-system/EcoCard";
 import EcoBadge from "@/components/design-system/EcoBadge";
 import EcoButton from "@/components/design-system/EcoButton";
@@ -46,14 +44,13 @@ export default function DashboardPage() {
   ].filter((d) => d.value > 0);
 
   return (
-    <PageWrapper className="min-h-screen bg-white pt-20 pb-24 font-body">
+    <div className="min-h-screen bg-white pt-20 pb-24 font-body">
       <motion.div
         variants={staggerContainer(0.1)}
         initial="hidden"
         animate="visible"
         className="max-w-4xl mx-auto px-4 py-6 space-y-10"
       >
-        {/* Hero */}
         <motion.div variants={fadeIn("down", 0.1)}>
           <EcoCard className="p-0 overflow-hidden bg-mint relative">
             <div className="p-8 relative z-10">
@@ -83,7 +80,7 @@ export default function DashboardPage() {
                     {totalXP.toLocaleString()}
                   </p>
                   <p className="text-black/60 text-xs font-bold uppercase tracking-wider">
-                    Total XP Points
+                    Total XP POINTS
                   </p>
                 </div>
               </div>
@@ -105,19 +102,17 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Stats */}
             <div className="grid grid-cols-3 divide-x-2 divide-black border-t-3 border-black bg-white">
-              <div className="p-6 text-center">
-                <p className="font-display text-3xl font-extrabold text-black">
+              <div className="p-6 text-center group hover:bg-yellow transition-colors">
+                <p className="font-display text-3xl font-extrabold text-black group-hover:scale-110 transition-transform">
                   {completedMissions.length}
                 </p>
                 <p className="text-xs text-black/50 font-bold uppercase mt-1">
                   Misi Selesai
                 </p>
               </div>
-
-              <div className="p-6 text-center">
-                <p className="font-display text-3xl font-extrabold text-black">
+              <div className="p-6 text-center group hover:bg-green transition-colors">
+                <p className="font-display text-3xl font-extrabold text-black group-hover:scale-110 transition-transform">
                   {exploredProvinces.length}
                   <span className="text-lg text-black/30 font-bold">/34</span>
                 </p>
@@ -125,9 +120,8 @@ export default function DashboardPage() {
                   Provinsi
                 </p>
               </div>
-
-              <div className="p-6 text-center">
-                <p className="font-display text-3xl font-extrabold text-black">
+              <div className="p-6 text-center group hover:bg-purple transition-colors">
+                <p className="font-display text-3xl font-extrabold text-black group-hover:scale-110 transition-transform">
                   {earnedBadges.length}
                 </p>
                 <p className="text-xs text-black/50 font-bold uppercase mt-1">
@@ -138,7 +132,6 @@ export default function DashboardPage() {
           </EcoCard>
         </motion.div>
 
-        {/* Impact */}
         <motion.div variants={fadeIn("up", 0.2)}>
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 rounded-xl bg-green border-2 border-black flex items-center justify-center text-black shadow-hard">
@@ -162,7 +155,6 @@ export default function DashboardPage() {
                 />
               ),
             )}
-
             <ImpactCard
               icon="🌳"
               value={impact.treesEquivalent || 0}
@@ -173,7 +165,106 @@ export default function DashboardPage() {
           </div>
         </motion.div>
 
-        {/* Actions */}
+        <div className="grid lg:grid-cols-2 gap-10">
+          {impactChartData.length > 0 && (
+            <motion.div variants={fadeIn("up", 0.3)}>
+              <EcoCard className="h-full flex flex-col">
+                <h3 className="font-display font-extrabold text-xl text-black mb-6">
+                  📊 Statistik Dampak
+                </h3>
+                <div className="flex-1 min-h-[250px] w-full relative">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={impactChartData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={80}
+                        paddingAngle={5}
+                        dataKey="value"
+                        cornerRadius={4}
+                        stroke="black"
+                        strokeWidth={2}
+                      >
+                        {impactChartData.map((entry, i) => (
+                          <Cell key={i} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        contentStyle={{
+                          borderRadius: "16px",
+                          border: "3px solid black",
+                          boxShadow: "4px 4px 0 black",
+                          fontFamily: "var(--font-dm-sans)",
+                          fontWeight: "bold",
+                        }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <span className="text-4xl">🌍</span>
+                  </div>
+                </div>
+                <div className="flex flex-wrap justify-center gap-3 mt-6">
+                  {impactChartData.map((d, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <div
+                        className="w-3 h-3 rounded-full border border-black"
+                        style={{ backgroundColor: d.color }}
+                      />
+                      <span className="text-xs font-bold text-black uppercase">
+                        {d.name}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </EcoCard>
+            </motion.div>
+          )}
+
+          <motion.div
+            variants={fadeIn("up", 0.4)}
+            className="flex flex-col gap-10"
+          >
+            <div>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-yellow border-2 border-black flex items-center justify-center text-black shadow-hard">
+                  <Award size={20} />
+                </div>
+                <h2 className="font-display text-2xl font-extrabold text-black">
+                  Koleksi Badge
+                </h2>
+              </div>
+
+              <EcoCard
+                variant="flat"
+                className="bg-white p-4 grid grid-cols-3 sm:grid-cols-4 gap-3"
+              >
+                {badgeList.slice(0, 8).map((badge) => (
+                  <BadgeCard
+                    key={badge.id}
+                    badge={badge}
+                    earned={earnedBadges.includes(badge.id)}
+                  />
+                ))}
+                {badgeList.length > 8 && (
+                  <div className="flex items-center justify-center text-xs text-black/40 font-bold uppercase border-2 border-dashed border-black/20 rounded-2xl h-full min-h-[100px]">
+                    +{badgeList.length - 8} lagi
+                  </div>
+                )}
+              </EcoCard>
+            </div>
+
+            <div>
+              <h2 className="font-display text-2xl font-extrabold text-black mb-6">
+                📸 Share Dampakmu
+              </h2>
+              <ShareCard />
+            </div>
+          </motion.div>
+        </div>
+
         <motion.div
           variants={fadeIn("up", 0.5)}
           className="flex flex-col sm:flex-row gap-4 pt-8 border-t-3 border-black"
@@ -187,7 +278,6 @@ export default function DashboardPage() {
               <Map size={20} /> Jelajahi Peta Indonesia
             </EcoButton>
           </Link>
-
           <button
             onClick={() => {
               if (
@@ -204,6 +294,6 @@ export default function DashboardPage() {
           </button>
         </motion.div>
       </motion.div>
-    </PageWrapper>
+    </div>
   );
 }

@@ -54,11 +54,11 @@ export default function ProfilePage() {
             </p>
 
             <div className="flex justify-center md:justify-start gap-4">
-              <div className="bg-primary-50 px-4 py-2 rounded-xl border border-primary-100">
-                <p className="text-xs text-primary-600 font-bold uppercase">
+              <div className="bg-emerald-50 px-4 py-2 rounded-xl border border-emerald-100">
+                <p className="text-xs text-emerald-600 font-bold uppercase">
                   Total XP
                 </p>
-                <p className="text-2xl font-bold text-primary-700">{totalXP}</p>
+                <p className="text-2xl font-bold text-emerald-700">{totalXP}</p>
               </div>
               <div className="bg-emerald-50 px-4 py-2 rounded-xl border border-emerald-100">
                 <p className="text-xs text-emerald-600 font-bold uppercase">
@@ -136,7 +136,7 @@ export default function ProfilePage() {
               </p>
               <Link
                 href="/dashboard"
-                className="mt-4 block text-primary-600 text-sm font-medium hover:underline"
+                className="mt-4 block text-emerald-600 text-sm font-medium hover:underline"
               >
                 Buka Dashboard →
               </Link>

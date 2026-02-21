@@ -44,11 +44,10 @@ export default function MissionPage() {
 
   const { completeMission, isMissionDone, unlockBadge } = useUserStore();
 
-  const [phase, setPhase] =
-    (useState < "briefing") | "playing" | ("result" > "briefing");
-  const [missionResult, setMissionResult] = useState < any > null;
+  const [phase, setPhase] = useState("briefing");
+  const [missionResult, setMissionResult] = useState(null);
   const [showCelebration, setShowCelebration] = useState(false);
-  const [newBadge, setNewBadge] = useState < any > null;
+  const [newBadge, setNewBadge] = useState(null);
 
   const province = provinces.find((p) => p.id === provinceId);
   const mission = missions[missionId];
@@ -138,16 +137,30 @@ export default function MissionPage() {
               </span>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-8 items-center">
+            <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
               <motion.div
                 variants={zoomIn(0.1)}
                 initial="hidden"
                 animate="visible"
+                className="relative group perspective-1000"
               >
                 <div
-                  className={`w-full aspect-square rounded-[3rem] bg-linear-to-br ${mission.color} flex items-center justify-center text-9xl`}
+                  className={`absolute inset-0 bg-gradient-to-br ${mission.color} opacity-20 blur-3xl rounded-full transform scale-110 group-hover:scale-125 transition-transform duration-700`}
+                />
+                <div
+                  className={`relative w-full aspect-square rounded-[3rem] bg-gradient-to-br ${mission.color} flex items-center justify-center text-9xl shadow-2xl shadow-emerald-500/20 ring-8 ring-white/50 backdrop-blur-sm transform group-hover:rotate-3 transition-transform duration-500`}
                 >
-                  {mission.icon}
+                  <motion.span
+                    animate={{ y: [0, -20, 0] }}
+                    transition={{
+                      repeat: Infinity,
+                      duration: 4,
+                      ease: "easeInOut",
+                    }}
+                    className="filter drop-shadow-xl"
+                  >
+                    {mission.icon}
+                  </motion.span>
                 </div>
               </motion.div>
 
@@ -156,17 +169,48 @@ export default function MissionPage() {
                 initial="hidden"
                 animate="visible"
               >
-                <h1 className="font-heading text-4xl font-black text-slate-800 mb-4">
-                  {mission.title}
-                </h1>
-                <p className="text-slate-600 mb-6">{mission.description}</p>
+                <div className="mb-6">
+                  <span className="inline-block px-3 py-1 bg-slate-900 text-white text-xs font-bold uppercase tracking-widest rounded-lg mb-4">
+                    Misi #{missionId}
+                  </span>
+                  <h1 className="font-heading text-4xl md:text-5xl font-black text-slate-800 mb-4 leading-tight">
+                    {mission.title}
+                  </h1>
+                  <p className="text-xl text-slate-500 font-medium">
+                    {mission.subtitle}
+                  </p>
+                </div>
+
+                <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-xl shadow-slate-200/50 mb-8">
+                  <p className="text-slate-600 leading-relaxed text-lg">
+                    {mission.description}
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-4 mb-8">
+                  <div className="flex items-center gap-2 bg-amber-50 text-amber-600 border border-amber-100 rounded-xl px-4 py-2 font-bold">
+                    <Zap size={18} fill="currentColor" /> +{mission.xpReward} XP
+                  </div>
+                  <div className="flex items-center gap-2 bg-slate-100 text-slate-600 rounded-xl px-4 py-2 font-medium">
+                    <Clock size={18} /> {mission.timeEstimate}
+                  </div>
+                  {alreadyDone && (
+                    <div className="flex items-center gap-2 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-xl px-4 py-2 font-bold">
+                      <span className="text-lg">✅</span> Selesai
+                    </div>
+                  )}
+                </div>
 
                 <button
                   onClick={() => setPhase("playing")}
-                  className="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold flex items-center justify-center gap-2"
+                  className="w-full py-5 bg-slate-900 hover:bg-emerald-600 text-white rounded-2xl font-heading font-bold text-xl shadow-xl shadow-slate-900/20 hover:shadow-emerald-600/30 hover:scale-[1.02] transition-all flex items-center justify-center gap-3 group"
                 >
-                  <Play size={20} />
+                  <Play size={24} fill="currentColor" />
                   {alreadyDone ? "Mainkan Ulang" : "Mulai Misi"}
+                  <ArrowRight
+                    size={24}
+                    className="group-hover:translate-x-1 transition-transform"
+                  />
                 </button>
               </motion.div>
             </div>
