@@ -1,11 +1,11 @@
-import { provinces } from '../data/provinces';
-import { missions } from '../data/missions';
+import { provinces } from "@/data/provinces";
+import { missions } from "@/data/missions";
 
 export const checkProvinceConqueror = (completedMissions) => {
   const provinceCompletions = {};
 
-  completedMissions.forEach(key => {
-    const [, provinceId] = key.split(':');
+  completedMissions.forEach((key) => {
+    const [, provinceId] = key.split(":");
     if (!provinceCompletions[provinceId]) {
       provinceCompletions[provinceId] = 0;
     }
@@ -37,16 +37,20 @@ export const getRecommendedMission = (completedMissions, exploredProvinces) => {
   return null;
 };
 
-export const getMissionUnlockStatus = (provinceMissions, completedMissions, provinceId) => {
+export const getMissionUnlockStatus = (
+  provinceMissions,
+  completedMissions,
+  provinceId,
+) => {
   return provinceMissions.map((missionId, index) => {
     const key = `${missionId}:${provinceId}`;
     const isDone = completedMissions.includes(key);
 
-    if (isDone) return 'completed';
-    if (index === 0) return 'unlocked';
+    if (isDone) return "completed";
+    if (index === 0) return "unlocked";
 
     const prevKey = `${provinceMissions[index - 1]}:${provinceId}`;
     const prevDone = completedMissions.includes(prevKey);
-    return prevDone ? 'unlocked' : 'locked';
+    return prevDone ? "unlocked" : "locked";
   });
 };

@@ -1,11 +1,11 @@
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { useEffect } from "react";
-import EcoCard from "../design-system/EcoCard";
+import EcoCard from "@/components/design-system/EcoCard";
 
 export default function ImpactCard({ icon, value, unit, label, delay = 0 }) {
   const count = useMotionValue(0);
   const rounded = useTransform(count, (latest) => {
-    if (latest >= 1000) return (latest / 1000).toFixed(1) + 'K';
+    if (latest >= 1000) return (latest / 1000).toFixed(1) + "K";
     return latest < 10 ? latest.toFixed(1) : Math.round(latest);
   });
 
@@ -33,9 +33,13 @@ export default function ImpactCard({ icon, value, unit, label, delay = 0 }) {
             <motion.span className="text-xl font-display font-extrabold text-black">
               {rounded}
             </motion.span>
-            <span className="text-xs font-bold text-black font-body">{unit}</span>
+            <span className="text-xs font-bold text-black font-body">
+              {unit}
+            </span>
           </div>
-          <p className="text-xs text-[#555] font-medium leading-tight">{label}</p>
+          <p className="text-xs text-[#555] font-medium leading-tight">
+            {label}
+          </p>
         </div>
       </EcoCard>
     </motion.div>

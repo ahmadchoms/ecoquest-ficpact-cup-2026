@@ -1,4 +1,4 @@
-import { PROGRESS_COLORS } from "../../utils/constants";
+import { PROGRESS_COLORS } from "@/utils/constants";
 
 export default function MapLegend() {
   const items = [
@@ -11,7 +11,7 @@ export default function MapLegend() {
     <div className="absolute bottom-4 right-4 z-[500] glass rounded-xl p-3">
       <p className="text-xs font-semibold text-gray-700 mb-2">Legenda</p>
       <div className="space-y-1.5">
-        {items.map(item => (
+        {items.map((item) => (
           <div key={item.label} className="flex items-center gap-2">
             <div
               className="w-3.5 h-3.5 rounded"

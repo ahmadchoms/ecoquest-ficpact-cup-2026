@@ -1,4 +1,6 @@
-import React from 'react';
+"use client";
+
+import React from "react";
 
 export default class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -11,7 +13,7 @@ export default class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    console.warn('ErrorBoundary caught:', error, errorInfo);
+    console.warn("ErrorBoundary caught:", error, errorInfo);
   }
 
   render() {

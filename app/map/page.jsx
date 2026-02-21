@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 import PageWrapper from "@/components/layout/PageWrapper";
-import InteractiveMap from "@/components/map/InteractiveMap";
 import MapLegend from "@/components/map/MapLegend";
 import { useUserStore } from "@/store/useUserStore";
 import { provinces } from "@/data/provinces";
@@ -12,6 +12,12 @@ import { REGIONS } from "@/utils/constants";
 import { ChevronRight, Filter } from "lucide-react";
 import XPBar from "@/components/ui/XPBar";
 import { getRecommendedMission } from "@/utils/achievements";
+
+// Dynamic import for browser-only component
+const InteractiveMap = dynamic(
+  () => import("@/components/map/InteractiveMap"),
+  { ssr: false },
+);
 
 export default function MapPage() {
   const router = useRouter();
@@ -26,7 +32,7 @@ export default function MapPage() {
   } = useUserStore();
 
   const xpProgress = getXPProgress();
-  const [activeFilter, setActiveFilter] = (useState < string) | (null > null);
+  const [activeFilter, setActiveFilter] = useState(null);
   const [showMobileCards, setShowMobileCards] = useState(false);
 
   const filteredProvinces = activeFilter

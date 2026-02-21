@@ -1,5 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
-import * as THREE from 'three';
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import * as THREE from "three";
 
 export default function TrophyScene() {
   const mountRef = useRef(null);
@@ -10,15 +12,23 @@ export default function TrophyScene() {
 
     // SCENE SETUP
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, mountRef.current.clientWidth / mountRef.current.clientHeight, 0.1, 100);
+    const camera = new THREE.PerspectiveCamera(
+      45,
+      mountRef.current.clientWidth / mountRef.current.clientHeight,
+      0.1,
+      100,
+    );
     camera.position.set(0, 1, 9);
 
-    const renderer = new THREE.WebGLRenderer({ 
-      antialias: true, 
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true,
       alpha: true,
-      powerPreference: "high-performance"
+      powerPreference: "high-performance",
     });
-    renderer.setSize(mountRef.current.clientWidth, mountRef.current.clientHeight);
+    renderer.setSize(
+      mountRef.current.clientWidth,
+      mountRef.current.clientHeight,
+    );
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.2;
@@ -30,7 +40,7 @@ export default function TrophyScene() {
       metalness: 1,
       roughness: 0.15,
       emissive: 0xffaa00,
-      emissiveIntensity: 0.1
+      emissiveIntensity: 0.1,
     });
 
     const glassMaterial = new THREE.MeshPhysicalMaterial({
@@ -39,7 +49,7 @@ export default function TrophyScene() {
       roughness: 0.05,
       transmission: 0.9, // Glass effect
       transparent: true,
-      thickness: 0.5
+      thickness: 0.5,
     });
 
     // --- GEOMETRY (Procedural Trophy) ---
@@ -58,7 +68,15 @@ export default function TrophyScene() {
     trophyGroup.add(stem);
 
     // Cup Body (Bot half)
-    const cupBaseGeo = new THREE.SphereGeometry(1.4, 32, 32, 0, Math.PI * 2, 0, Math.PI * 0.5);
+    const cupBaseGeo = new THREE.SphereGeometry(
+      1.4,
+      32,
+      32,
+      0,
+      Math.PI * 2,
+      0,
+      Math.PI * 0.5,
+    );
     const cupBase = new THREE.Mesh(cupBaseGeo, goldMaterial);
     cupBase.position.y = 0.5;
     cupBase.rotation.x = Math.PI;
@@ -82,26 +100,37 @@ export default function TrophyScene() {
     const particleCount = 50;
     const posArray = new Float32Array(particleCount * 3);
     const colorsArray = new Float32Array(particleCount * 3);
-    const colorPalette = [new THREE.Color(0xfbbf24), new THREE.Color(0x34d399), new THREE.Color(0xf472b6)];
+    const colorPalette = [
+      new THREE.Color(0xfbbf24),
+      new THREE.Color(0x34d399),
+      new THREE.Color(0xf472b6),
+    ];
 
-    for(let i = 0; i < particleCount; i++) {
-       posArray[i * 3] = (Math.random() - 0.5) * 6;
-       posArray[i * 3 + 1] = (Math.random() - 0.5) * 6;
-       posArray[i * 3 + 2] = (Math.random() - 0.5) * 4;
+    for (let i = 0; i < particleCount; i++) {
+      posArray[i * 3] = (Math.random() - 0.5) * 6;
+      posArray[i * 3 + 1] = (Math.random() - 0.5) * 6;
+      posArray[i * 3 + 2] = (Math.random() - 0.5) * 4;
 
-       const color = colorPalette[Math.floor(Math.random() * colorPalette.length)];
-       colorsArray[i * 3] = color.r;
-       colorsArray[i * 3 + 1] = color.g;
-       colorsArray[i * 3 + 2] = color.b;
+      const color =
+        colorPalette[Math.floor(Math.random() * colorPalette.length)];
+      colorsArray[i * 3] = color.r;
+      colorsArray[i * 3 + 1] = color.g;
+      colorsArray[i * 3 + 2] = color.b;
     }
-    particlesGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-    particlesGeo.setAttribute('color', new THREE.BufferAttribute(colorsArray, 3));
-    
+    particlesGeo.setAttribute(
+      "position",
+      new THREE.BufferAttribute(posArray, 3),
+    );
+    particlesGeo.setAttribute(
+      "color",
+      new THREE.BufferAttribute(colorsArray, 3),
+    );
+
     const particlesMat = new THREE.PointsMaterial({
       size: 0.15,
       vertexColors: true,
       transparent: true,
-      opacity: 0.8
+      opacity: 0.8,
     });
     const confetti = new THREE.Points(particlesGeo, particlesMat);
     trophyGroup.add(confetti);
@@ -153,11 +182,11 @@ export default function TrophyScene() {
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
     };
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
 
     // CLEANUP
     return () => {
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener("resize", handleResize);
       cancelAnimationFrame(requestID);
       if (mountRef.current && renderer.domElement) {
         mountRef.current.removeChild(renderer.domElement);
@@ -179,15 +208,13 @@ export default function TrophyScene() {
     <div className="w-full h-full relative" style={{ minHeight: 180 }}>
       {/* Container */}
       <div ref={mountRef} className="w-full h-full absolute inset-0 z-0" />
-      
+
       {/* Loading */}
       {!isLoaded && (
         <div className="absolute inset-0 flex items-center justify-center">
-           <div className="w-10 h-10 rounded-full border-4 border-amber-200 border-t-amber-500 animate-spin" />
+          <div className="w-10 h-10 rounded-full border-4 border-amber-200 border-t-amber-500 animate-spin" />
         </div>
       )}
     </div>
   );
 }
-
-

@@ -1,21 +1,23 @@
+"use client";
+
 import { motion } from "framer-motion";
-import { useLocation } from "react-router-dom";
+import { usePathname } from "next/navigation";
 
 const pageVariants = {
-  initial: { 
-    opacity: 0, 
+  initial: {
+    opacity: 0,
     y: 20,
-    scale: 0.98
+    scale: 0.98,
   },
-  in: { 
-    opacity: 1, 
+  in: {
+    opacity: 1,
     y: 0,
-    scale: 1
+    scale: 1,
   },
-  out: { 
-    opacity: 0, 
+  out: {
+    opacity: 0,
     y: -20,
-    scale: 0.98
+    scale: 0.98,
   },
 };
 
@@ -27,11 +29,11 @@ const pageTransition = {
 };
 
 export default function PageWrapper({ children, className = "" }) {
-  const location = useLocation();
-  
+  const pathname = usePathname();
+
   return (
     <motion.div
-      key={location.pathname}
+      key={pathname}
       initial="initial"
       animate="in"
       exit="out"
