@@ -24,6 +24,7 @@ import { staggerContainer, fadeIn, zoomIn } from "@/utils/motion-variants";
 import EcoCard from "@/components/design-system/EcoCard";
 import EcoBadge from "@/components/design-system/EcoBadge";
 import EcoButton from "@/components/design-system/EcoButton";
+import PageWrapper from "@/components/layout/PageWrapper";
 
 export default function DashboardPage() {
   const {
@@ -51,7 +52,7 @@ export default function DashboardPage() {
   ].filter((d) => d.value > 0);
 
   return (
-    <div className="min-h-screen bg-white pt-20 pb-24 font-body">
+    <PageWrapper className="min-h-screen bg-white bg-grid-pattern pt-20 pb-24 font-body">
       <motion.div
         variants={staggerContainer(0.1)}
         initial="hidden"
@@ -341,6 +342,6 @@ export default function DashboardPage() {
           </button>
         </motion.div>
       </motion.div>
-    </div>
+    </PageWrapper>
   );
 }
