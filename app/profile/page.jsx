@@ -34,7 +34,7 @@ export default function ProfilePage() {
   ];
 
   return (
-    <PageWrapper className="min-h-screen bg-slate-50 pt-20 md:pb-12 pb-24">
+    <PageWrapper className="min-h-screen bg-slate-50 bg-grid-pattern pt-20 md:pb-12 pb-24">
       <div className="max-w-4xl mx-auto px-4">
         {/* Header Profile */}
         <div className="bg-mint border-3 border-black shadow-hard-lg rounded-4xl p-8 flex flex-col md:flex-row items-center gap-8 mb-12 relative overflow-hidden">
@@ -97,8 +97,8 @@ export default function ProfilePage() {
           <div className="md:col-span-2 space-y-8">
             <section>
               <h2 className="text-2xl font-display font-black text-black mb-6 flex items-center gap-3 uppercase tracking-wide">
-                <div className="p-2 bg-amber-500 border-3 border-black rounded-xl shadow-hard">
-                  <Award size={24} className="text-amber-200" strokeWidth={3} />
+                <div className="p-2 bg-amber-400 border-3 border-black rounded-xl shadow-hard">
+                  <Award size={24} className="text-amber-600" strokeWidth={3} />
                 </div>
                 Koleksi Badge Terbaru
               </h2>
