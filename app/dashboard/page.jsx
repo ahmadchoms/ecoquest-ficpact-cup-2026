@@ -11,7 +11,14 @@ import BadgeCard from "@/components/ui/BadgeCard";
 import ImpactCard from "@/components/ui/ImpactCard";
 import ShareCard from "@/components/ui/ShareCard";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
-import { Map, RotateCcw, Award, TreePine } from "lucide-react";
+import {
+  Map,
+  RotateCcw,
+  Award,
+  TreePine,
+  BarChart3,
+  Share2,
+} from "lucide-react";
 import { staggerContainer, fadeIn, zoomIn } from "@/utils/motion-variants";
 
 import EcoCard from "@/components/design-system/EcoCard";
@@ -49,98 +56,106 @@ export default function DashboardPage() {
         variants={staggerContainer(0.1)}
         initial="hidden"
         animate="visible"
-        className="max-w-4xl mx-auto px-4 py-6 space-y-10"
+        className="max-w-4xl mx-auto px-4 py-6 space-y-14"
       >
+        {/* HEADER DASHBOARD - NEO BRUTALISM */}
         <motion.div variants={fadeIn("down", 0.1)}>
-          <EcoCard className="p-0 overflow-hidden bg-mint relative">
-            <div className="p-8 relative z-10">
-              <div className="absolute top-0 right-0 p-6 opacity-10 text-black">
-                <TreePine size={140} />
-              </div>
+          <div className="bg-mint border-3 border-black shadow-hard-lg rounded-4xl overflow-hidden relative">
+            {/* Dekorasi Latar Belakang */}
+            <div className="absolute -bottom-20 -right-10 w-64 h-64 bg-yellow rounded-full border-3 border-black opacity-80 pointer-events-none" />
+            <div className="absolute top-0 right-10 p-6 opacity-20 text-black pointer-events-none mix-blend-overlay">
+              <TreePine size={180} />
+            </div>
 
+            <div className="p-8 relative z-10 border-b-3 border-black">
               <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
                 <motion.div variants={zoomIn(0.2)}>
-                  <LevelBadge level={level} size="lg" />
+                  <div className="bg-white rounded-full p-2 border-3 border-black shadow-hard">
+                    <LevelBadge level={level} size="lg" />
+                  </div>
                 </motion.div>
 
                 <div className="flex-1 text-center md:text-left">
-                  <h1 className="font-display text-4xl font-extrabold mb-2 text-black">
+                  <h1 className="font-display text-4xl font-black mb-3 text-black uppercase tracking-wide">
                     {explorerName || "Eco Explorer"}
                   </h1>
-                  <EcoBadge
-                    variant="neutral"
-                    className="bg-white/50 border-black/20"
-                  >
+                  <span className="inline-block bg-white border-2 border-black px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest shadow-[2px_2px_0_#0f0f0f]">
                     Level {level} Guardian
-                  </EcoBadge>
+                  </span>
                 </div>
 
-                <div className="text-right hidden md:block">
-                  <p className="text-5xl font-display font-extrabold text-black">
+                <div className="text-center md:text-right bg-white p-4 rounded-2xl border-3 border-black shadow-hard transform rotate-2">
+                  <p className="text-5xl font-display font-black text-black leading-none mb-1">
                     {totalXP.toLocaleString()}
                   </p>
-                  <p className="text-black/60 text-xs font-bold uppercase tracking-wider">
+                  <p className="text-black text-xs font-bold uppercase tracking-widest">
                     Total XP POINTS
                   </p>
                 </div>
               </div>
 
-              <div className="mt-8 bg-white border-3 border-black rounded-2xl p-5 shadow-hard">
-                <div className="flex justify-between text-xs text-black font-bold uppercase mb-2">
+              {/* Progress Bar Container */}
+              <div className="mt-8 bg-white border-3 border-black rounded-2xl p-5 shadow-hard relative overflow-hidden">
+                <div className="flex justify-between text-xs text-black font-black uppercase tracking-widest mb-3">
                   <span>Progress Level {level}</span>
-                  <span>
+                  <span className="bg-yellow px-2 py-0.5 rounded-md border border-black">
                     {xpProgress.xpInCurrentLevel} / {xpProgress.xpToNextLevel}{" "}
                     XP
                   </span>
                 </div>
-                <XPBar
-                  current={xpProgress.xpInCurrentLevel}
-                  max={xpProgress.xpToNextLevel}
-                  level={level}
-                  showLabel={false}
-                />
+                {/* Asumsi XPBar sudah punya styling yang tebal, jika belum, bisa dibungkus dengan border */}
+                <div className="rounded-full border-2 border-black overflow-hidden bg-gray-100">
+                  <XPBar
+                    current={xpProgress.xpInCurrentLevel}
+                    max={xpProgress.xpToNextLevel}
+                    level={level}
+                    showLabel={false}
+                  />
+                </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-3 divide-x-2 divide-black border-t-3 border-black bg-white">
-              <div className="p-6 text-center group hover:bg-yellow transition-colors">
-                <p className="font-display text-3xl font-extrabold text-black group-hover:scale-110 transition-transform">
+            {/* Statistik Bottom Bar */}
+            <div className="grid grid-cols-3 divide-x-3 divide-black bg-white relative z-10">
+              <div className="p-6 text-center group hover:bg-yellow transition-colors cursor-default">
+                <p className="font-display text-4xl font-black text-black group-hover:scale-110 transition-transform">
                   {completedMissions.length}
                 </p>
-                <p className="text-xs text-black/50 font-bold uppercase mt-1">
+                <p className="text-xs text-black font-bold uppercase mt-2 tracking-wider">
                   Misi Selesai
                 </p>
               </div>
-              <div className="p-6 text-center group hover:bg-green transition-colors">
-                <p className="font-display text-3xl font-extrabold text-black group-hover:scale-110 transition-transform">
+              <div className="p-6 text-center group hover:bg-green transition-colors cursor-default">
+                <p className="font-display text-4xl font-black text-black group-hover:scale-110 transition-transform">
                   {exploredProvinces.length}
-                  <span className="text-lg text-black/30 font-bold">/34</span>
+                  <span className="text-xl text-black/40 font-bold ml-1">
+                    /34
+                  </span>
                 </p>
-                <p className="text-xs text-black/50 font-bold uppercase mt-1">
+                <p className="text-xs text-black font-bold uppercase mt-2 tracking-wider">
                   Provinsi
                 </p>
               </div>
-              <div className="p-6 text-center group hover:bg-purple transition-colors">
-                <p className="font-display text-3xl font-extrabold text-black group-hover:scale-110 transition-transform">
+              <div className="p-6 text-center group hover:bg-purple transition-colors cursor-default">
+                <p className="font-display text-4xl font-black text-black group-hover:scale-110 transition-transform">
                   {earnedBadges.length}
                 </p>
-                <p className="text-xs text-black/50 font-bold uppercase mt-1">
+                <p className="text-xs text-black font-bold uppercase mt-2 tracking-wider">
                   Badge
                 </p>
               </div>
             </div>
-          </EcoCard>
+          </div>
         </motion.div>
 
+        {/* SECTION: DAMPAK LINGKUNGANMU */}
         <motion.div variants={fadeIn("up", 0.2)}>
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-green border-2 border-black flex items-center justify-center text-black shadow-hard">
-              <TreePine size={20} />
+          <h2 className="text-2xl font-display font-black text-black mb-6 flex items-center gap-3 uppercase tracking-wide">
+            <div className="p-2 bg-green border-3 border-black rounded-xl shadow-hard">
+              <TreePine size={24} className="text-green-800" strokeWidth={3} />
             </div>
-            <h2 className="font-display text-2xl font-extrabold text-black">
-              Dampak Lingkunganmu
-            </h2>
-          </div>
+            Dampak Lingkunganmu
+          </h2>
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
             {Object.entries(IMPACT_LABELS).map(
@@ -165,14 +180,25 @@ export default function DashboardPage() {
           </div>
         </motion.div>
 
+        {/* SECTION: CHART & BADGES */}
         <div className="grid lg:grid-cols-2 gap-10">
           {impactChartData.length > 0 && (
             <motion.div variants={fadeIn("up", 0.3)}>
-              <EcoCard className="h-full flex flex-col">
-                <h3 className="font-display font-extrabold text-xl text-black mb-6">
-                  📊 Statistik Dampak
+              <div className="bg-white border-3 border-black rounded-4xl p-6 shadow-hard h-full flex flex-col relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-pink rounded-full blur-3xl opacity-20 pointer-events-none" />
+
+                <h3 className="text-xl font-display font-black text-black mb-6 flex items-center gap-3 uppercase tracking-wide relative z-10">
+                  <div className="p-1.5 bg-pink border-2 border-black rounded-lg shadow-[3px_3px_0_#0f0f0f]">
+                    <BarChart3
+                      size={20}
+                      className="text-black"
+                      strokeWidth={3}
+                    />
+                  </div>
+                  Statistik Dampak
                 </h3>
-                <div className="flex-1 min-h-62.5 w-full relative">
+
+                <div className="flex-1 min-h-62.5 w-full relative z-10">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
@@ -185,7 +211,7 @@ export default function DashboardPage() {
                         dataKey="value"
                         cornerRadius={4}
                         stroke="black"
-                        strokeWidth={2}
+                        strokeWidth={3}
                       >
                         {impactChartData.map((entry, i) => (
                           <Cell key={i} fill={entry.color} />
@@ -196,30 +222,35 @@ export default function DashboardPage() {
                           borderRadius: "16px",
                           border: "3px solid black",
                           boxShadow: "4px 4px 0 black",
-                          fontFamily: "var(--font-dm-sans)",
+                          fontFamily: "var(--font-body)",
                           fontWeight: "bold",
+                          textTransform: "uppercase",
                         }}
                       />
                     </PieChart>
                   </ResponsiveContainer>
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <span className="text-4xl">🌍</span>
+                    <span className="text-5xl">🌍</span>
                   </div>
                 </div>
-                <div className="flex flex-wrap justify-center gap-3 mt-6">
+
+                <div className="flex flex-wrap justify-center gap-3 mt-6 relative z-10">
                   {impactChartData.map((d, i) => (
-                    <div key={i} className="flex items-center gap-2">
+                    <div
+                      key={i}
+                      className="flex items-center gap-2 bg-gray-50 px-3 py-1.5 border-2 border-black rounded-xl"
+                    >
                       <div
-                        className="w-3 h-3 rounded-full border border-black"
+                        className="w-3 h-3 rounded-full border-2 border-black shadow-sm"
                         style={{ backgroundColor: d.color }}
                       />
-                      <span className="text-xs font-bold text-black uppercase">
+                      <span className="text-xs font-black text-black uppercase tracking-wider">
                         {d.name}
                       </span>
                     </div>
                   ))}
                 </div>
-              </EcoCard>
+              </div>
             </motion.div>
           )}
 
@@ -227,20 +258,20 @@ export default function DashboardPage() {
             variants={fadeIn("up", 0.4)}
             className="flex flex-col gap-10"
           >
+            {/* KOLEKSI BADGE */}
             <div>
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-yellow border-2 border-black flex items-center justify-center text-black shadow-hard">
-                  <Award size={20} />
+              <h2 className="text-xl font-display font-black text-black mb-6 flex items-center gap-3 uppercase tracking-wide">
+                <div className="p-1.5 bg-yellow border-2 border-black rounded-lg shadow-[3px_3px_0_#0f0f0f]">
+                  <Award
+                    size={20}
+                    className="text-yellow-600"
+                    strokeWidth={3}
+                  />
                 </div>
-                <h2 className="font-display text-2xl font-extrabold text-black">
-                  Koleksi Badge
-                </h2>
-              </div>
+                Koleksi Badge
+              </h2>
 
-              <EcoCard
-                variant="flat"
-                className="bg-white p-4 grid grid-cols-3 sm:grid-cols-4 gap-3"
-              >
+              <div className="bg-white border-3 border-black shadow-hard rounded-4xl p-5 grid grid-cols-3 sm:grid-cols-4 gap-4">
                 {badgeList.slice(0, 8).map((badge) => (
                   <BadgeCard
                     key={badge.id}
@@ -249,35 +280,46 @@ export default function DashboardPage() {
                   />
                 ))}
                 {badgeList.length > 8 && (
-                  <div className="flex items-center justify-center text-xs text-black/40 font-bold uppercase border-2 border-dashed border-black/20 rounded-2xl h-full min-h-25">
-                    +{badgeList.length - 8} lagi
+                  <div className="flex flex-col items-center justify-center bg-gray-100 border-3 border-dashed border-black rounded-3xl h-full min-h-25">
+                    <span className="text-xl font-black text-black/50">
+                      +{badgeList.length - 8}
+                    </span>
+                    <span className="text-[10px] font-bold uppercase text-black/50">
+                      Lagi
+                    </span>
                   </div>
                 )}
-              </EcoCard>
+              </div>
             </div>
 
+            {/* SHARE DAMPAKMU */}
             <div>
-              <h2 className="font-display text-2xl font-extrabold text-black mb-6">
-                📸 Share Dampakmu
+              <h2 className="text-xl font-display font-black text-black mb-6 flex items-center gap-3 uppercase tracking-wide">
+                <div className="p-1.5 bg-orange border-2 border-black rounded-lg shadow-[3px_3px_0_#0f0f0f]">
+                  <Share2
+                    size={20}
+                    className="text-amber-800"
+                    strokeWidth={3}
+                  />
+                </div>
+                Share Dampakmu
               </h2>
               <ShareCard />
             </div>
           </motion.div>
         </div>
 
+        {/* SECTION: TOMBOL AKSI BAWAH */}
         <motion.div
           variants={fadeIn("up", 0.5)}
-          className="flex flex-col sm:flex-row gap-4 pt-8 border-t-3 border-black"
+          className="flex flex-col sm:flex-row gap-5 pt-8"
         >
           <Link href="/map" className="flex-1">
-            <EcoButton
-              variant="secondary"
-              size="lg"
-              className="w-full justify-center"
-            >
-              <Map size={20} /> Jelajahi Peta Indonesia
-            </EcoButton>
+            <button className="w-full py-4 px-6 bg-yellow border-3 border-black rounded-2xl shadow-hard hover:bg-orange hover:-translate-y-1 hover:shadow-hard-lg active:translate-x-1 active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-3 font-display font-black text-black uppercase tracking-widest text-lg">
+              <Map size={24} strokeWidth={2.5} /> Jelajahi Peta
+            </button>
           </Link>
+
           <button
             onClick={() => {
               if (
@@ -288,9 +330,14 @@ export default function DashboardPage() {
                 resetProgress();
               }
             }}
-            className="px-6 py-4 rounded-xl border-3 border-black font-display font-extrabold text-red-500 hover:bg-red-50 transition-colors flex items-center gap-2"
+            className="px-6 py-4 rounded-2xl bg-white border-3 border-black shadow-hard hover:bg-red-500 hover:text-white hover:-translate-y-1 hover:shadow-hard-lg active:translate-x-1 active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-2 font-display font-black text-red-600 uppercase tracking-widest group"
           >
-            <RotateCcw size={18} /> Reset Progress
+            <RotateCcw
+              size={20}
+              strokeWidth={3}
+              className="group-hover:-rotate-180 transition-transform duration-500"
+            />
+            Reset Progress
           </button>
         </motion.div>
       </motion.div>

@@ -23,7 +23,7 @@ export default function AnimatedButton({
     outline:
       "border-2 border-primary-500 text-primary-600 hover:bg-primary-50 cursor-pointer",
     brutal:
-      "bg-yellow border-3 border-black text-black font-bold uppercase shadow-[4px_4px_0_#0f0f0f] hover:bg-orange active:translate-x-[2px] active:translate-y-[2px] active:shadow-none cursor-pointer",
+      "bg-yellow border-3 border-black text-black font-bold uppercase shadow-hard hover:bg-orange active:translate-x-[2px] active:translate-y-[2px] active:shadow-none cursor-pointer",
   };
 
   return (
