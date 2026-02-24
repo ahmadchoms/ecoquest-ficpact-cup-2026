@@ -25,7 +25,7 @@ export default function ImpactCard({ icon, value, unit, label, delay = 0 }) {
       transition={{ delay: delay }}
     >
       <EcoCard variant="feature" className="p-4 flex items-center gap-3 h-full">
-        <div className="text-3xl flex-shrink-0 bg-white border-2 border-black rounded-lg w-12 h-12 flex items-center justify-center shadow-[2px_2px_0_#000]">
+        <div className="text-3xl shrink-0 bg-white border-2 border-black rounded-lg w-12 h-12 flex items-center justify-center shadow-[2px_2px_0_#000]">
           {icon}
         </div>
         <div>

@@ -141,7 +141,7 @@ export default function MangroveSimulator({
           Klik area rusak (🟫) untuk menanam mangrove. Target: 50% dipulihkan.
         </p>
 
-        <div className="bg-gradient-to-b from-sky-200 to-sky-100 rounded-xl p-3 overflow-x-auto">
+        <div className="bg-linear-to-b from-sky-200 to-sky-100 rounded-xl p-3 overflow-x-auto">
           <div
             className="inline-grid gap-1"
             style={{ gridTemplateColumns: `repeat(${COLS}, 1fr)` }}
@@ -221,7 +221,7 @@ export default function MangroveSimulator({
         className={`w-full py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2
           ${
             plantedCount > 0
-              ? "bg-gradient-to-r from-blue-400 to-cyan-500 text-white hover:shadow-lg"
+              ? "bg-linear-to-r from-blue-400 to-cyan-500 text-white hover:shadow-lg"
               : "bg-gray-200 text-gray-400 cursor-not-allowed"
           }`}
       >

@@ -240,7 +240,7 @@ export default function TrophyScene() {
   return (
     <div className="w-full h-full relative group" style={{ minHeight: 50 }}>
       {/* Background Glow */}
-      <div className="absolute inset-0 bg-gradient-to-b from-amber-500/5 to-transparent rounded-full blur-3xl" />
+      <div className="absolute inset-0 bg-linear-to-b from-amber-500/5 to-transparent rounded-full blur-3xl" />
 
       <div ref={mountRef} className="w-full h-full absolute inset-0 z-10" />
 

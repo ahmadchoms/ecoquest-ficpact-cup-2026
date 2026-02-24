@@ -99,7 +99,7 @@ export default function CelebrationOverlay({
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ delay: 0.3, type: "spring" }}
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-primary-400 to-primary-600 text-white rounded-full px-6 py-2 mb-4"
+                className="inline-flex items-center gap-2 bg-linear-to-r from-primary-400 to-primary-600 text-white rounded-full px-6 py-2 mb-4"
               >
                 <span className="text-xl">⚡</span>
                 <span className="font-heading font-bold text-lg">

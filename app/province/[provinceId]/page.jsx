@@ -63,7 +63,7 @@ export default function ProvincePage() {
       {/* Dynamic Header */}
       <div className="relative overflow-hidden bg-slate-900 text-white pb-24 -mt-20 pt-32 rounded-b-[3rem] shadow-2xl z-0">
         <div
-          className={`absolute inset-0 bg-gradient-to-br from-emerald-900 to-teal-900 opacity-90`}
+          className={`absolute inset-0 bg-linear-to-br from-emerald-900 to-teal-900 opacity-90`}
         />
 
         {/* Abstract Pattern Overlay */}
@@ -152,7 +152,7 @@ export default function ProvincePage() {
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.3 }}
-              className="bg-white/10 border border-white/20 backdrop-blur-md p-6 rounded-3xl text-center min-w-[140px]"
+              className="bg-white/10 border border-white/20 backdrop-blur-md p-6 rounded-3xl text-center min-w-35"
             >
               <ProgressRing
                 progress={progress}
@@ -233,9 +233,9 @@ export default function ProvincePage() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="bg-gradient-to-r from-amber-100 via-yellow-50 to-amber-100 border border-amber-200/50 rounded-2xl p-6 flex flex-col md:flex-row items-center gap-4 shadow-sm"
+          className="bg-linear-to-r from-amber-100 via-yellow-50 to-amber-100 border border-amber-200/50 rounded-2xl p-6 flex flex-col md:flex-row items-center gap-4 shadow-sm"
         >
-          <div className="bg-amber-400 text-white p-3 rounded-xl flex-shrink-0 shadow-lg shadow-amber-400/40">
+          <div className="bg-amber-400 text-white p-3 rounded-xl shrink-0 shadow-lg shadow-amber-400/40">
             <Star size={24} fill="currentColor" />
           </div>
           <p className="text-amber-900 font-medium text-base md:text-lg">
@@ -283,11 +283,11 @@ export default function ProvincePage() {
                   >
                     {/* Connector Line (Vertical) */}
                     {i < province.missions.length - 1 && (
-                      <div className="absolute left-8 top-24 bottom-[-2rem] w-0.5 bg-slate-200 z-0 hidden md:block ml-0.5 border-l-2 border-dashed border-slate-300" />
+                      <div className="absolute left-8 top-24 -bottom-8 w-0.5 bg-slate-200 z-0 hidden md:block ml-0.5 border-l-2 border-dashed border-slate-300" />
                     )}
 
                     <div
-                      className={`relative bg-white rounded-[2rem] p-6 md:p-8 border-2 transition-all duration-300 transform ${cardClasses}`}
+                      className={`relative bg-white rounded-4xl p-6 md:p-8 border-2 transition-all duration-300 transform ${cardClasses}`}
                     >
                       {status !== "locked" ? (
                         <Link
@@ -296,7 +296,7 @@ export default function ProvincePage() {
                         >
                           <div className="relative z-10">
                             <div
-                              className={`w-20 h-20 rounded-[1.5rem] bg-gradient-to-br ${mission.color} flex items-center justify-center text-4xl shadow-lg ring-4 ring-white group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300`}
+                              className={`w-20 h-20 rounded-3xl bg-linear-to-br ${mission.color} flex items-center justify-center text-4xl shadow-lg ring-4 ring-white group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300`}
                             >
                               {mission.icon}
                             </div>
@@ -333,7 +333,7 @@ export default function ProvincePage() {
                             </div>
                           </div>
 
-                          <div className="flex-shrink-0">
+                          <div className="shrink-0">
                             <div
                               className={`w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300
                                     ${status === "completed" ? "bg-emerald-100 text-emerald-600" : "bg-slate-900 text-white shadow-xl shadow-slate-900/30 group-hover:scale-110"}`}
@@ -352,7 +352,7 @@ export default function ProvincePage() {
                         </Link>
                       ) : (
                         <div className="flex flex-col md:flex-row items-center gap-8 opacity-60">
-                          <div className="w-20 h-20 rounded-[1.5rem] bg-slate-200 flex items-center justify-center text-slate-400 ring-4 ring-white">
+                          <div className="w-20 h-20 rounded-3xl bg-slate-200 flex items-center justify-center text-slate-400 ring-4 ring-white">
                             <Lock size={32} />
                           </div>
                           <div className="flex-1 text-center md:text-left">

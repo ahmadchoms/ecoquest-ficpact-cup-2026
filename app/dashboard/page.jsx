@@ -172,7 +172,7 @@ export default function DashboardPage() {
                 <h3 className="font-display font-extrabold text-xl text-black mb-6">
                   📊 Statistik Dampak
                 </h3>
-                <div className="flex-1 min-h-[250px] w-full relative">
+                <div className="flex-1 min-h-62.5 w-full relative">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
@@ -249,7 +249,7 @@ export default function DashboardPage() {
                   />
                 ))}
                 {badgeList.length > 8 && (
-                  <div className="flex items-center justify-center text-xs text-black/40 font-bold uppercase border-2 border-dashed border-black/20 rounded-2xl h-full min-h-[100px]">
+                  <div className="flex items-center justify-center text-xs text-black/40 font-bold uppercase border-2 border-dashed border-black/20 rounded-2xl h-full min-h-25">
                     +{badgeList.length - 8} lagi
                   </div>
                 )}

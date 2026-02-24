@@ -159,7 +159,7 @@ export default function InteractiveMap({
 
   if (!geoData) {
     return (
-      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-cyan-50">
+      <div className="w-full h-full flex items-center justify-center bg-linear-to-br from-blue-50 to-cyan-50">
         <div className="text-center">
           <div className="text-5xl animate-float mb-3">🗺️</div>
           <p className="text-sm text-gray-500">Memuat peta Indonesia...</p>

@@ -27,7 +27,7 @@ export default function BottomNav() {
             <Link
               key={href}
               href={href}
-              className={`flex flex-col items-center gap-1 min-w-[64px] rounded-xl transition-all relative
+              className={`flex flex-col items-center gap-1 min-w-16 rounded-xl transition-all relative
                 ${isActive ? "text-emerald-600" : "text-slate-400 hover:text-slate-600"}`}
             >
               <div
