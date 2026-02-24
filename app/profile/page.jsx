@@ -97,8 +97,8 @@ export default function ProfilePage() {
           <div className="md:col-span-2 space-y-8">
             <section>
               <h2 className="text-2xl font-display font-black text-black mb-6 flex items-center gap-3 uppercase tracking-wide">
-                <div className="p-2 bg-amber-500 border-3 border-black rounded-xl shadow-hard">
-                  <Award size={24} className="text-amber-200" strokeWidth={3} />
+                <div className="p-2 bg-amber-400 border-3 border-black rounded-xl shadow-hard">
+                  <Award size={24} className="text-amber-600" strokeWidth={3} />
                 </div>
                 Koleksi Badge Terbaru
               </h2>
