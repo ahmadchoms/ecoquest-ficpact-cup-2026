@@ -18,7 +18,7 @@ export const generateQuizQuestions = async (
   if (!genAI) return null;
 
   try {
-    const model = genAI.getGenerativeModel({ model: "gemma-3-4b-it" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
     const prompt = `Buat ${count} soal pilihan ganda tentang ${topic} dalam Bahasa Indonesia.
                     Semua pertanyaan WAJIB berdasarkan fakta ilmiah atau historis yang benar dan dapat diverifikasi.
                     Jangan membuat asumsi, jangan mengarang lokasi, dan jangan membuat fakta baru.
