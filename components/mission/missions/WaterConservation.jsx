@@ -106,6 +106,8 @@ export default function WaterConservation({
   };
 
   const handleSubmit = () => {
+    if (!result || !mission) return;
+
     const tips = [];
     if (inputs.useShower && inputs.bathMin > 10)
       tips.push("Kurangi durasi shower — setiap menit menghemat 12 liter air");
@@ -122,13 +124,13 @@ export default function WaterConservation({
 
     onComplete({
       score: Math.max(0, 100 - Math.round((result.total / 300) * 100)),
-      earnedXP: mission.xpReward,
+      earnedXP: mission?.xpReward || 0,
       impactValues: { waterSaved: Math.max(0, result.total * 0.2) },
       tips,
     });
   };
 
-  if (result) {
+  if (result && result.total !== undefined && result.breakdown) {
     const chartData = Object.entries(result.breakdown)
       .filter(([, v]) => v > 0)
       .map(([key, value]) => ({
@@ -175,16 +177,16 @@ export default function WaterConservation({
             {result.total} <span className="text-lg">liter</span>
           </p>
           <p className="text-sm text-gray-500 mt-1">
-            Rata-rata nasional: {result.nationalAverage} liter/hari
+            Rata-rata nasional: {result.nationalAverage || 150} liter/hari
           </p>
           <div
             className={`inline-block mt-2 px-3 py-1 rounded-full text-sm font-medium ${
-              result.total <= result.nationalAverage
+              result.total <= (result.nationalAverage || 150)
                 ? "bg-green-100 text-green-700"
                 : "bg-red-100 text-red-700"
             }`}
           >
-            {result.total <= result.nationalAverage
+            {result.total <= (result.nationalAverage || 150)
               ? "✅ Di bawah rata-rata"
               : "⚠️ Di atas rata-rata"}
           </div>

@@ -26,6 +26,7 @@ import WasteSorting from "@/components/mission/missions/WasteSorting";
 import SpeciesQuiz from "@/components/mission/missions/SpeciesQuiz";
 import MangroveSimulator from "@/components/mission/missions/MangroveSimulator";
 import WaterConservation from "@/components/mission/missions/WaterConservation";
+import OceanRescue from "@/components/mission/missions/OceanRescue";
 
 const missionComponents = {
   CarbonCalculator,
@@ -33,6 +34,7 @@ const missionComponents = {
   SpeciesQuiz,
   MangroveSimulator,
   WaterConservation,
+  OceanRescue,
 };
 
 export default function MissionPage() {

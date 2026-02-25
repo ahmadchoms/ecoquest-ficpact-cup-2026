@@ -89,11 +89,24 @@ export default function CarbonCalculator({
   ];
 
   const handleCalculate = () => {
-    const calc = calculateCarbonFootprint(inputs);
-    setResult(calc);
+    try {
+      const calc = calculateCarbonFootprint(inputs);
+      if (calc && calc.total !== undefined) {
+        setResult(calc);
+      } else {
+        console.error("Invalid calculation result:", calc);
+      }
+    } catch (error) {
+      console.error("Error calculating carbon footprint:", error);
+    }
   };
 
   const handleSubmit = () => {
+    if (!result || result.total === undefined) {
+      console.error("Result data is missing!");
+      return;
+    }
+
     const tips = [];
     if (inputs.carKm > 20)
       tips.push(

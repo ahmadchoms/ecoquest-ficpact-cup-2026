@@ -39,6 +39,14 @@ export const badges = {
     rarity: "common",
     category: "water",
   },
+  "ocean-guardian": {
+    id: "ocean-guardian",
+    name: "Ocean Guardian",
+    description: "Pahlawan laut — berhasil membersihkan sampah di lautan",
+    icon: "🌊",
+    rarity: "uncommon",
+    category: "ocean",
+  },
   "eco-explorer": {
     id: "eco-explorer",
     name: "Eco Explorer",

@@ -74,6 +74,21 @@ export const missions = {
     icon: "💧",
     color: "from-sky-400 to-blue-500",
   },
+  "ocean-rescue": {
+    id: "ocean-rescue",
+    title: "Penyelamat Laut",
+    subtitle: "Bersihkan sampah laut sebelum waktu habis",
+    description: "Setiap tahun 8 juta ton sampah plastik masuk ke lautan. Bantu bersihkan laut dan selamatkan kehidupan laut!",
+    type: "game",
+    difficulty: "medium",
+    xpReward: 150,
+    timeEstimate: "2 menit",
+    badgeReward: "ocean-guardian",
+    category: "ocean",
+    component: "OceanRescue",
+    icon: "🌊",
+    color: "from-blue-500 to-cyan-600",
+  },
 };
 
 export const getMissionById = (id) => missions[id];

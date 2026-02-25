@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const API_KEY = process.env.VITE_GEMINI_API_KEY;
+const API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 let genAI = null;
 
 if (API_KEY) {
@@ -18,12 +18,20 @@ export const generateQuizQuestions = async (
   if (!genAI) return null;
 
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-    const prompt = `Generate ${count} multiple-choice quiz questions about ${topic} in Indonesian. 
-    Format the output strictly as a JSON array of objects with these keys: 
-    "question" (string), "options" (array of 4 strings), "correctAnswer" (index 0-3), "explanation" (short string).
-    Ensure the questions are educational, engaging, and suitable for general audience.
-    Do not include markdown code ticks (\`\`\`). Just the raw JSON.`;
+    const model = genAI.getGenerativeModel({ model: "gemma-3-4b-it" });
+    const prompt = `Buat ${count} soal pilihan ganda tentang ${topic} dalam Bahasa Indonesia.
+                    Semua pertanyaan WAJIB berdasarkan fakta ilmiah atau historis yang benar dan dapat diverifikasi.
+                    Jangan membuat asumsi, jangan mengarang lokasi, dan jangan membuat fakta baru.
+                    Jika informasi tidak valid, jangan gunakan.
+
+                    Format output harus berupa array JSON valid dengan struktur:
+                    "question" (string),
+                    "options" (array 4 string),
+                    "correctAnswer" (angka 0-3),
+                    "explanation" (string singkat berbasis fakta).
+
+                    Hanya satu jawaban benar.
+                    Keluarkan hanya JSON mentah tanpa teks tambahan.`;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
