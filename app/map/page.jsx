@@ -48,7 +48,7 @@ export default function MapPage() {
     <PageWrapper className="min-h-screen bg-gray-50 pt-16 md:pt-20">
       <div className="flex flex-col lg:flex-row h-[calc(100vh-64px)] md:h-[calc(100vh-80px)]">
         {/* Map Area */}
-        <div className="flex-1 relative">
+        <div className="flex-1 relative z-10">
           <InteractiveMap
             provinces={filteredProvinces}
             onProvinceClick={(id) => router.push(`/province/${id}`)}
@@ -56,14 +56,14 @@ export default function MapPage() {
           <MapLegend />
 
           {/* Region Filter */}
-          <div className="absolute top-3 left-3 z-500">
+          <div className="absolute top-3 left-15 z-500">
             <div className="glass rounded-2xl p-2 flex flex-wrap gap-1.5 max-w-xs">
               <button
                 onClick={() => setActiveFilter(null)}
                 className={`text-xs px-3 py-1.5 rounded-full font-medium transition-all
                   ${
                     !activeFilter
-                      ? "bg-primary-500 text-white"
+                      ? "bg-green-500 text-white"
                       : "bg-white/80 text-gray-600 hover:bg-primary-50"
                   }`}
               >
@@ -78,7 +78,7 @@ export default function MapPage() {
                   className={`text-xs px-3 py-1.5 rounded-full font-medium transition-all
                     ${
                       activeFilter === region
-                        ? "bg-primary-500 text-white"
+                        ? "bg-green-500 text-white"
                         : "bg-white/80 text-gray-600 hover:bg-primary-50"
                     }`}
                 >
