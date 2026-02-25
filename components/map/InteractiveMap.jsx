@@ -44,18 +44,18 @@ export default function InteractiveMap({
 
   const getProvinceId = useCallback((feature) => {
     const props = feature.properties;
-    const name = (
-      props.name ||
-      props.NAME_1 ||
-      props.Propinsi ||
-      props.state ||
-      ""
-    ).toLowerCase();
+    // Natural Earth uses 'name' field for province names
+    const name = (props.name || props.NAME_1 || props.Propinsi || "").toLowerCase();
+
+    if (!name) return null;
 
     for (const p of provinces) {
       const pName = p.name.toLowerCase();
       const pId = p.id.toLowerCase();
+      
+      // Exact match or close match
       if (
+        name === pName ||
         name.includes(pName) ||
         pName.includes(name) ||
         name.replace(/\s+/g, "-") === pId ||
@@ -65,6 +65,7 @@ export default function InteractiveMap({
       }
     }
 
+    // Fuzzy match for similar names
     const nameNorm = name.replace(/\s+/g, "").replace(/-/g, "");
     for (const p of provinces) {
       const pNorm = p.name.toLowerCase().replace(/\s+/g, "").replace(/-/g, "");
