@@ -6,14 +6,25 @@ import { AnimatePresence } from "framer-motion";
 import PageWrapper from "@/components/layout/PageWrapper";
 import StatusCard from "@/components/ui/StatusCard";
 import CelebrationOverlay from "@/components/ui/CelebrationOverlay";
-import { useUserStore } from "@/store/useUserStore";
-import { useUserMission, useCompleteMission } from "@/hooks/useUserMissions";
-import { useProvince } from "@/hooks/useProvinces";
+import { fadeIn, zoomIn } from "@/utils/motion-variants";
 
-import missionComponents from "@/constants/missionRegistry";
-import BriefingPhase from "@/components/mission/phases/BriefingPhase";
-import PlayingPhase from "@/components/mission/phases/PlayingPhase";
-import ResultPhase from "@/components/mission/phases/ResultPhase";
+import CarbonCalculator from "@/components/mission/missions/CarbonCalculator";
+import WasteSorting from "@/components/mission/missions/WasteSorting";
+import SpeciesQuiz from "@/components/mission/missions/SpeciesQuiz";
+import MangroveSimulator from "@/components/mission/missions/MangroveSimulator";
+import WaterConservation from "@/components/mission/missions/WaterConservation";
+import OceanRescue from "@/components/mission/missions/OceanRescue";
+import EcoRoute from "@/components/mission/missions/EcoRoute";
+
+const missionComponents = {
+  CarbonCalculator,
+  WasteSorting,
+  SpeciesQuiz,
+  MangroveSimulator,
+  WaterConservation,
+  OceanRescue,
+  EcoRoute,
+};
 
 export default function MissionPage() {
   const { provinceId, missionId } = useParams();
