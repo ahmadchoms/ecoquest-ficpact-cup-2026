@@ -1,56 +1,67 @@
-import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
+import { requireAdmin } from "@/lib/server/middlewares/auth";
+import {
+  successResponse, validationErrorResponse, notFoundResponse,
+  serverErrorResponse,
+} from "@/lib/server/utils/response";
+import { logger } from "@/lib/server/utils/logger";
 import { adminMissionSchema } from "@/lib/validations/admin";
+import { getMissionById, updateMission, deleteMission } from "@/lib/server/services/admin/mission.service";
 
 export async function GET(request, { params }) {
+  const authError = await requireAdmin(request);
+  if (authError) return authError;
+
   try {
-    const id = params.id;
-    const mission = await prisma.mission.findUnique({
-      where: { id },
-      include: {
-        province: { select: { id: true, name: true, region: true } },
-        badgeReward: { select: { id: true, name: true, rarity: true, icon: true } },
-      }
-    });
+    const { id } = await params;
+    logger.apiRequest("GET", `/api/admin/missions/${id}`);
 
-    if (!mission) return NextResponse.json({ success: false, error: "Misi tidak ditemukan." }, { status: 404 });
+    const mission = await getMissionById(id);
+    if (!mission) return notFoundResponse("Misi");
 
-    return NextResponse.json({ success: true, data: mission });
+    logger.apiSuccess("GET", `/api/admin/missions/${id}`);
+    return successResponse(mission);
   } catch (error) {
-    console.error("[GET_ADMIN_MISSION_ID]", error);
-    return NextResponse.json({ success: false, error: "Gagal memuat misi." }, { status: 500 });
+    logger.apiError("GET", `/api/admin/missions/[id]`, error);
+    return serverErrorResponse("Gagal memuat misi.");
   }
 }
 
 export async function PATCH(request, { params }) {
+  const authError = await requireAdmin(request);
+  if (authError) return authError;
+
   try {
-    const id = params.id;
+    const { id } = await params;
+    logger.apiRequest("PATCH", `/api/admin/missions/${id}`);
+
     const body = await request.json();
-    
     const parsedData = adminMissionSchema.partial().safeParse(body);
-    if (!parsedData.success) {
-      return NextResponse.json({ success: false, error: parsedData.error.errors }, { status: 400 });
-    }
+    if (!parsedData.success) return validationErrorResponse(parsedData.error);
 
-    const updatedMission = await prisma.mission.update({
-      where: { id },
-      data: parsedData.data
-    });
+    const updatedMission = await updateMission(id, parsedData.data);
 
-    return NextResponse.json({ success: true, data: updatedMission });
+    logger.apiSuccess("PATCH", `/api/admin/missions/${id}`);
+    return successResponse(updatedMission);
   } catch (error) {
-    console.error("[PATCH_ADMIN_MISSION_ID]", error);
-    return NextResponse.json({ success: false, error: "Gagal memperbarui misi." }, { status: 500 });
+    logger.apiError("PATCH", `/api/admin/missions/[id]`, error);
+    return serverErrorResponse("Gagal memperbarui misi.");
   }
 }
 
 export async function DELETE(request, { params }) {
+  const authError = await requireAdmin(request);
+  if (authError) return authError;
+
   try {
-    const id = params.id;
-    await prisma.mission.delete({ where: { id } });
-    return NextResponse.json({ success: true, data: { deleted: true } });
+    const { id } = await params;
+    logger.apiRequest("DELETE", `/api/admin/missions/${id}`);
+
+    await deleteMission(id);
+
+    logger.apiSuccess("DELETE", `/api/admin/missions/${id}`);
+    return successResponse({ deleted: true });
   } catch (error) {
-    console.error("[DELETE_ADMIN_MISSION_ID]", error);
-    return NextResponse.json({ success: false, error: "Gagal menghapus misi." }, { status: 500 });
+    logger.apiError("DELETE", `/api/admin/missions/[id]`, error);
+    return serverErrorResponse("Gagal menghapus misi.");
   }
 }

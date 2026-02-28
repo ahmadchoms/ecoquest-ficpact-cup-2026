@@ -1,60 +1,68 @@
-import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
+import { requireAdmin } from "@/lib/server/middlewares/auth";
+import {
+  successResponse, validationErrorResponse, notFoundResponse,
+  conflictResponse, serverErrorResponse,
+} from "@/lib/server/utils/response";
+import { logger } from "@/lib/server/utils/logger";
 import { adminProvinceSchema } from "@/lib/validations/admin";
+import { getProvinceById, updateProvince, deleteProvince } from "@/lib/server/services/admin/province.service";
 
 export async function GET(request, { params }) {
+  const authError = await requireAdmin(request);
+  if (authError) return authError;
+
   try {
-    const id = params.id;
-    const province = await prisma.province.findUnique({
-      where: { id },
-      include: {
-        missions: {
-          select: { id: true, title: true, status: true, difficulty: true }
-        }
-      }
-    });
+    const { id } = await params;
+    logger.apiRequest("GET", `/api/admin/provinces/${id}`);
 
-    if (!province) return NextResponse.json({ success: false, error: "Provinsi tidak ditemukan." }, { status: 404 });
+    const province = await getProvinceById(id);
+    if (!province) return notFoundResponse("Provinsi");
 
-    return NextResponse.json({ success: true, data: province });
+    logger.apiSuccess("GET", `/api/admin/provinces/${id}`);
+    return successResponse(province);
   } catch (error) {
-    console.error("[GET_ADMIN_PROVINCE_ID]", error);
-    return NextResponse.json({ success: false, error: "Gagal memuat provinsi." }, { status: 500 });
+    logger.apiError("GET", `/api/admin/provinces/[id]`, error);
+    return serverErrorResponse("Gagal memuat provinsi.");
   }
 }
 
 export async function PATCH(request, { params }) {
+  const authError = await requireAdmin(request);
+  if (authError) return authError;
+
   try {
-    const id = params.id;
+    const { id } = await params;
+    logger.apiRequest("PATCH", `/api/admin/provinces/${id}`);
+
     const body = await request.json();
-    
     const parsedData = adminProvinceSchema.partial().safeParse(body);
-    if (!parsedData.success) {
-      return NextResponse.json({ success: false, error: parsedData.error.errors }, { status: 400 });
-    }
+    if (!parsedData.success) return validationErrorResponse(parsedData.error);
 
-    const updatedProvince = await prisma.province.update({
-      where: { id },
-      data: parsedData.data
-    });
+    const updatedProvince = await updateProvince(id, parsedData.data);
 
-    return NextResponse.json({ success: true, data: updatedProvince });
+    logger.apiSuccess("PATCH", `/api/admin/provinces/${id}`);
+    return successResponse(updatedProvince);
   } catch (error) {
-    console.error("[PATCH_ADMIN_PROVINCE_ID]", error);
-    if (error.code === 'P2002') {
-      return NextResponse.json({ success: false, error: "Nama provinsi sudah terdaftar." }, { status: 409 });
-    }
-    return NextResponse.json({ success: false, error: "Gagal memperbarui provinsi." }, { status: 500 });
+    logger.apiError("PATCH", `/api/admin/provinces/[id]`, error);
+    if (error.code === "P2002") return conflictResponse("Nama provinsi sudah terdaftar.");
+    return serverErrorResponse("Gagal memperbarui provinsi.");
   }
 }
 
 export async function DELETE(request, { params }) {
+  const authError = await requireAdmin(request);
+  if (authError) return authError;
+
   try {
-    const id = params.id;
-    await prisma.province.delete({ where: { id } });
-    return NextResponse.json({ success: true, data: { deleted: true } });
+    const { id } = await params;
+    logger.apiRequest("DELETE", `/api/admin/provinces/${id}`);
+
+    await deleteProvince(id);
+
+    logger.apiSuccess("DELETE", `/api/admin/provinces/${id}`);
+    return successResponse({ deleted: true });
   } catch (error) {
-    console.error("[DELETE_ADMIN_PROVINCE_ID]", error);
-    return NextResponse.json({ success: false, error: "Gagal menghapus provinsi." }, { status: 500 });
+    logger.apiError("DELETE", `/api/admin/provinces/[id]`, error);
+    return serverErrorResponse("Gagal menghapus provinsi.");
   }
 }

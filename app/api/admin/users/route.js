@@ -1,114 +1,60 @@
-import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
+import { requireAdmin } from "@/lib/server/middlewares/auth";
+import { checkRateLimit, getClientIdentifier } from "@/lib/server/utils/rate-limit";
+import {
+  successResponse, createdResponse, errorResponse,
+  validationErrorResponse, conflictResponse, serverErrorResponse,
+} from "@/lib/server/utils/response";
+import { logger } from "@/lib/server/utils/logger";
 import { adminUserSchema, paginationSchema } from "@/lib/validations/admin";
+import { listUsers, createUser } from "@/lib/server/services/admin/user.service";
 
 export async function GET(request) {
+  const authError = await requireAdmin(request);
+  if (authError) return authError;
+
+  const clientId = getClientIdentifier(request);
+  const { limited } = checkRateLimit(`users:${clientId}`, { maxRequests: 30 });
+  if (limited) return errorResponse("Terlalu banyak permintaan. Coba lagi nanti.", 429);
+
   try {
+    logger.apiRequest("GET", "/api/admin/users");
+
     const { searchParams } = new URL(request.url);
     const query = Object.fromEntries(searchParams.entries());
-    
-    // Parse pagination and search
+
     const parsedParams = paginationSchema.safeParse(query);
-    if (!parsedParams.success) {
-      return NextResponse.json({ success: false, error: parsedParams.error.errors }, { status: 400 });
-    }
+    if (!parsedParams.success) return validationErrorResponse(parsedParams.error);
 
     const { page, limit, search } = parsedParams.data;
-    const skip = (page - 1) * limit;
+    const result = await listUsers({ page, limit, search, role: query.role, status: query.status });
 
-    // Filter conditions
-    const where = {};
-    if (search) {
-      where.OR = [
-        { username: { contains: search, mode: "insensitive" } },
-        { email: { contains: search, mode: "insensitive" } },
-      ];
-    }
-    
-    // Additional filters (could be passed in query)
-    if (query.role && query.role !== "ALL") {
-      where.role = query.role;
-    }
-    if (query.status && query.status !== "ALL") {
-      where.status = query.status;
-    }
-
-    const [users, total] = await Promise.all([
-      prisma.user.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: { createdAt: "desc" },
-        select: {
-          id: true,
-          username: true,
-          email: true,
-          role: true,
-          status: true,
-          level: true,
-          xp: true,
-          profileImage: true,
-          createdAt: true,
-        }
-      }),
-      prisma.user.count({ where })
-    ]);
-
-    return NextResponse.json({
-      success: true,
-      data: users,
-      meta: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit)
-      }
-    });
-
+    logger.apiSuccess("GET", "/api/admin/users", { total: result.meta.total });
+    return successResponse(result.data, result.meta);
   } catch (error) {
-    console.error("[GET_ADMIN_USERS]", error);
-    return NextResponse.json({ success: false, error: "Gagal memuat pengguna." }, { status: 500 });
+    logger.apiError("GET", "/api/admin/users", error);
+    return serverErrorResponse("Gagal memuat pengguna.");
   }
 }
 
 export async function POST(request) {
+  const authError = await requireAdmin(request);
+  if (authError) return authError;
+
   try {
+    logger.apiRequest("POST", "/api/admin/users");
+
     const body = await request.json();
     const parsedData = adminUserSchema.safeParse(body);
+    if (!parsedData.success) return validationErrorResponse(parsedData.error);
 
-    if (!parsedData.success) {
-      return NextResponse.json({ success: false, error: parsedData.error.errors }, { status: 400 });
-    }
+    const newUser = await createUser(parsedData.data);
 
-    // Usually hash password here via bcrypt. For dummy purpose we skip hashing if not provided
-    const password = parsedData.data.password || "defaultpassword123";
-
-    const newUser = await prisma.user.create({
-      data: {
-        username: parsedData.data.username,
-        email: parsedData.data.email,
-        password: password, // In production ALWAYS hash
-        role: parsedData.data.role,
-        status: parsedData.data.status,
-        level: parsedData.data.level,
-        xp: parsedData.data.xp,
-      },
-      select: {
-        id: true,
-        username: true,
-        email: true,
-        role: true,
-        status: true,
-      }
-    });
-
-    return NextResponse.json({ success: true, data: newUser }, { status: 201 });
-
+    logger.apiSuccess("POST", "/api/admin/users", { id: newUser.id });
+    return createdResponse(newUser);
   } catch (error) {
-    console.error("[POST_ADMIN_USERS]", error);
-    if (error.code === 'P2002') {
-      return NextResponse.json({ success: false, error: "Username atau Email sudah terdaftar." }, { status: 409 });
-    }
-    return NextResponse.json({ success: false, error: "Gagal membuat pengguna." }, { status: 500 });
+    logger.apiError("POST", "/api/admin/users", error);
+    if (error.code === "P2002") return conflictResponse("Username atau Email sudah terdaftar.");
+    if (error.message?.includes("Password wajib")) return errorResponse(error.message, 400);
+    return serverErrorResponse("Gagal membuat pengguna.");
   }
 }

@@ -1,65 +1,68 @@
-import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
+import { requireAdmin } from "@/lib/server/middlewares/auth";
+import {
+  successResponse, validationErrorResponse, notFoundResponse,
+  conflictResponse, serverErrorResponse,
+} from "@/lib/server/utils/response";
+import { logger } from "@/lib/server/utils/logger";
 import { adminBadgeSchema } from "@/lib/validations/admin";
+import { getBadgeById, updateBadge, deleteBadge } from "@/lib/server/services/admin/badge.service";
 
 export async function GET(request, { params }) {
+  const authError = await requireAdmin(request);
+  if (authError) return authError;
+
   try {
-    const id = params.id;
-    const badge = await prisma.badge.findUnique({
-      where: { id },
-      include: {
-        _count: { select: { users: true } }
-      }
-    });
+    const { id } = await params;
+    logger.apiRequest("GET", `/api/admin/badges/${id}`);
 
-    if (!badge) return NextResponse.json({ success: false, error: "Lencana tidak ditemukan." }, { status: 404 });
+    const badge = await getBadgeById(id);
+    if (!badge) return notFoundResponse("Lencana");
 
-    // Transform count
-    const formattedBadge = {
-      ...badge,
-      usersCount: badge._count.users
-    };
-    delete formattedBadge._count;
-
-    return NextResponse.json({ success: true, data: formattedBadge });
+    logger.apiSuccess("GET", `/api/admin/badges/${id}`);
+    return successResponse(badge);
   } catch (error) {
-    console.error("[GET_ADMIN_BADGE_ID]", error);
-    return NextResponse.json({ success: false, error: "Gagal memuat lencana." }, { status: 500 });
+    logger.apiError("GET", `/api/admin/badges/[id]`, error);
+    return serverErrorResponse("Gagal memuat lencana.");
   }
 }
 
 export async function PATCH(request, { params }) {
+  const authError = await requireAdmin(request);
+  if (authError) return authError;
+
   try {
-    const id = params.id;
+    const { id } = await params;
+    logger.apiRequest("PATCH", `/api/admin/badges/${id}`);
+
     const body = await request.json();
-    
     const parsedData = adminBadgeSchema.partial().safeParse(body);
-    if (!parsedData.success) {
-      return NextResponse.json({ success: false, error: parsedData.error.errors }, { status: 400 });
-    }
+    if (!parsedData.success) return validationErrorResponse(parsedData.error);
 
-    const updatedBadge = await prisma.badge.update({
-      where: { id },
-      data: parsedData.data
-    });
+    const updatedBadge = await updateBadge(id, parsedData.data);
 
-    return NextResponse.json({ success: true, data: updatedBadge });
+    logger.apiSuccess("PATCH", `/api/admin/badges/${id}`);
+    return successResponse(updatedBadge);
   } catch (error) {
-    console.error("[PATCH_ADMIN_BADGE_ID]", error);
-    if (error.code === 'P2002') {
-      return NextResponse.json({ success: false, error: "Nama lencana sudah terdaftar." }, { status: 409 });
-    }
-    return NextResponse.json({ success: false, error: "Gagal memperbarui lencana." }, { status: 500 });
+    logger.apiError("PATCH", `/api/admin/badges/[id]`, error);
+    if (error.code === "P2002") return conflictResponse("Nama lencana sudah terdaftar.");
+    return serverErrorResponse("Gagal memperbarui lencana.");
   }
 }
 
 export async function DELETE(request, { params }) {
+  const authError = await requireAdmin(request);
+  if (authError) return authError;
+
   try {
-    const id = params.id;
-    await prisma.badge.delete({ where: { id } });
-    return NextResponse.json({ success: true, data: { deleted: true } });
+    const { id } = await params;
+    logger.apiRequest("DELETE", `/api/admin/badges/${id}`);
+
+    await deleteBadge(id);
+
+    logger.apiSuccess("DELETE", `/api/admin/badges/${id}`);
+    return successResponse({ deleted: true });
   } catch (error) {
-    console.error("[DELETE_ADMIN_BADGE_ID]", error);
-    return NextResponse.json({ success: false, error: "Gagal menghapus lencana." }, { status: 500 });
+    logger.apiError("DELETE", `/api/admin/badges/[id]`, error);
+    return serverErrorResponse("Gagal menghapus lencana.");
   }
 }

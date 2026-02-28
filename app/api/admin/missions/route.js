@@ -1,88 +1,63 @@
-import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
+import { requireAdmin } from "@/lib/server/middlewares/auth";
+import { checkRateLimit, getClientIdentifier } from "@/lib/server/utils/rate-limit";
+import {
+  successResponse, createdResponse, errorResponse,
+  validationErrorResponse, serverErrorResponse,
+} from "@/lib/server/utils/response";
+import { logger } from "@/lib/server/utils/logger";
 import { adminMissionSchema, paginationSchema } from "@/lib/validations/admin";
+import { listMissions, createMission } from "@/lib/server/services/admin/mission.service";
 
 export async function GET(request) {
+  const authError = await requireAdmin(request);
+  if (authError) return authError;
+
+  const clientId = getClientIdentifier(request);
+  const { limited } = checkRateLimit(`missions:${clientId}`, { maxRequests: 30 });
+  if (limited) return errorResponse("Terlalu banyak permintaan. Coba lagi nanti.", 429);
+
   try {
+    logger.apiRequest("GET", "/api/admin/missions");
+
     const { searchParams } = new URL(request.url);
     const query = Object.fromEntries(searchParams.entries());
-    
-    // Parse pagination and search
+
     const parsedParams = paginationSchema.safeParse(query);
-    if (!parsedParams.success) {
-      return NextResponse.json({ success: false, error: parsedParams.error.errors }, { status: 400 });
-    }
+    if (!parsedParams.success) return validationErrorResponse(parsedParams.error);
 
     const { page, limit, search } = parsedParams.data;
-    const skip = (page - 1) * limit;
-
-    // Filter conditions
-    const where = {};
-    if (search) {
-      where.OR = [
-        { title: { contains: search, mode: "insensitive" } },
-        { description: { contains: search, mode: "insensitive" } },
-      ];
-    }
-    
-    if (query.status && query.status !== "ALL") where.status = query.status;
-    if (query.difficulty && query.difficulty !== "ALL") where.difficulty = query.difficulty;
-    if (query.category && query.category !== "ALL") where.category = query.category;
-
-    const [missions, total] = await Promise.all([
-      prisma.mission.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: { createdAt: "desc" },
-        include: {
-          province: { select: { id: true, name: true } },
-          badgeReward: { select: { id: true, name: true, icon: true } },
-          _count: { select: { completions: true } }
-        }
-      }),
-      prisma.mission.count({ where })
-    ]);
-
-    const formattedMissions = missions.map(m => ({
-      ...m,
-      completionsCount: m._count.completions
-    }));
-
-    return NextResponse.json({
-      success: true,
-      data: formattedMissions,
-      meta: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit)
-      }
+    const result = await listMissions({
+      page, limit, search,
+      status: query.status,
+      difficulty: query.difficulty,
+      category: query.category,
     });
 
+    logger.apiSuccess("GET", "/api/admin/missions", { total: result.meta.total });
+    return successResponse(result.data, result.meta);
   } catch (error) {
-    console.error("[GET_ADMIN_MISSIONS]", error);
-    return NextResponse.json({ success: false, error: "Gagal memuat misi." }, { status: 500 });
+    logger.apiError("GET", "/api/admin/missions", error);
+    return serverErrorResponse("Gagal memuat misi.");
   }
 }
 
 export async function POST(request) {
+  const authError = await requireAdmin(request);
+  if (authError) return authError;
+
   try {
+    logger.apiRequest("POST", "/api/admin/missions");
+
     const body = await request.json();
     const parsedData = adminMissionSchema.safeParse(body);
+    if (!parsedData.success) return validationErrorResponse(parsedData.error);
 
-    if (!parsedData.success) {
-      return NextResponse.json({ success: false, error: parsedData.error.errors }, { status: 400 });
-    }
+    const newMission = await createMission(parsedData.data);
 
-    const newMission = await prisma.mission.create({
-      data: parsedData.data
-    });
-
-    return NextResponse.json({ success: true, data: newMission }, { status: 201 });
-
+    logger.apiSuccess("POST", "/api/admin/missions", { id: newMission.id });
+    return createdResponse(newMission);
   } catch (error) {
-    console.error("[POST_ADMIN_MISSIONS]", error);
-    return NextResponse.json({ success: false, error: "Gagal menambahkan misi." }, { status: 500 });
+    logger.apiError("POST", "/api/admin/missions", error);
+    return serverErrorResponse("Gagal menambahkan misi.");
   }
 }

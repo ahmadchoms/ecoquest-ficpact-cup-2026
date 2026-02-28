@@ -12,7 +12,7 @@ export default function EcoSelect({
   placeholder = "Pilih opsi...",
   className = "",
   size = "md",
-  disabled = false
+  disabled = false,
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef(null);
@@ -20,7 +20,7 @@ export default function EcoSelect({
   const sizes = {
     sm: "py-2.5 px-4 text-xs",
     md: "py-3 px-4 text-sm",
-    lg: "py-4 px-5 text-base"
+    lg: "py-4 px-5 text-base",
   };
 
   useEffect(() => {
@@ -33,28 +33,34 @@ export default function EcoSelect({
     return () => document.removeEventListener("mousedown", handleOutsideClick);
   }, [isOpen]);
 
-  const selectedOption = options.find(opt => opt.value === value) || null;
+  const selectedOption = options.find((opt) => opt.value === value) || null;
 
   return (
-    <div className={`relative w-full ${disabled ? "opacity-60 cursor-not-allowed" : ""}`} ref={containerRef}>
+    <div
+      className={`relative w-full ${disabled ? "opacity-60 cursor-not-allowed" : ""}`}
+      ref={containerRef}
+    >
       {/* Trigger Button */}
       <button
         type="button"
         disabled={disabled}
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full flex items-center justify-between bg-slate-50 border-3 border-black rounded-2xl font-body font-bold transition-all
-          focus:outline-none focus:bg-white hover:bg-white shadow-[3px_3px_0_transparent] hover:shadow-[3px_3px_0_#0f0f0f]
-          ${isOpen ? "bg-white shadow-[3px_3px_0_#0f0f0f] border-b-transparent rounded-b-none" : ""} 
+        className={`w-full flex items-center justify-between border-[2.5px] border-black rounded-2xl font-body font-bold transition-all
+          focus:outline-none hover:bg-[#f5e642] shadow-[3px_3px_0_#0f0f0f] hover:shadow-[5px_5px_0_#0f0f0f]
+          ${isOpen ? "bg-[#f5e642] shadow-[5px_5px_0_#0f0f0f]" : "bg-white"} 
           ${sizes[size]} ${className}`}
       >
         <div className="flex items-center gap-3">
-          {Icon && <Icon size={18} className="text-slate-400" />}
-          <span className={selectedOption ? "text-black" : "text-slate-400"}>
+          {Icon && <Icon size={18} className="text-black" strokeWidth={2.5} />}
+          <span className="text-black">
             {selectedOption ? selectedOption.label : placeholder}
           </span>
         </div>
-        <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
-          <ChevronDown size={18} className="text-black" />
+        <motion.div
+          animate={{ rotate: isOpen ? 180 : 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <ChevronDown size={18} className="text-black" strokeWidth={3} />
         </motion.div>
       </button>
 
@@ -64,9 +70,11 @@ export default function EcoSelect({
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95 }}
+            exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.15 }}
-            className="absolute left-0 right-0 top-full bg-white border-3 border-t-0 border-black rounded-b-2xl shadow-[3px_6px_0_#0f0f0f] z-50 max-h-60 overflow-y-auto"
+            // z-[60] memastikan menu ini selalu berada di atas popover parent
+            // Ditambah mt-2 agar dropdown terpisah sedikit dari tombol untuk efek brutalism yang tegas
+            className="absolute left-0 right-0 top-full mt-2 bg-white border-[2.5px] border-black rounded-2xl shadow-[6px_6px_0_#0f0f0f] z-[60] max-h-60 overflow-y-auto"
           >
             <ul className="py-2">
               {options.map((opt, idx) => (
@@ -74,15 +82,18 @@ export default function EcoSelect({
                   <button
                     type="button"
                     onClick={() => {
-                      onChange(opt.value);
+                      // Format event diubah agar cocok dengan e.target.value di handleFilterChange
+                      onChange({ target: { value: opt.value } });
                       setIsOpen(false);
                     }}
-                    className="w-full text-left px-5 py-3 hover:bg-slate-100 flex items-center justify-between group transition-colors"
+                    className="w-full text-left px-5 py-3 hover:bg-[#b5f0c0] flex items-center justify-between group transition-none border-b-2 border-transparent hover:border-black"
                   >
-                    <span className="font-body font-bold text-sm text-black group-hover:pl-2 transition-all">
+                    <span className="font-body font-bold text-sm text-black group-hover:translate-x-1 transition-transform">
                       {opt.label}
                     </span>
-                    {value === opt.value && <Check size={16} className="text-emerald-600" />}
+                    {value === opt.value && (
+                      <Check size={18} className="text-black" strokeWidth={3} />
+                    )}
                   </button>
                 </li>
               ))}

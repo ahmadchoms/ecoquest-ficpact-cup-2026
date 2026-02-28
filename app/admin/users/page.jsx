@@ -10,7 +10,13 @@ import EcoSelect from "@/components/ui/EcoSelect";
 import { useAdminUsers, useDeleteAdminUser } from "@/hooks/admin/useAdminUsers";
 
 export default function UsersPage() {
-  const [filters, setFilters] = useState({ page: 1, limit: 10, search: "", role: "ALL", status: "ALL" });
+  const [filters, setFilters] = useState({
+    page: 1,
+    limit: 10,
+    search: "",
+    role: "ALL",
+    status: "ALL",
+  });
   const { data: response, isLoading, isError, error } = useAdminUsers(filters);
   const deleteMutation = useDeleteAdminUser();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -77,14 +83,6 @@ export default function UsersPage() {
       ),
     },
     {
-      key: "createdAt",
-      label: "Bergabung",
-      render: (val) => {
-        const date = val ? new Date(val) : new Date();
-        return <span className="text-xs font-bold text-slate-400">{date.toLocaleDateString("id-ID")}</span>;
-      },
-    },
-    {
       key: "status",
       label: "Status",
       render: (val) => (
@@ -133,8 +131,12 @@ export default function UsersPage() {
 
       {isError ? (
         <div className="p-8 bg-red-50 border-3 border-black rounded-3xl text-center">
-          <h2 className="text-xl font-display font-black text-red-600 mb-2">Gagal Memuat Data</h2>
-          <p className="font-body font-bold text-slate-700">{error?.message || "Terjadi kesalahan saat menghubungi server."}</p>
+          <h2 className="text-xl font-display font-black text-red-600 mb-2">
+            Gagal Memuat Data
+          </h2>
+          <p className="font-body font-bold text-slate-700">
+            {error?.message || "Terjadi kesalahan saat menghubungi server."}
+          </p>
         </div>
       ) : (
         <DataTable
@@ -222,7 +224,7 @@ export default function UsersPage() {
             <EcoSelect
               icon={Shield}
               value="Standard User"
-              onChange={() => { }}
+              onChange={() => {}}
               options={[
                 { label: "Standard User", value: "Standard User" },
                 { label: "Moderator", value: "Moderator" },

@@ -1,51 +1,24 @@
-import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
+import { requireAdmin } from "@/lib/server/middlewares/auth";
+import { checkRateLimit, getClientIdentifier } from "@/lib/server/utils/rate-limit";
+import { successResponse, errorResponse, serverErrorResponse } from "@/lib/server/utils/response";
+import { logger } from "@/lib/server/utils/logger";
+import { getRecentActivities } from "@/lib/server/services/admin/activity.service";
 
-export async function GET() {
+export async function GET(request) {
+  const authError = await requireAdmin(request);
+  if (authError) return authError;
+
+  const clientId = getClientIdentifier(request);
+  const { limited } = checkRateLimit(`activities:${clientId}`, { maxRequests: 30 });
+  if (limited) return errorResponse("Terlalu banyak permintaan. Coba lagi nanti.", 429);
+
   try {
-    const defaultLimit = 5;
-
-    const recentCompletions = await prisma.missionCompletion.findMany({
-      orderBy: {
-        completedAt: 'desc'
-      },
-      take: defaultLimit,
-      include: {
-        user: {
-          select: {
-            username: true,
-            profileImage: true,
-          }
-        },
-        mission: {
-          select: {
-            title: true,
-            icon: true,
-            color: true,
-            category: true
-          }
-        }
-      }
-    });
-
-    // Transform to match UI expectations
-    const formattedActivities = recentCompletions.map(c => ({
-      id: c.id,
-      user_id: c.userId,
-      username: c.user.username,
-      action: `Menyelesaikan misi "${c.mission.title}"`,
-      timestamp: c.completedAt.toISOString(),
-      type: "mission_completion",
-      xp_earned: c.xpEarned,
-      mission_category: c.mission.category
-    }));
-
-    return NextResponse.json({ success: true, data: formattedActivities });
+    logger.apiRequest("GET", "/api/admin/activities");
+    const data = await getRecentActivities();
+    logger.apiSuccess("GET", "/api/admin/activities", { count: data.length });
+    return successResponse(data);
   } catch (error) {
-    console.error("[GET_ADMIN_ACTIVITIES]", error);
-    return NextResponse.json(
-      { success: false, error: "Gagal memuat aktivitas terbaru." },
-      { status: 500 }
-    );
+    logger.apiError("GET", "/api/admin/activities", error);
+    return serverErrorResponse("Gagal memuat aktivitas terbaru.");
   }
 }

@@ -1,92 +1,59 @@
-import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
+import { requireAdmin } from "@/lib/server/middlewares/auth";
+import { checkRateLimit, getClientIdentifier } from "@/lib/server/utils/rate-limit";
+import {
+  successResponse, createdResponse, errorResponse,
+  validationErrorResponse, conflictResponse, serverErrorResponse,
+} from "@/lib/server/utils/response";
+import { logger } from "@/lib/server/utils/logger";
 import { adminProvinceSchema, paginationSchema } from "@/lib/validations/admin";
+import { listProvinces, createProvince } from "@/lib/server/services/admin/province.service";
 
 export async function GET(request) {
+  const authError = await requireAdmin(request);
+  if (authError) return authError;
+
+  const clientId = getClientIdentifier(request);
+  const { limited } = checkRateLimit(`provinces:${clientId}`, { maxRequests: 30 });
+  if (limited) return errorResponse("Terlalu banyak permintaan. Coba lagi nanti.", 429);
+
   try {
+    logger.apiRequest("GET", "/api/admin/provinces");
+
     const { searchParams } = new URL(request.url);
     const query = Object.fromEntries(searchParams.entries());
-    
-    // Parse pagination and search
+
     const parsedParams = paginationSchema.safeParse(query);
-    if (!parsedParams.success) {
-      return NextResponse.json({ success: false, error: parsedParams.error.errors }, { status: 400 });
-    }
+    if (!parsedParams.success) return validationErrorResponse(parsedParams.error);
 
     const { page, limit, search } = parsedParams.data;
-    const skip = (page - 1) * limit;
+    const result = await listProvinces({ page, limit, search, threatLevel: query.threatLevel });
 
-    // Filter conditions
-    const where = {};
-    if (search) {
-      where.OR = [
-        { name: { contains: search, mode: "insensitive" } },
-        { region: { contains: search, mode: "insensitive" } },
-      ];
-    }
-    
-    if (query.threatLevel && query.threatLevel !== "ALL") {
-      where.threatLevel = query.threatLevel;
-    }
-
-    const [provinces, total] = await Promise.all([
-      prisma.province.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: { name: "asc" },
-        include: {
-          _count: {
-            select: { missions: true }
-          }
-        }
-      }),
-      prisma.province.count({ where })
-    ]);
-
-    // Transform count for frontend display
-    const formattedProvinces = provinces.map(p => ({
-      ...p,
-      missionsCount: p._count.missions
-    }));
-
-    return NextResponse.json({
-      success: true,
-      data: formattedProvinces,
-      meta: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit)
-      }
-    });
-
+    logger.apiSuccess("GET", "/api/admin/provinces", { total: result.meta.total });
+    return successResponse(result.data, result.meta);
   } catch (error) {
-    console.error("[GET_ADMIN_PROVINCES]", error);
-    return NextResponse.json({ success: false, error: "Gagal memuat provinsi." }, { status: 500 });
+    logger.apiError("GET", "/api/admin/provinces", error);
+    return serverErrorResponse("Gagal memuat provinsi.");
   }
 }
 
 export async function POST(request) {
+  const authError = await requireAdmin(request);
+  if (authError) return authError;
+
   try {
+    logger.apiRequest("POST", "/api/admin/provinces");
+
     const body = await request.json();
     const parsedData = adminProvinceSchema.safeParse(body);
+    if (!parsedData.success) return validationErrorResponse(parsedData.error);
 
-    if (!parsedData.success) {
-      return NextResponse.json({ success: false, error: parsedData.error.errors }, { status: 400 });
-    }
+    const newProvince = await createProvince(parsedData.data);
 
-    const newProvince = await prisma.province.create({
-      data: parsedData.data
-    });
-
-    return NextResponse.json({ success: true, data: newProvince }, { status: 201 });
-
+    logger.apiSuccess("POST", "/api/admin/provinces", { id: newProvince.id });
+    return createdResponse(newProvince);
   } catch (error) {
-    console.error("[POST_ADMIN_PROVINCES]", error);
-    if (error.code === 'P2002') {
-      return NextResponse.json({ success: false, error: "Nama provinsi sudah terdaftar." }, { status: 409 });
-    }
-    return NextResponse.json({ success: false, error: "Gagal menambahkan provinsi." }, { status: 500 });
+    logger.apiError("POST", "/api/admin/provinces", error);
+    if (error.code === "P2002") return conflictResponse("Nama provinsi sudah terdaftar.");
+    return serverErrorResponse("Gagal menambahkan provinsi.");
   }
 }
