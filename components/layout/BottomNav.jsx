@@ -13,9 +13,7 @@ const navItems = [
 
 export default function BottomNav() {
   const pathname = usePathname();
-  const hiddenRoutes = ["/", "/login", "/register"];
-
-  if (hiddenRoutes.includes(pathname)) return null;
+  if (pathname === "/" || pathname === "/login" || pathname === "/register" || pathname.startsWith("/admin")) return null;
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-t border-slate-200 safe-area-pb">

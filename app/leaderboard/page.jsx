@@ -32,12 +32,12 @@ export default function LeaderboardPage() {
     .map((u) =>
       u.id === 6
         ? {
-            ...u,
-            name: explorerName || "Eco Explorer (You)",
-            xp: totalXP,
-            level,
-            badges: earnedBadges.length,
-          }
+          ...u,
+          name: explorerName || "Eco Explorer (You)",
+          xp: totalXP,
+          level,
+          badges: earnedBadges.length,
+        }
         : u,
     )
     .sort((a, b) => b.xp - a.xp);

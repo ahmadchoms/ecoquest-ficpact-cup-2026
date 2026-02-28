@@ -105,6 +105,18 @@
     background-size: 24px 24px;
     opacity: 0.1;
   }
+
+  .nav-collapsed span,
+  .nav-collapsed p,
+  .nav-collapsed .w-1\.5 {
+    display: none;
+  }
+
+  @media (min-width: 1024px) {
+    .nav-collapsed .sidebar-header {
+      justify-content: center;
+    }
+  }
 }
 
 /* Custom scrollbar */
