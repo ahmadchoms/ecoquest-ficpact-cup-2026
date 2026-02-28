@@ -25,7 +25,13 @@ export default function Navbar() {
   }, [pathname]);
 
   // Hide navbar on landing page, auth pages, and admin pages
-  if (pathname === "/" || pathname === "/login" || pathname === "/register" || pathname.startsWith("/admin")) return null;
+  if (
+    pathname === "/" ||
+    pathname === "/auth/login" ||
+    pathname === "/auth/register" ||
+    pathname.startsWith("/admin")
+  )
+    return null;
 
   const navLinks = [
     { href: "/map", icon: <Map size={18} />, label: "Peta" },
@@ -38,10 +44,11 @@ export default function Navbar() {
     return (
       <Link
         href={href}
-        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all font-medium text-sm ${isActive
+        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all font-medium text-sm ${
+          isActive
             ? "bg-emerald-50 text-emerald-600"
             : "text-slate-600 hover:bg-slate-50 hover:text-emerald-500"
-          }`}
+        }`}
       >
         {icon}
         <span>{label}</span>
@@ -219,10 +226,11 @@ export default function Navbar() {
                       <Link
                         href={link.href}
                         onClick={() => setMobileOpen(false)}
-                        className={`flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all font-medium ${pathname === link.href
+                        className={`flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all font-medium ${
+                          pathname === link.href
                             ? "bg-emerald-50 text-emerald-600"
                             : "text-slate-600 hover:bg-slate-50"
-                          }`}
+                        }`}
                       >
                         {link.icon}
                         {link.label}

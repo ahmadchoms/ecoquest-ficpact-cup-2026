@@ -16,8 +16,6 @@ datasource db {
 
 enum Role {
   USER
-  MODERATOR
-  ADMIN
   SUPER_ADMIN
 }
 
@@ -29,9 +27,10 @@ enum UserStatus {
 
 enum MissionType {
   CALCULATOR
-  QUIZ
   DRAG_DROP
+  QUIZ
   SIMULATION
+  GAME
 }
 
 enum Difficulty {
@@ -47,36 +46,22 @@ enum MissionStatus {
 }
 
 enum MissionCategory {
-  CLIMATE
-  WASTE
-  BIODIVERSITY
-  COASTAL
+  OCEAN
+  TRANSPORT
   WATER
+  COASTAL
+  BIODIVERSITY
+  WASTE
+  CLIMATE
 }
 
 enum Rarity {
-  COMMON
-  UNCOMMON
-  RARE
-  EPIC
-  LEGENDARY
-}
-
-enum BadgeCategory {
-  CLIMATE
-  WASTE
-  BIODIVERSITY
-  COASTAL
-  WATER
-  EXPLORATION
-  MILESTONE
-}
-
-enum ThreatLevel {
-  LOW
-  MEDIUM
-  HIGH
-  CRITICAL
+  BRONZE
+  SILVER
+  GOLD
+  PLATINUM
+  DIAMOND
+  CHALLENGER
 }
 
 model User {
@@ -85,6 +70,7 @@ model User {
   password     String
   username     String     @unique
   xp           Int        @default(0)
+  points       Int        @default(0)
   level        Int        @default(1)
   profileImage String?
   bio          String?
@@ -98,19 +84,16 @@ model User {
 }
 
 model Province {
-  id           String       @id @default(cuid())
-  name         String       @unique
-  region       String
-  coordinates  String
-  ecosystems   String[]
-  threatLevel  ThreatLevel?
-  description  String?
-  funFact      String?
-  species      String[]
-  illustration String?
-  color        String?
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
+  id          String      @id @default(cuid())
+  name        String      @unique
+  region      String
+  ecosystems  String[]
+  threatLevel Difficulty?
+  description String?
+  funFact     String?
+  species     String[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 
   missions Mission[]
 }
@@ -123,12 +106,11 @@ model Mission {
   type         MissionType
   difficulty   Difficulty
   status       MissionStatus   @default(DRAFT)
+  pointsReward Int
   xpReward     Int
   timeEstimate String?
   category     MissionCategory
-  component    String?
   icon         String?
-  color        String?
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt
 
@@ -142,14 +124,14 @@ model Mission {
 }
 
 model Badge {
-  id          String         @id @default(cuid())
-  name        String         @unique
+  id          String           @id @default(cuid())
+  name        String           @unique
   description String
   icon        String?
   rarity      Rarity
-  category    BadgeCategory?
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  category    MissionCategory?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
 
   users    User[]    @relation("UserBadges")
   missions Mission[]
@@ -169,4 +151,3 @@ model MissionCompletion {
 
   @@unique([userId, missionId])
 }
-
