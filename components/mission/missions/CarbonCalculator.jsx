@@ -221,7 +221,7 @@ export default function CarbonCalculator({
 
         <button
           onClick={handleSubmit}
-          className="w-full py-3 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
+          className="w-full py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
         >
           Selesai & Klaim XP ⚡
         </button>
@@ -247,7 +247,7 @@ export default function CarbonCalculator({
 
       <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
         <div
-          className="h-full bg-gradient-to-r from-primary-400 to-primary-600 rounded-full transition-all"
+          className="h-full bg-gradient-to-r from-orange-400 to-orange-600 rounded-full transition-all"
           style={{ width: `${((step + 1) / steps.length) * 100}%` }}
         />
       </div>
@@ -268,7 +268,7 @@ export default function CarbonCalculator({
                 <label className="text-sm font-medium text-gray-700">
                   {field.emoji} {field.label}
                 </label>
-                <span className="bg-primary-100 text-primary-700 px-3 py-1 rounded-full text-sm font-bold min-w-[50px] text-center">
+                <span className="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-sm font-bold min-w-[50px] text-center">
                   {inputs[field.key]}
                 </span>
               </div>
@@ -280,7 +280,7 @@ export default function CarbonCalculator({
                 onChange={(e) =>
                   setInputs({ ...inputs, [field.key]: Number(e.target.value) })
                 }
-                className="w-full h-2 bg-gray-200 rounded-full appearance-none cursor-pointer accent-primary-500"
+                className="w-full h-2 bg-gray-200 rounded-full appearance-none cursor-pointer accent-orange-500"
               />
               <div className="flex justify-between text-xs text-gray-400 mt-1">
                 <span>{field.min}</span>
@@ -295,7 +295,7 @@ export default function CarbonCalculator({
         {step < steps.length - 1 ? (
           <button
             onClick={() => setStep(step + 1)}
-            className="flex-1 py-3 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
+            className="flex-1 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
           >
             Lanjut →
           </button>

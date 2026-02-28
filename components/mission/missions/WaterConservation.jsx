@@ -229,7 +229,7 @@ export default function WaterConservation({
 
         <button
           onClick={handleSubmit}
-          className="w-full py-3 bg-gradient-to-r from-sky-400 to-blue-500 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
+          className="w-full py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
         >
           Selesai & Klaim XP ⚡
         </button>
@@ -329,14 +329,14 @@ export default function WaterConservation({
         {step < steps.length - 1 ? (
           <button
             onClick={() => setStep(step + 1)}
-            className="flex-1 py-3 bg-gradient-to-r from-sky-400 to-blue-500 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
+            className="flex-1 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
           >
             Lanjut →
           </button>
         ) : (
           <button
             onClick={handleCalculate}
-            className="flex-1 py-3 bg-gradient-to-r from-sky-400 to-blue-500 text-white rounded-xl font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2"
+            className="flex-1 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2"
           >
             <Droplets size={18} /> Hitung Konsumsi Air
           </button>

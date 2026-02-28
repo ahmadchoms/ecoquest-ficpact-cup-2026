@@ -89,6 +89,21 @@ export const missions = {
     icon: "🌊",
     color: "from-blue-500 to-cyan-600",
   },
+  "eco-route": {
+    id: "eco-route",
+    title: "EcoRoute - Smart Travel Simulator",
+    subtitle: "Pilih kendaraan ramah lingkungan untuk perjalananmu",
+    description: "Sektor transportasi menghasilkan 27% emisi gas rumah kaca di Indonesia. Simulasikan perjalanan dengan kendaraan terbaik dan buat pilihan transportasi yang lebih hijau!",
+    type: "simulation",
+    difficulty: "medium",
+    xpReward: 160,
+    timeEstimate: "3 menit",
+    badgeReward: "eco-traveler",
+    category: "transport",
+    component: "EcoRoute",
+    icon: "🚗",
+    color: "from-green-400 to-emerald-600",
+  },
 };
 
 export const getMissionById = (id) => missions[id];

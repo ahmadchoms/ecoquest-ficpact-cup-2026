@@ -5,15 +5,35 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, RefreshCw } from "lucide-react";
 
 const TRASH_TYPES = {
-  plastic: { emoji: "🧴", points: 10, color: "bg-blue-300", label: "Plastik" },
-  can: { emoji: "🥫", points: 15, color: "bg-yellow-400", label: "Kaleng" },
-  net: { emoji: "🎣", points: 25, color: "bg-gray-400", label: "Jaring Ikan" },
+  // Organik (Organic)
+  leaf: { emoji: "🍃", points: 5, category: "organik", label: "Daun" },
+  wood: { emoji: "🪵", points: 8, category: "organik", label: "Kayu" },
+  paper: { emoji: "📄", points: 7, category: "organik", label: "Kertas" },
+  food: { emoji: "🍌", points: 6, category: "organik", label: "Sampah Makanan" },
+  
+  // Anorganik (Inorganic)
+  plastic: { emoji: "🧴", points: 10, category: "anorganik", label: "Plastik" },
+  can: { emoji: "🥫", points: 12, category: "anorganik", label: "Kaleng" },
+  bottle: { emoji: "🍾", points: 11, category: "anorganik", label: "Botol Kaca" },
+  bag: { emoji: "🛍️", points: 10, category: "anorganik", label: "Tas Plastik" },
+  
+  // B3 (Hazardous)
+  net: { emoji: "🎣", points: 25, category: "b3", label: "Jaring Ikan" },
+  rope: { emoji: "🪢", points: 20, category: "b3", label: "Tali" },
+  battery: { emoji: "🔋", points: 22, category: "b3", label: "Baterai" },
+  chemicals: { emoji: "⚗️", points: 30, category: "b3", label: "Bahan Kimia" },
 };
 
 const GRID_SIZE = 10;
 const GAME_DURATION = 60;
-const TRASH_SPAWN_INTERVAL = 800; // ms
+const TRASH_SPAWN_INTERVAL = 1200; // ms - lebih lambat
 const TRASH_LIFETIME = 8000; // ms
+
+const CATEGORIES = {
+  organik: { label: "Organik", color: "bg-green-400", icon: "♻️" },
+  anorganik: { label: "Anorganik", color: "bg-blue-400", icon: "♻️" },
+  b3: { label: "B3 (Berbahaya)", color: "bg-red-400", icon: "⚠️" },
+};
 
 export default function OceanRescue({
   province,
@@ -28,6 +48,10 @@ export default function OceanRescue({
   const [collectedCount, setCollectedCount] = useState(0);
   const [result, setResult] = useState(null);
   const [mounted, setMounted] = useState(false);
+  const [draggedTrash, setDraggedTrash] = useState(null);
+  const [hoveredCategory, setHoveredCategory] = useState(null);
+  const [correctSorts, setCorrectSorts] = useState({ organik: 0, anorganik: 0, b3: 0 });
+  const [incorrectCount, setIncorrectCount] = useState(0);
   const idCounterRef = useRef(0);
 
   // Only mount on client
@@ -86,13 +110,51 @@ export default function OceanRescue({
     return () => clearInterval(cleanupTimer);
   }, [mounted]);
 
-  // Handle trash click
-  const handleTrashClick = useCallback((trashId, trashType) => {
-    setTrash((prev) => prev.filter((t) => t.id !== trashId));
-    const points = TRASH_TYPES[trashType].points;
-    setScore((prev) => prev + points);
-    setCollectedCount((prev) => prev + 1);
-  }, []);
+  // Handle drag start
+  const handleDragStart = (e, trash) => {
+    setDraggedTrash(trash);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  // Handle drop on category
+  const handleDrop = useCallback((e, category) => {
+    e.preventDefault();
+    if (!draggedTrash) return;
+
+    const trashCategory = TRASH_TYPES[draggedTrash.type].category;
+    const isCorrect = trashCategory === category;
+
+    // Remove trash from grid
+    setTrash((prev) => prev.filter((t) => t.id !== draggedTrash.id));
+
+    if (isCorrect) {
+      // Correct sort
+      const points = TRASH_TYPES[draggedTrash.type].points;
+      setScore((prev) => prev + points);
+      setCollectedCount((prev) => prev + 1);
+      setCorrectSorts((prev) => ({
+        ...prev,
+        [category]: prev[category] + 1,
+      }));
+    } else {
+      // Wrong sort - lose points
+      setScore((prev) => Math.max(0, prev - 10));
+      setIncorrectCount((prev) => prev + 1);
+    }
+
+    setDraggedTrash(null);
+    setHoveredCategory(null);
+  }, [draggedTrash]);
+
+  const handleDragOver = (e, category) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    setHoveredCategory(category);
+  };
+
+  const handleDragLeave = () => {
+    setHoveredCategory(null);
+  };
 
   // Finish game
   useEffect(() => {
@@ -101,12 +163,13 @@ export default function OceanRescue({
       const finalResult = {
         score,
         collectedCount,
+        incorrectCount,
         rating,
         earnedXP: mission?.xpReward || 0,
       };
       setResult(finalResult);
     }
-  }, [gameState, score, result, mission, mounted]);
+  }, [gameState, score, result, mission, mounted, incorrectCount]);
 
   const calculateRating = (finalScore) => {
     if (finalScore >= 500) return 5;
@@ -178,9 +241,16 @@ export default function OceanRescue({
               </div>
 
               <div className="eco-card p-4 bg-gradient-to-r from-emerald-50 to-green-50">
-                <p className="text-sm text-gray-600 mb-1">Sampah Dibersihkan</p>
+                <p className="text-sm text-gray-600 mb-1">Sampah Berhasil Dipilah</p>
                 <p className="font-heading text-2xl font-bold text-emerald-600">
-                  {result.collectedCount} 🗑️
+                  {result.collectedCount} ✅
+                </p>
+              </div>
+
+              <div className="eco-card p-4 bg-gradient-to-r from-red-50 to-orange-50">
+                <p className="text-sm text-gray-600 mb-1">Sampah Salah Pilah</p>
+                <p className="font-heading text-2xl font-bold text-red-600">
+                  {result.incorrectCount} ❌
                 </p>
               </div>
 
@@ -290,7 +360,7 @@ export default function OceanRescue({
               item={item}
               gridSize={GRID_SIZE}
               trashType={TRASH_TYPES[item.type]}
-              onCollect={() => handleTrashClick(item.id, item.type)}
+              onDragStart={(e) => handleDragStart(e, item)}
             />
           ))}
         </AnimatePresence>
@@ -306,26 +376,62 @@ export default function OceanRescue({
         )}
       </div>
 
+      {/* Category Boxes */}
+      <div className="grid grid-cols-3 gap-2">
+        {Object.entries(CATEGORIES).map(([key, category]) => {
+          const isCorrectCategory = draggedTrash && TRASH_TYPES[draggedTrash.type].category === key;
+          const isHovered = hoveredCategory === key;
+          
+          return (
+            <motion.div
+              key={key}
+              onDrop={(e) => handleDrop(e, key)}
+              onDragOver={(e) => handleDragOver(e, key)}
+              onDragLeave={handleDragLeave}
+              whileHover={{ scale: 1.05 }}
+              className={`${category.color} rounded-xl p-3 text-center cursor-pointer border-2 transition-all ${
+                draggedTrash
+                  ? isCorrectCategory && isHovered
+                    ? "border-yellow-300 ring-2 ring-yellow-300"
+                    : !isCorrectCategory && isHovered
+                    ? "border-red-300 ring-2 ring-red-300"
+                    : "border-white"
+                  : "border-white"
+              } shadow-lg`}
+            >
+              <p className="text-2xl mb-1">{category.icon}</p>
+              <p className="font-heading text-sm font-bold text-white">
+                {category.label}
+              </p>
+              <p className="text-xs text-white/80">
+                {correctSorts[key]} dikumpul
+              </p>
+            </motion.div>
+          );
+        })}
+      </div>
+
       {/* Tips */}
       <div className="eco-card p-2 bg-blue-50 text-center">
         <p className="text-xs text-gray-600 font-medium">
-          💡 Kaleng = 15 | Plastik = 10 | Jaring = 25
+          💡 Drag sampah ke kategori yang tepat!
         </p>
       </div>
     </div>
   );
 }
 
-function TrashItem({ item, gridSize, trashType, onCollect }) {
+function TrashItem({ item, gridSize, trashType, onDragStart }) {
   const cellWidth = 100 / gridSize;
   const posX = cellWidth * item.x + cellWidth / 2;
   const posY = cellWidth * item.y + cellWidth / 2;
 
   const age = Date.now() - item.createdAt;
   const progress = Math.min(age / 8000, 1);
+  const [showLabel, setShowLabel] = useState(false);
 
   return (
-    <motion.button
+    <motion.div
       initial={{ scale: 0, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       exit={{
@@ -333,15 +439,33 @@ function TrashItem({ item, gridSize, trashType, onCollect }) {
         opacity: 0,
         transition: { duration: 0.2 },
       }}
-      whileHover={{ scale: 1.1 }}
-      whileTap={{ scale: 0.95 }}
-      onClick={onCollect}
-      className="absolute w-12 h-12 -translate-x-1/2 -translate-y-1/2 cursor-pointer group"
+      draggable
+      onDragStart={(e) => {
+        e.dataTransfer.effectAllowed = "move";
+        onDragStart(e);
+      }}
+      onMouseEnter={() => setShowLabel(true)}
+      onMouseLeave={() => setShowLabel(false)}
+      className="absolute w-12 h-12 -translate-x-1/2 -translate-y-1/2 cursor-grab active:cursor-grabbing group"
       style={{
         left: `${posX}%`,
         top: `${posY}%`,
       }}
     >
+      {/* Label Tooltip */}
+      <AnimatePresence>
+        {showLabel && (
+          <motion.div
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 5 }}
+            className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10 pointer-events-none"
+          >
+            {trashType.label}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Danger Ring - grows as trash ages */}
       {progress > 0.5 && (
         <motion.div
@@ -359,9 +483,13 @@ function TrashItem({ item, gridSize, trashType, onCollect }) {
 
       {/* Trash Icon Background */}
       <motion.div
-        className={`absolute inset-0 rounded-full ${trashType.color} shadow-lg flex items-center justify-center text-2xl group-hover:shadow-xl transition-shadow border-2 border-white`}
+        className={`absolute inset-0 rounded-full shadow-lg flex items-center justify-center text-2xl group-hover:shadow-xl transition-shadow border-2 border-white ${
+          progress > 0.7
+            ? "bg-red-500"
+            : "bg-white"
+        }`}
         animate={{
-          backgroundColor: progress > 0.7 ? "#ef4444" : trashType.color,
+          backgroundColor: progress > 0.7 ? "#ef4444" : "#ffffff",
         }}
         transition={{ duration: 0.3 }}
       >
@@ -385,6 +513,6 @@ function TrashItem({ item, gridSize, trashType, onCollect }) {
       >
         +{trashType.points}
       </motion.div>
-    </motion.button>
+    </motion.div>
   );
 }
