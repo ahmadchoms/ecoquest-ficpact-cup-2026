@@ -96,14 +96,36 @@ export const enrichSpeciesWithIndonesianNames = async (speciesList) => {
 
   const enrichedSpecies = await Promise.all(
     speciesList.map(async (species) => {
-      const { indonesianName, description } = await getIndonesianName(
-        species.scientificName,
-      );
-      return {
-        ...species,
-        indonesianName,
-        description,
-      };
+      try {
+        // Use server API endpoint to avoid CORS issues
+        const response = await fetch('/api/species/get-indonesian-name', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ scientificName: species.scientificName }),
+        });
+        
+        if (!response.ok) {
+          return {
+            ...species,
+            indonesianName: species.scientificName,
+            description: '',
+          };
+        }
+        
+        const { indonesianName, description } = await response.json();
+        return {
+          ...species,
+          indonesianName,
+          description,
+        };
+      } catch (error) {
+        console.error(`Error enriching species ${species.scientificName}:`, error);
+        return {
+          ...species,
+          indonesianName: species.scientificName,
+          description: '',
+        };
+      }
     }),
   );
 
