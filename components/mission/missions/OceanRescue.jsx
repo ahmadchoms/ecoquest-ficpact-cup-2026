@@ -329,7 +329,7 @@ export default function OceanRescue({
       </div>
 
       {/* Game Grid */}
-      <div className="relative w-full h-[680px] bg-gradient-to-b from-blue-200 to-cyan-300 rounded-xl overflow-hidden border-2 border-blue-400 shadow-lg">
+      <div className="relative w-full h-[560px] bg-gradient-to-b from-blue-200 to-cyan-300 rounded-xl overflow-hidden border-2 border-blue-400 shadow-lg">
         {/* Grid Background */}
         <div className="absolute inset-0">
           <svg className="w-full h-full opacity-20">
