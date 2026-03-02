@@ -11,33 +11,154 @@ if (API_KEY) {
   );
 }
 
+// Fungsi untuk fetch spesies dari GBIF berdasarkan provinsi
+export const fetchProvinceSpecies = async (provinceName) => {
+  try {
+    const safeProvinceName = encodeURIComponent(provinceName);
+    const url = `https://api.gbif.org/v1/occurrence/search?country=ID&stateProvince=${safeProvinceName}&limit=100`;
+
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("GBIF API Error");
+    
+    const data = await response.json();
+
+    // Extract & clean species data
+    const rawSpeciesList = data.results
+      .filter(
+        (item) =>
+          item.species &&
+          (item.kingdom === "Animalia" || item.kingdom === "Plantae"),
+      )
+      .map((item) => ({
+        scientificName: item.species,
+        kingdom: item.kingdom,
+        province: item.stateProvince,
+      }));
+
+    // Remove duplicates
+    const uniqueSpecies = Array.from(
+      new Set(rawSpeciesList.map((s) => s.scientificName)),
+    ).map((scientificName) => {
+      return rawSpeciesList.find((s) => s.scientificName === scientificName);
+    });
+
+    return uniqueSpecies.slice(0, 5);
+  } catch (error) {
+    console.error("Gagal mengambil data dari GBIF:", error);
+    return null;
+  }
+};
+
+// Fungsi untuk mendapatkan nama Indonesia dari Wikidata/Wikipedia
+export const getIndonesianName = async (scientificName) => {
+  try {
+    // Search di Wikidata untuk entity dengan nama ilmiah
+    const response = await fetch(
+      `https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodeURIComponent(
+        scientificName,
+      )}&language=id&type=item&format=json`,
+    );
+    const data = await response.json();
+
+    if (data.search && data.search.length > 0) {
+      const entityId = data.search[0].id;
+
+      // Get label & description dalam bahasa Indonesia
+      const detailResponse = await fetch(
+        `https://www.wikidata.org/w/api.php?action=wbgetentities&ids=${entityId}&props=labels|descriptions&languages=id|en&format=json`,
+      );
+      const detailData = await detailResponse.json();
+      const entity = detailData.entities[entityId];
+
+      // Prioritas: Indonesian label > English label > scientific name
+      const label =
+        entity.labels?.id?.value ||
+        entity.labels?.en?.value ||
+        scientificName;
+      const description =
+        entity.descriptions?.id?.value ||
+        entity.descriptions?.en?.value ||
+        "";
+
+      return { indonesianName: label, description };
+    }
+
+    return { indonesianName: scientificName, description: "" };
+  } catch (error) {
+    console.error("Error fetching Indonesian name:", error);
+    return { indonesianName: scientificName, description: "" };
+  }
+};
+
+// Fungsi untuk enrich spesies dengan nama Indonesia
+export const enrichSpeciesWithIndonesianNames = async (speciesList) => {
+  if (!speciesList || speciesList.length === 0) return [];
+
+  const enrichedSpecies = await Promise.all(
+    speciesList.map(async (species) => {
+      const { indonesianName, description } = await getIndonesianName(
+        species.scientificName,
+      );
+      return {
+        ...species,
+        indonesianName,
+        description,
+      };
+    }),
+  );
+
+  return enrichedSpecies;
+};
+
 export const generateQuizQuestions = async (
   topic = "Indonesian wildlife",
   count = 5,
+  speciesList = null,
 ) => {
   if (!genAI) return null;
 
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+    // Build context dari spesies yang diberikan
+    let speciesContext = "";
+    if (speciesList && speciesList.length > 0) {
+      speciesContext = speciesList
+        .map(
+          (s) =>
+            `- ${s.indonesianName} (${s.scientificName})${s.description ? ": " + s.description : ""}`,
+        )
+        .join("\n");
+    }
+
     const prompt = `Buat ${count} soal pilihan ganda tentang ${topic} dalam Bahasa Indonesia.
-                    Semua pertanyaan WAJIB berdasarkan fakta ilmiah atau historis yang benar dan dapat diverifikasi.
-                    Jangan membuat asumsi, jangan mengarang lokasi, dan jangan membuat fakta baru.
-                    Jika informasi tidak valid, jangan gunakan.
+${
+  speciesContext
+    ? `Gunakan spesies/flora-fauna berikut sebagai basis (WAJIB ada minimal 3 dari daftar ini):\n${speciesContext}\n`
+    : ""
+}
+Semua pertanyaan WAJIB berdasarkan fakta ilmiah atau historis yang benar dan dapat diverifikasi.
+Jangan membuat asumsi, jangan mengarang lokasi, dan jangan membuat fakta baru.
+Setiap soal HARUS menyebutkan nama Indonesia (bukan hanya nama ilmiah/Latin).
+Prioritaskan pertanyaan tentang konservasi, habitat, dan peran ekologi.
 
-                    Format output harus berupa array JSON valid dengan struktur:
-                    "question" (string),
-                    "options" (array 4 string),
-                    "correctAnswer" (angka 0-3),
-                    "explanation" (string singkat berbasis fakta).
+Format output harus berupa array JSON valid dengan struktur:
+{
+  "question": "string pertanyaan dalam Bahasa Indonesia",
+  "options": ["pilihan 1", "pilihan 2", "pilihan 3", "pilihan 4"],
+  "correctAnswer": angka 0-3,
+  "explanation": "penjelasan singkat berbasis fakta",
+  "species": "Nama Indonesia (nama ilmiah) 🦁"
+}
 
-                    Hanya satu jawaban benar.
-                    Keluarkan hanya JSON mentah tanpa teks tambahan.`;
+Hanya satu jawaban benar per soal.
+Keluarkan hanya JSON array mentah tanpa teks tambahan.`;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
 
-    // Clean up if the model adds markdown ticks despite instructions
+    // Clean up markdown ticks if present
     const jsonStr = text
       .replace(/```json/g, "")
       .replace(/```/g, "")

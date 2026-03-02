@@ -10,7 +10,11 @@ import {
   Sparkles,
   AlertCircle,
 } from "lucide-react";
-import { generateQuizQuestions } from "@/services/ai";
+import {
+  generateQuizQuestions,
+  fetchProvinceSpecies,
+  enrichSpeciesWithIndonesianNames,
+} from "@/services/ai";
 import AnimatedButton from "@/components/ui/AnimatedButton";
 
 // Fallback questions if AI fails or key missing
@@ -81,36 +85,92 @@ export default function SpeciesQuiz({ province, mission, onComplete, onBack }) {
   const [isFinished, setIsFinished] = useState(false);
 
   useEffect(() => {
-    const fetchQuestions = async () => {
-      setLoading(true);
-      // Try fetching from AI first
-      const aiQuestions = await generateQuizQuestions(
-        `Wildlife in ${province?.name || "Indonesia"}`,
-        5,
-      );
+    let abortController = new AbortController();
+    let isMounted = true;
+    let isRequesting = false;
 
-      if (aiQuestions && aiQuestions.length >= 3) {
-        // Map AI response to our format
-        const formatted = aiQuestions.map((q, i) => ({
-          id: i,
-          question: q.question,
-          options: q.options,
-          correct: q.correctAnswer, // AI returns 0-3 index
-          explanation: q.explanation || "Jawaban yang benar adalah yang itu.",
-          species: "AI Generated 🤖",
-        }));
-        setQuestions(formatted);
-        setUsingAI(true);
-      } else {
-        // Fallback
-        setQuestions([...fallbackQuestions].sort(() => Math.random() - 0.5));
-        setUsingAI(false);
+    const fetchQuestions = async () => {
+      if (isRequesting) return;
+      isRequesting = true;
+      
+      setLoading(true);
+      setError(null);
+
+      try {
+        // Step 1: Fetch spesies dari GBIF berdasarkan provinsi
+        const gbifSpecies = await fetchProvinceSpecies(province?.name);
+
+        if (!isMounted) return;
+
+        let aiQuestions = null;
+
+        if (gbifSpecies && gbifSpecies.length >= 2) {
+          // Step 2: Enrich dengan nama Indonesia
+          const enrichedSpecies =
+            await enrichSpeciesWithIndonesianNames(gbifSpecies);
+
+          if (!isMounted) return;
+
+          // Step 3: Generate soal dari AI dengan spesies nyata
+          aiQuestions = await generateQuizQuestions(
+            `Wildlife and Flora in ${province?.name || "Indonesia"}`,
+            5,
+            enrichedSpecies,
+          );
+        } else {
+          // Fallback: Jika GBIF gagal, generate soal umum
+          aiQuestions = await generateQuizQuestions(
+            `Wildlife in ${province?.name || "Indonesia"}`,
+            5,
+          );
+        }
+
+        if (!isMounted) return;
+
+        if (aiQuestions && aiQuestions.length >= 3) {
+          // Map AI response to our format
+          const formatted = aiQuestions.map((q, i) => ({
+            id: i,
+            question: q.question,
+            options: q.options,
+            correct: q.correctAnswer, // AI returns 0-3 index
+            explanation: q.explanation || "Jawaban yang benar adalah yang itu.",
+            species: q.species || "Pembelajaran Spesies 🌿",
+          }));
+          setQuestions(formatted);
+          setUsingAI(true);
+        } else {
+          // Fallback ke pertanyaan default
+          setQuestions([...fallbackQuestions].sort(() => Math.random() - 0.5));
+          setUsingAI(false);
+        }
+      } catch (error) {
+        if (error.name === "AbortError") {
+          console.log("Quiz fetch dibatalkan");
+          return;
+        }
+        console.error("Error fetching questions:", error);
+        // Final fallback
+        if (isMounted) {
+          setQuestions([...fallbackQuestions].sort(() => Math.random() - 0.5));
+          setUsingAI(false);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+          isRequesting = false;
+        }
       }
-      setLoading(false);
     };
 
     fetchQuestions();
-  }, [province]);
+
+    // Cleanup function
+    return () => {
+      isMounted = false;
+      abortController.abort();
+    };
+  }, [province?.id]);
 
   const q = questions[currentQ];
 
@@ -156,12 +216,12 @@ export default function SpeciesQuiz({ province, mission, onComplete, onBack }) {
           className="w-12 h-12 border-4 border-emerald-200 border-t-emerald-500 rounded-full mb-4"
         />
         <p className="text-slate-600 font-medium animate-pulse">
-          Sedang menyiapkan pertanyaan{" "}
-          {province ? `tentang ${province.name}` : ""}...
+          Sedang mempersiapkan kuis yang dipersonalisasi
+          {province ? ` tentang spesies ${province.name}` : ""}...
         </p>
         <p className="text-xs text-slate-400 mt-2 flex items-center gap-1">
           <Sparkles size={12} className="text-purple-400" />
-          Powered by Gemini AI
+          Mengambil data dari GBIF & Gemini AI
         </p>
       </div>
     );
@@ -181,7 +241,7 @@ export default function SpeciesQuiz({ province, mission, onComplete, onBack }) {
         <div className="flex items-center gap-3">
           {usingAI && (
             <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded flex items-center gap-1">
-              <Sparkles size={10} /> AI Quiz
+              <Sparkles size={10} /> Berbasis Data Real
             </span>
           )}
           <span className="text-sm text-gray-500">
