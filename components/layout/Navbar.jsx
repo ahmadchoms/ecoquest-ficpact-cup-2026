@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useUserStore } from "@/store/useUserStore";
 import XPBar from "@/components/ui/XPBar";
 import LevelBadge from "@/components/ui/LevelBadge";
+import { signOut } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Leaf, User, Map, LogOut, Award, Menu, X } from "lucide-react";
 import { useState, useEffect, useTransition } from "react";
@@ -29,6 +30,7 @@ export default function Navbar() {
     pathname === "/" ||
     pathname === "/auth/login" ||
     pathname === "/auth/register" ||
+    pathname === "/auth/error" ||
     pathname.startsWith("/admin")
   )
     return null;
@@ -54,6 +56,12 @@ export default function Navbar() {
         <span>{label}</span>
       </Link>
     );
+  };
+
+  const handleLogout = async () => {
+    await signOut({
+      callbackUrl: "/auth/login",
+    });
   };
 
   return (
@@ -136,8 +144,8 @@ export default function Navbar() {
                       </Link>
                       <div className="h-px bg-slate-100 my-1" />
                       <Link
-                        href="/"
-                        onClick={() => setDropdownOpen(false)}
+                        href = ""
+                        onClick={() => handleLogout()}
                         className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-50 text-slate-600 hover:text-red-600 transition-colors text-sm font-medium"
                       >
                         <LogOut size={16} /> Keluar
@@ -257,8 +265,8 @@ export default function Navbar() {
 
                 {/* Logout */}
                 <Link
-                  href="/"
-                  onClick={() => setMobileOpen(false)}
+                href=""
+                  onClick={() => handleLogout()}
                   className="flex items-center gap-3 px-4 py-3 rounded-xl text-red-500 hover:bg-red-50 font-medium mt-auto"
                 >
                   <LogOut size={18} /> Keluar

@@ -67,6 +67,7 @@ async function main() {
 
   const superAdmin = await prisma.user.create({
     data: {
+      name: "Super Admin",
       username: "superadmin",
       email: "admin@ecoquest.id",
       password: passwordHash,
@@ -82,6 +83,7 @@ async function main() {
 
   const regionalAdmin = await prisma.user.create({
     data: {
+      name: "Admin Jawa Barat",
       username: "admin_jabar",
       email: "jabar@ecoquest.id",
       password: passwordHash,
@@ -96,6 +98,7 @@ async function main() {
   for (let i = 0; i < 18; i++) {
     const newUser = await prisma.user.create({
       data: {
+        name: `Eco Explorer ${i + 1}`,
         username: `eco_explorer_${i + 1}`,
         email: `user${i + 1}@example.com`,
         password: passwordHash,
