@@ -1,6 +1,13 @@
 import { requireAdmin } from "@/lib/server/middlewares/auth";
 import {
-  successResponse, validationErrorResponse, notFoundResponse,
+  checkRateLimit,
+  getClientIdentifier,
+} from "@/lib/server/utils/rate-limit";
+import {
+  successResponse,
+  errorResponse,
+  validationErrorResponse,
+  notFoundResponse,
   serverErrorResponse,
 } from "@/lib/server/utils/response";
 import { logger } from "@/lib/server/utils/logger";
@@ -30,11 +37,24 @@ export async function PATCH(request, { params }) {
   const authError = await requireAdmin(request);
   if (authError) return authError;
 
+  const clientId = getClientIdentifier(request);
+  const { limited } = checkRateLimit(`missions:${clientId}:mutate`, {
+    maxRequests: 10,
+  });
+  if (limited)
+    return errorResponse("Terlalu banyak permintaan. Coba lagi nanti.", 429);
+
   try {
     const { id } = await params;
     logger.apiRequest("PATCH", `/api/admin/missions/${id}`);
 
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (e) {
+      return errorResponse("Format body JSON tidak valid", 400);
+    }
+
     const parsedData = adminMissionSchema.partial().safeParse(body);
     if (!parsedData.success) return validationErrorResponse(parsedData.error);
 
@@ -44,6 +64,7 @@ export async function PATCH(request, { params }) {
     return successResponse(updatedMission);
   } catch (error) {
     logger.apiError("PATCH", `/api/admin/missions/[id]`, error);
+    if (error.code === "P2025") return notFoundResponse("Misi");
     return serverErrorResponse("Gagal memperbarui misi.");
   }
 }
@@ -51,6 +72,13 @@ export async function PATCH(request, { params }) {
 export async function DELETE(request, { params }) {
   const authError = await requireAdmin(request);
   if (authError) return authError;
+
+  const clientId = getClientIdentifier(request);
+  const { limited } = checkRateLimit(`missions:${clientId}:mutate`, {
+    maxRequests: 10,
+  });
+  if (limited)
+    return errorResponse("Terlalu banyak permintaan. Coba lagi nanti.", 429);
 
   try {
     const { id } = await params;
@@ -62,6 +90,7 @@ export async function DELETE(request, { params }) {
     return successResponse({ deleted: true });
   } catch (error) {
     logger.apiError("DELETE", `/api/admin/missions/[id]`, error);
+    if (error.code === "P2025") return notFoundResponse("Misi");
     return serverErrorResponse("Gagal menghapus misi.");
   }
 }

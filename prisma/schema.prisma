@@ -16,7 +16,7 @@ datasource db {
 
 enum Role {
   USER
-  SUPER_ADMIN
+  ADMIN
 }
 
 enum UserStatus {
@@ -105,7 +105,7 @@ model Mission {
   description  String
   type         MissionType
   difficulty   Difficulty
-  status       MissionStatus   @default(DRAFT)
+  status       MissionStatus   @default(ACTIVE)
   pointsReward Int
   xpReward     Int
   timeEstimate String?

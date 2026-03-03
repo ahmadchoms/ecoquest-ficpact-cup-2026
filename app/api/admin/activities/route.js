@@ -1,6 +1,13 @@
 import { requireAdmin } from "@/lib/server/middlewares/auth";
-import { checkRateLimit, getClientIdentifier } from "@/lib/server/utils/rate-limit";
-import { successResponse, errorResponse, serverErrorResponse } from "@/lib/server/utils/response";
+import {
+  checkRateLimit,
+  getClientIdentifier,
+} from "@/lib/server/utils/rate-limit";
+import {
+  successResponse,
+  errorResponse,
+  serverErrorResponse,
+} from "@/lib/server/utils/response";
 import { logger } from "@/lib/server/utils/logger";
 import { getRecentActivities } from "@/lib/server/services/admin/activity.service";
 
@@ -9,8 +16,11 @@ export async function GET(request) {
   if (authError) return authError;
 
   const clientId = getClientIdentifier(request);
-  const { limited } = checkRateLimit(`activities:${clientId}`, { maxRequests: 30 });
-  if (limited) return errorResponse("Terlalu banyak permintaan. Coba lagi nanti.", 429);
+  const { limited } = checkRateLimit(`activities:${clientId}`, {
+    maxRequests: 10,
+  });
+  if (limited)
+    return errorResponse("Terlalu banyak permintaan. Coba lagi nanti.", 429);
 
   try {
     logger.apiRequest("GET", "/api/admin/activities");

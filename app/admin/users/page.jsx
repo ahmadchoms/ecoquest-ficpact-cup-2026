@@ -226,10 +226,8 @@ export default function UsersPage() {
               value="Standard User"
               onChange={() => {}}
               options={[
-                { label: "Standard User", value: "Standard User" },
-                { label: "Moderator", value: "Moderator" },
-                { label: "Regional Admin", value: "Regional Admin" },
-                { label: "Super Admin", value: "Super Admin" },
+                { label: "Standard User", value: "USER" },
+                { label: "Super Admin", value: "ADMIN" },
               ]}
             />
           </div>
