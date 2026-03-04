@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -31,8 +31,6 @@ export default function DataTable({
   columns,
   data,
   isLoading,
-  onEdit,
-  onDelete,
   emptyMessage = "Tidak ada data ditemukan",
   searchPlaceholder = "Cari data...",
   filterConfigs = [],
@@ -135,10 +133,10 @@ export default function DataTable({
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95 }}
                     // Buang overflow-hidden, pertahankan border tebal & hard shadow
-                    className="absolute right-0 top-full mt-4 w-72 bg-white border-[2.5px] border-black rounded-3xl shadow-[8px_8px_0_#0f0f0f] z-50 flex flex-col"
+                    className="absolute right-0 top-full mt-4 w-72 bg-white border-[2.5px] border-black rounded-3xl shadow-hard-xl z-50 flex flex-col"
                   >
                     {/* Header - Diberi rounded-t agar sudut atas tetap melengkung rapi tanpa overflow-hidden */}
-                    <div className="p-4 border-b-[2.5px] border-black bg-[#d4fce8] rounded-t-[22px] flex items-center justify-between">
+                    <div className="p-4 border-b-[2.5px] border-black bg-mint rounded-t-[22px] flex items-center justify-between">
                       <span className="font-display font-black uppercase tracking-tight text-black">
                         Kriteria Filter
                       </span>
@@ -163,10 +161,7 @@ export default function DataTable({
                             onChange={(e) =>
                               handleFilterChange(config.key, e.target.value)
                             }
-                            options={[
-                              { label: "Semua Kategori", value: "ALL" },
-                              ...config.options,
-                            ]}
+                            options={[...config.options]}
                           />
                         </div>
                       ))}
@@ -174,10 +169,10 @@ export default function DataTable({
 
                     {/* Footer / Reset Button */}
                     {activeFilterCount > 0 && (
-                      <div className="p-4 border-t-[2.5px] border-black bg-[#ffb8d9] rounded-b-[22px]">
+                      <div className="p-4 border-t-[2.5px] border-black bg-pink rounded-b-[22px]">
                         <button
                           onClick={clearFilters}
-                          className="w-full py-2 bg-white border-[2.5px] border-black rounded-xl font-black text-xs uppercase tracking-widest text-black shadow-[4px_4px_0_#0f0f0f] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_#0f0f0f] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all"
+                          className="w-full py-2 bg-white border-[2.5px] border-black rounded-xl font-black text-xs uppercase tracking-widest text-black shadow-hard hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_#0f0f0f] active:translate-x-1 active:translate-y-1 active:shadow-none transition-all"
                         >
                           Reset Filter
                         </button>
@@ -193,7 +188,7 @@ export default function DataTable({
 
       {/* Table Container */}
       <div className="bg-white border-3 border-black rounded-4xl shadow-hard overflow-hidden">
-        <div className="overflow-x-auto min-h-[400px]">
+        <div className="overflow-x-auto min-h-100">
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-slate-50 border-b-3 border-black">
@@ -210,11 +205,6 @@ export default function DataTable({
                     </div>
                   </th>
                 ))}
-                {(onEdit || onDelete) && (
-                  <th className="px-6 py-5 text-right text-[10px] font-black uppercase tracking-[0.2em] text-black w-24">
-                    Aksi
-                  </th>
-                )}
               </tr>
             </thead>
             <tbody className="divide-y-3 divide-black/5">
@@ -244,20 +234,6 @@ export default function DataTable({
                             : row[col.key]}
                         </td>
                       ))}
-                      {(onEdit || onDelete) && (
-                        <td className="px-6 py-5 text-right w-24">
-                          <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            {onEdit && (
-                              <button
-                                onClick={() => onEdit(row)}
-                                className="p-2 hover:bg-yellow border-2 border-transparent hover:border-black rounded-lg transition-all shadow-[2px_2px_0_transparent] hover:shadow-[2px_2px_0_#0f0f0f]"
-                              >
-                                <MoreHorizontal size={18} />
-                              </button>
-                            )}
-                          </div>
-                        </td>
-                      )}
                     </motion.tr>
                   ))
                 ) : (

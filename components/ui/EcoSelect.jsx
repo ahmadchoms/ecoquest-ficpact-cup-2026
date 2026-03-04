@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { ChevronDown, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { createPortal } from "react-dom";
 
 export default function EcoSelect({
   icon: Icon,
@@ -15,7 +16,8 @@ export default function EcoSelect({
   disabled = false,
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const containerRef = useRef(null);
+  const [dropdownStyle, setDropdownStyle] = useState({});
+  const triggerRef = useRef(null);
 
   const sizes = {
     sm: "py-2.5 px-4 text-xs",
@@ -23,84 +25,117 @@ export default function EcoSelect({
     lg: "py-4 px-5 text-base",
   };
 
+  const selectedOption = options.find((opt) => opt.value === value) || null;
+
+  // Hitung posisi dropdown saat open
   useEffect(() => {
-    const handleOutsideClick = (e) => {
-      if (containerRef.current && !containerRef.current.contains(e.target)) {
+    if (!isOpen || !triggerRef.current) return;
+
+    const rect = triggerRef.current.getBoundingClientRect();
+
+    setDropdownStyle({
+      position: "fixed",
+      top: rect.bottom + 8,
+      left: rect.left,
+      width: rect.width,
+      zIndex: 9999,
+    });
+
+    const handleScroll = () => {
+      const updated = triggerRef.current.getBoundingClientRect();
+      setDropdownStyle({
+        position: "fixed",
+        top: updated.bottom + 8,
+        left: updated.left,
+        width: updated.width,
+        zIndex: 9999,
+      });
+    };
+
+    window.addEventListener("scroll", handleScroll, true);
+    window.addEventListener("resize", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll, true);
+      window.removeEventListener("resize", handleScroll);
+    };
+  }, [isOpen]);
+
+  // Close on outside click
+  useEffect(() => {
+    const handleClick = (e) => {
+      if (triggerRef.current && !triggerRef.current.contains(e.target)) {
         setIsOpen(false);
       }
     };
-    if (isOpen) document.addEventListener("mousedown", handleOutsideClick);
-    return () => document.removeEventListener("mousedown", handleOutsideClick);
+
+    if (isOpen) document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
   }, [isOpen]);
 
-  const selectedOption = options.find((opt) => opt.value === value) || null;
-
   return (
-    <div
-      className={`relative w-full ${disabled ? "opacity-60 cursor-not-allowed" : ""}`}
-      ref={containerRef}
-    >
-      {/* Trigger Button */}
+    <>
+      {/* Trigger */}
       <button
+        ref={triggerRef}
         type="button"
         disabled={disabled}
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => setIsOpen((prev) => !prev)}
         className={`w-full flex items-center justify-between border-[2.5px] border-black rounded-2xl font-body font-bold transition-all
-          focus:outline-none hover:bg-[#f5e642] shadow-[3px_3px_0_#0f0f0f] hover:shadow-[5px_5px_0_#0f0f0f]
-          ${isOpen ? "bg-[#f5e642] shadow-[5px_5px_0_#0f0f0f]" : "bg-white"} 
+          focus:outline-none hover:bg-yellow shadow-[3px_3px_0_#0f0f0f] hover:shadow-[5px_5px_0_#0f0f0f]
+          ${isOpen ? "bg-yellow shadow-[5px_5px_0_#0f0f0f]" : "bg-white"} 
           ${sizes[size]} ${className}`}
       >
         <div className="flex items-center gap-3">
-          {Icon && <Icon size={18} className="text-black" strokeWidth={2.5} />}
-          <span className="text-black">
-            {selectedOption ? selectedOption.label : placeholder}
-          </span>
+          {Icon && <Icon size={18} strokeWidth={2.5} />}
+          <span>{selectedOption ? selectedOption.label : placeholder}</span>
         </div>
+
         <motion.div
           animate={{ rotate: isOpen ? 180 : 0 }}
           transition={{ duration: 0.2 }}
         >
-          <ChevronDown size={18} className="text-black" strokeWidth={3} />
+          <ChevronDown size={18} strokeWidth={3} />
         </motion.div>
       </button>
 
-      {/* Dropdown Options */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.15 }}
-            // z-[60] memastikan menu ini selalu berada di atas popover parent
-            // Ditambah mt-2 agar dropdown terpisah sedikit dari tombol untuk efek brutalism yang tegas
-            className="absolute left-0 right-0 top-full mt-2 bg-white border-[2.5px] border-black rounded-2xl shadow-[6px_6px_0_#0f0f0f] z-[60] max-h-60 overflow-y-auto"
-          >
-            <ul className="py-2">
-              {options.map((opt, idx) => (
-                <li key={idx}>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      // Format event diubah agar cocok dengan e.target.value di handleFilterChange
-                      onChange({ target: { value: opt.value } });
-                      setIsOpen(false);
-                    }}
-                    className="w-full text-left px-5 py-3 hover:bg-[#b5f0c0] flex items-center justify-between group transition-none border-b-2 border-transparent hover:border-black"
-                  >
-                    <span className="font-body font-bold text-sm text-black group-hover:translate-x-1 transition-transform">
-                      {opt.label}
-                    </span>
-                    {value === opt.value && (
-                      <Check size={18} className="text-black" strokeWidth={3} />
-                    )}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
+      {/* Portal Dropdown */}
+      {typeof window !== "undefined" &&
+        createPortal(
+          <AnimatePresence>
+            {isOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.15 }}
+                style={dropdownStyle}
+                className="bg-white border-[2.5px] border-black rounded-2xl shadow-hard-lg max-h-60 overflow-y-auto"
+              >
+                <ul className="py-2">
+                  {options.map((opt, idx) => (
+                    <li key={idx}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onChange({ target: { value: opt.value } });
+                          setIsOpen(false);
+                        }}
+                        className="w-full text-left px-5 py-3 hover:bg-green flex items-center justify-between border-b-2 border-transparent hover:border-black"
+                      >
+                        <span className="font-bold text-sm">{opt.label}</span>
+                        {value === opt.value && (
+                          <Check size={18} strokeWidth={3} />
+                        )}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
+            )}
+          </AnimatePresence>,
+          document.body,
         )}
-      </AnimatePresence>
-    </div>
+    </>
   );
 }

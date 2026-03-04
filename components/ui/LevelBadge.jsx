@@ -25,7 +25,7 @@ export default function LevelBadge({ level, size = "md" }) {
 
   return (
     <div
-      className={`${sizes[size]} rounded-full ${bgColor} border-black flex items-center justify-center shadow-hard`}
+      className={`${sizes[size]} py-0.5 px-1 rounded-full ${bgColor} border-black flex items-center justify-center shadow-hard`}
     >
       <div className="flex flex-col items-center">
         <span className="font-display font-extrabold text-black leading-none">

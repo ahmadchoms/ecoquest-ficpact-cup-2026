@@ -64,10 +64,21 @@ enum Rarity {
   CHALLENGER
 }
 
+enum Region {
+  SUMATERA
+  JAWA
+  KALIMANTAN
+  SULAWESI
+  PAPUA
+  BALI_NUSA_TENGGARA
+  MALUKU
+}
+
 model User {
   id           String     @id @default(cuid())
   email        String     @unique
   password     String
+  name         String
   username     String     @unique
   xp           Int        @default(0)
   points       Int        @default(0)
@@ -81,12 +92,14 @@ model User {
 
   badges             Badge[]             @relation("UserBadges")
   missionCompletions MissionCompletion[]
+  accounts           Account[]
+  sessions           Session[]
 }
 
 model Province {
   id          String      @id @default(cuid())
   name        String      @unique
-  region      String
+  region      Region
   ecosystems  String[]
   threatLevel Difficulty?
   description String?
@@ -150,4 +163,39 @@ model MissionCompletion {
   mission   Mission @relation(fields: [missionId], references: [id], onDelete: Cascade)
 
   @@unique([userId, missionId])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
 }

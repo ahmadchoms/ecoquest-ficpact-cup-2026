@@ -1,12 +1,12 @@
-import { useQuery } from '@tanstack/react-query';
-import { AdminAPI } from '@/lib/api/admin';
+import { useQuery } from "@tanstack/react-query";
+import { AdminAPI } from "@/lib/api/admin";
 
 export const adminQueryKeys = {
-  stats: ['admin', 'stats'],
-  activities: ['admin', 'activities']
+  stats: ["admin", "stats"],
+  activities: ["admin", "activities"],
 };
 
-export const useAdminDashboardInfo = () => {
+export const useAdmin = () => {
   const statsQuery = useQuery({
     queryKey: adminQueryKeys.stats,
     queryFn: async () => {
@@ -34,6 +34,6 @@ export const useAdminDashboardInfo = () => {
     refetch: () => {
       statsQuery.refetch();
       activitiesQuery.refetch();
-    }
+    },
   };
 };

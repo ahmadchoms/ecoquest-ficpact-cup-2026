@@ -1,4 +1,3 @@
-import { requireAdmin } from "@/lib/server/middlewares/auth";
 import {
   checkRateLimit,
   getClientIdentifier,
@@ -13,12 +12,13 @@ import {
 } from "@/lib/server/utils/response";
 import { logger } from "@/lib/server/utils/logger";
 import { adminBadgeSchema } from "@/lib/validations/admin";
-import { getBadgeById, updateBadge, deleteBadge } from "@/lib/server/services/admin/badge.service";
+import {
+  getBadgeById,
+  updateBadge,
+  deleteBadge,
+} from "@/lib/server/services/badge.service";
 
 export async function GET(request, { params }) {
-  const authError = await requireAdmin(request);
-  if (authError) return authError;
-
   try {
     const { id } = await params;
     logger.apiRequest("GET", `/api/admin/badges/${id}`);
@@ -35,9 +35,6 @@ export async function GET(request, { params }) {
 }
 
 export async function PATCH(request, { params }) {
-  const authError = await requireAdmin(request);
-  if (authError) return authError;
-
   const clientId = getClientIdentifier(request);
   const { limited } = checkRateLimit(`badges:${clientId}:mutate`, {
     maxRequests: 10,
@@ -73,9 +70,6 @@ export async function PATCH(request, { params }) {
 }
 
 export async function DELETE(request, { params }) {
-  const authError = await requireAdmin(request);
-  if (authError) return authError;
-
   const clientId = getClientIdentifier(request);
   const { limited } = checkRateLimit(`badges:${clientId}:mutate`, {
     maxRequests: 10,

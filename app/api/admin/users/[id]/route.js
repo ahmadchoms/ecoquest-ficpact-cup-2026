@@ -1,4 +1,3 @@
-import { requireAdmin } from "@/lib/server/middlewares/auth";
 import {
   successResponse,
   errorResponse,
@@ -13,12 +12,9 @@ import {
   getUserById,
   updateUser,
   deleteUser,
-} from "@/lib/server/services/admin/user.service";
+} from "@/lib/server/services/user.service";
 
 export async function GET(request, { params }) {
-  const authError = await requireAdmin(request);
-  if (authError) return authError;
-
   try {
     const { id } = await params;
     logger.apiRequest("GET", `/api/admin/users/${id}`);
@@ -35,9 +31,6 @@ export async function GET(request, { params }) {
 }
 
 export async function PATCH(request, { params }) {
-  const authError = await requireAdmin(request);
-  if (authError) return authError;
-
   try {
     const { id } = await params;
     logger.apiRequest("PATCH", `/api/admin/users/${id}`);
@@ -60,9 +53,6 @@ export async function PATCH(request, { params }) {
 }
 
 export async function DELETE(request, { params }) {
-  const authError = await requireAdmin(request);
-  if (authError) return authError;
-
   try {
     const { id } = await params;
     logger.apiRequest("DELETE", `/api/admin/users/${id}`);

@@ -1,4 +1,3 @@
-import { requireAdmin } from "@/lib/server/middlewares/auth";
 import {
   checkRateLimit,
   getClientIdentifier,
@@ -12,12 +11,13 @@ import {
 } from "@/lib/server/utils/response";
 import { logger } from "@/lib/server/utils/logger";
 import { adminMissionSchema } from "@/lib/validations/admin";
-import { getMissionById, updateMission, deleteMission } from "@/lib/server/services/admin/mission.service";
+import {
+  getMissionById,
+  updateMission,
+  deleteMission,
+} from "@/lib/server/services/mission.service";
 
 export async function GET(request, { params }) {
-  const authError = await requireAdmin(request);
-  if (authError) return authError;
-
   try {
     const { id } = await params;
     logger.apiRequest("GET", `/api/admin/missions/${id}`);
@@ -34,9 +34,6 @@ export async function GET(request, { params }) {
 }
 
 export async function PATCH(request, { params }) {
-  const authError = await requireAdmin(request);
-  if (authError) return authError;
-
   const clientId = getClientIdentifier(request);
   const { limited } = checkRateLimit(`missions:${clientId}:mutate`, {
     maxRequests: 10,
@@ -70,9 +67,6 @@ export async function PATCH(request, { params }) {
 }
 
 export async function DELETE(request, { params }) {
-  const authError = await requireAdmin(request);
-  if (authError) return authError;
-
   const clientId = getClientIdentifier(request);
   const { limited } = checkRateLimit(`missions:${clientId}:mutate`, {
     maxRequests: 10,
