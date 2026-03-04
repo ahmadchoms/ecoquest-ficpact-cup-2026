@@ -1,4 +1,3 @@
-import { requireAdmin } from "@/lib/server/middlewares/auth";
 import {
   checkRateLimit,
   getClientIdentifier,
@@ -15,12 +14,9 @@ import { adminMissionSchema, paginationSchema } from "@/lib/validations/admin";
 import {
   listMissions,
   createMission,
-} from "@/lib/server/services/admin/mission.service";
+} from "@/lib/server/services/mission.service";
 
 export async function GET(request) {
-  const authError = await requireAdmin(request);
-  if (authError) return authError;
-
   const clientId = getClientIdentifier(request);
   const { limited } = checkRateLimit(`missions:${clientId}`, {
     maxRequests: 10,
@@ -67,9 +63,6 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
-  const authError = await requireAdmin(request);
-  if (authError) return authError;
-
   const clientId = getClientIdentifier(request);
   const { limited } = checkRateLimit(`missions:${clientId}:mutate`, {
     maxRequests: 10,

@@ -1,4 +1,3 @@
-import { requireAdmin } from "@/lib/server/middlewares/auth";
 import {
   checkRateLimit,
   getClientIdentifier,
@@ -13,15 +12,9 @@ import {
 } from "@/lib/server/utils/response";
 import { logger } from "@/lib/server/utils/logger";
 import { adminUserSchema, paginationSchema } from "@/lib/validations/admin";
-import {
-  listUsers,
-  createUser,
-} from "@/lib/server/services/admin/user.service";
+import { listUsers, createUser } from "@/lib/server/services/user.service";
 
 export async function GET(request) {
-  const authError = await requireAdmin(request);
-  if (authError) return authError;
-
   const clientId = getClientIdentifier(request);
   const { limited } = checkRateLimit(`users:${clientId}`, { maxRequests: 10 });
   if (limited)
@@ -63,9 +56,6 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
-  const authError = await requireAdmin(request);
-  if (authError) return authError;
-
   try {
     logger.apiRequest("POST", "/api/admin/users");
 

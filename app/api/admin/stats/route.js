@@ -1,4 +1,3 @@
-import { requireAdmin } from "@/lib/server/middlewares/auth";
 import {
   checkRateLimit,
   getClientIdentifier,
@@ -9,12 +8,9 @@ import {
   serverErrorResponse,
 } from "@/lib/server/utils/response";
 import { logger } from "@/lib/server/utils/logger";
-import { getDashboardStats } from "@/lib/server/services/admin/stats.service";
+import { getDashboardStats } from "@/lib/server/services/stats.service";
 
 export async function GET(request) {
-  const authError = await requireAdmin(request);
-  if (authError) return authError;
-
   const clientId = getClientIdentifier(request);
   const { limited } = checkRateLimit(`stats:${clientId}`, { maxRequests: 10 });
   if (limited)

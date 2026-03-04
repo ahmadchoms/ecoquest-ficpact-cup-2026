@@ -1,4 +1,3 @@
-import { requireAdmin } from "@/lib/server/middlewares/auth";
 import {
   checkRateLimit,
   getClientIdentifier,
@@ -13,15 +12,9 @@ import {
 } from "@/lib/server/utils/response";
 import { logger } from "@/lib/server/utils/logger";
 import { adminBadgeSchema, paginationSchema } from "@/lib/validations/admin";
-import {
-  listBadges,
-  createBadge,
-} from "@/lib/server/services/admin/badge.service";
+import { listBadges, createBadge } from "@/lib/server/services/badge.service";
 
 export async function GET(request) {
-  const authError = await requireAdmin(request);
-  if (authError) return authError;
-
   const clientId = getClientIdentifier(request);
   const { limited } = checkRateLimit(`badges:${clientId}`, { maxRequests: 10 });
   if (limited)
@@ -63,9 +56,6 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
-  const authError = await requireAdmin(request);
-  if (authError) return authError;
-
   const clientId = getClientIdentifier(request);
   const { limited } = checkRateLimit(`badges:${clientId}:mutate`, {
     maxRequests: 10,

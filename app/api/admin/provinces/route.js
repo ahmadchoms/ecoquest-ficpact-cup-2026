@@ -1,4 +1,3 @@
-import { requireAdmin } from "@/lib/server/middlewares/auth";
 import {
   checkRateLimit,
   getClientIdentifier,
@@ -16,12 +15,9 @@ import { adminProvinceSchema, paginationSchema } from "@/lib/validations/admin";
 import {
   listProvinces,
   createProvince,
-} from "@/lib/server/services/admin/province.service";
+} from "@/lib/server/services/province.service";
 
 export async function GET(request) {
-  const authError = await requireAdmin(request);
-  if (authError) return authError;
-
   const clientId = getClientIdentifier(request);
   const { limited } = checkRateLimit(`provinces:${clientId}`, {
     maxRequests: 10,
@@ -66,9 +62,6 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
-  const authError = await requireAdmin(request);
-  if (authError) return authError;
-
   const clientId = getClientIdentifier(request);
   const { limited } = checkRateLimit(`provinces:${clientId}:mutate`, {
     maxRequests: 10,

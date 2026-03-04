@@ -1,37 +1,38 @@
 "use client";
 
-import React from "react";
-
 const badgeVariants = {
-    // Threat Levels
-    low: "bg-green/20 text-green-700 border-green-500",
-    medium: "bg-yellow/20 text-yellow-700 border-yellow-500",
-    high: "bg-orange/20 text-orange-700 border-orange-500",
-    critical: "bg-red/20 text-red-700 border-red-500",
+  // Difficulty
+  easy: "bg-green-50 text-green-700 border-green-400",
+  medium: "bg-yellow-50 text-yellow-700 border-yellow-400",
+  hard: "bg-red-50 text-red-700 border-red-400",
 
-    // Rarities
-    common: "bg-slate-100 text-slate-600 border-slate-300",
-    uncommon: "bg-emerald-50 text-emerald-600 border-emerald-300",
-    rare: "bg-blue-50 text-blue-600 border-blue-300",
-    epic: "bg-purple-50 text-purple-600 border-purple-300",
-    legendary: "bg-amber-50 text-amber-600 border-amber-300",
+  // Rarity
+  bronze: "bg-amber-100 text-amber-800 border-amber-500",
+  silver: "bg-slate-200 text-slate-700 border-slate-400",
+  gold: "bg-yellow-100 text-yellow-800 border-yellow-500",
+  platinum: "bg-cyan-100 text-cyan-800 border-cyan-500",
+  diamond: "bg-blue-100 text-blue-800 border-blue-500",
+  challenger: "bg-purple-100 text-purple-800 border-purple-500",
 
-    // Statuses
-    active: "bg-mint text-emerald-800 border-emerald-500",
-    inactive: "bg-slate-200 text-slate-500 border-slate-400",
-    pending: "bg-orange/10 text-orange-600 border-orange-300",
+  // Status
+  active: "bg-emerald-100 text-emerald-800 border-emerald-500",
+  suspended: "bg-slate-200 text-slate-500 border-slate-400",
+  banned: "bg-orange-100 text-orange-700 border-orange-400",
 };
 
 export default function StatusBadge({
-    children,
-    variant = "common",
-    className = ""
+  children,
+  variant = "suspended",
+  className = "",
 }) {
-    const variantStyles = badgeVariants[variant.toLowerCase()] || badgeVariants.common;
+  const variantStyles =
+    badgeVariants[variant.toLowerCase()] || badgeVariants.suspended;
 
-    return (
-        <span className={`inline-flex items-center px-2.5 py-1 rounded-lg border-2 font-body font-black text-[10px] uppercase tracking-wider transition-all shadow-[2px_2px_0_rgba(0,0,0,0.1)] ${variantStyles} ${className}`}>
-            {children}
-        </span>
-    );
+  return (
+    <span
+      className={`inline-flex items-center px-2.5 py-1 rounded-lg border-2 font-body font-black text-[10px] uppercase tracking-wider transition-all shadow-[2px_2px_0_rgba(0,0,0,0.1)] ${variantStyles} ${className}`}
+    >
+      {children}
+    </span>
+  );
 }

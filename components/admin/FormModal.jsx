@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { X, Save, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 

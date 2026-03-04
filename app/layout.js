@@ -3,6 +3,7 @@ import "./globals.css";
 import { Syne, DM_Sans } from "next/font/google";
 import BottomNav from "@/components/layout/BottomNav";
 import Providers from "@/components/providers";
+import EcoToaster from "@/components/ui/EcoToaster";
 
 const syne = Syne({
   subsets: ["latin"],
@@ -58,6 +59,7 @@ export default function RootLayout({ children }) {
         <Providers>
           <Navbar />
           {children}
+          <EcoToaster position="bottom-right" />
           <BottomNav />
         </Providers>
       </body>

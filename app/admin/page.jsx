@@ -18,8 +18,7 @@ import {
 import AdminCard from "@/components/admin/AdminCard";
 import FormModal from "@/components/admin/FormModal";
 import EcoSelect from "@/components/ui/EcoSelect";
-import { useAdminDashboardInfo } from "@/hooks/admin/useAdminDashboardInfo";
-import { Trophy } from "lucide-react";
+import { useAdmin } from "@/hooks/useAdmin";
 import {
   BarChart,
   Bar,
@@ -33,7 +32,7 @@ import {
 
 export default function AdminDashboard() {
   const router = useRouter();
-  const { stats, activities, isLoading, isError, error } = useAdminDashboardInfo();
+  const { stats, activities, isLoading, isError, error } = useAdmin();
 
   // Modals & Action States
   const [isActivityModalOpen, setIsActivityModalOpen] = useState(false);
@@ -44,12 +43,34 @@ export default function AdminDashboard() {
     setExpandedActivities(activities || []);
   };
 
-  const uiStats = stats ? [
-    { label: "Total Pengguna", value: stats.totalUsers || 0, trend: "+12%", color: "bg-blue-100 text-blue-600 border-blue-500" },
-    { label: "Misi Aktif", value: stats.activeMissions || 0, trend: "Stabil", color: "bg-emerald-100 text-emerald-600 border-emerald-500" },
-    { label: "XP Regional Harian", value: stats.xpToday || 0, trend: "+4%", color: "bg-yellow text-orange-600 border-orange-500" },
-    { label: "Aktivitas Ekosistem", value: stats.totalCompletions || 0, trend: "+8%", color: "bg-fuchsia-100 text-fuchsia-600 border-fuchsia-500" },
-  ] : [];
+  const uiStats = stats
+    ? [
+        {
+          label: "Total Pengguna",
+          value: stats.totalUsers || 0,
+          trend: "+12%",
+          color: "bg-blue-100 text-blue-600 border-blue-500",
+        },
+        {
+          label: "Misi Aktif",
+          value: stats.activeMissions || 0,
+          trend: "Stabil",
+          color: "bg-emerald-100 text-emerald-600 border-emerald-500",
+        },
+        {
+          label: "XP Regional Harian",
+          value: stats.xpToday || 0,
+          trend: "+4%",
+          color: "bg-yellow text-orange-600 border-orange-500",
+        },
+        {
+          label: "Aktivitas Ekosistem",
+          value: stats.totalCompletions || 0,
+          trend: "+8%",
+          color: "bg-fuchsia-100 text-fuchsia-600 border-fuchsia-500",
+        },
+      ]
+    : [];
 
   const activityFeeds = activities || [];
 
@@ -89,8 +110,12 @@ export default function AdminDashboard() {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center p-12 bg-red-50 border-3 border-black rounded-3xl m-8">
-        <h2 className="text-xl font-display font-black text-red-600 mb-2">Gagal Memuat Dashboard</h2>
-        <p className="font-body font-bold text-slate-700">{error?.message || "Terjadi kesalahan saat menghubungi server."}</p>
+        <h2 className="text-xl font-display font-black text-red-600 mb-2">
+          Gagal Memuat Dashboard
+        </h2>
+        <p className="font-body font-bold text-slate-700">
+          {error?.message || "Terjadi kesalahan saat menghubungi server."}
+        </p>
       </div>
     );
   }
@@ -152,7 +177,7 @@ export default function AdminDashboard() {
               <EcoSelect
                 icon={Calendar}
                 value="Bulan Ini"
-                onChange={() => { }}
+                onChange={() => {}}
                 options={[
                   { label: "Bulan Ini", value: "Bulan Ini" },
                   { label: "Tahun Ini", value: "Tahun Ini" },
@@ -245,12 +270,15 @@ export default function AdminDashboard() {
                       {activity.username}
                     </h4>
                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                      {new Date(activity.timestamp).toLocaleDateString("id-ID", {
-                        day: "numeric",
-                        month: "short",
-                        hour: "2-digit",
-                        minute: "2-digit"
-                      })}
+                      {new Date(activity.timestamp).toLocaleDateString(
+                        "id-ID",
+                        {
+                          day: "numeric",
+                          month: "short",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        },
+                      )}
                     </span>
                   </div>
                   <p className="text-xs font-bold text-slate-500">
@@ -313,7 +341,9 @@ export default function AdminDashboard() {
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
                     Misi Aktif
                   </p>
-                  <p className="text-2xl font-display font-black text-black leading-none mt-1">{stats?.activeMissions || 0}</p>
+                  <p className="text-2xl font-display font-black text-black leading-none mt-1">
+                    {stats?.activeMissions || 0}
+                  </p>
                 </div>
                 <div className="text-emerald-600 font-black text-sm flex items-center gap-1">
                   <TrendingUp size={14} /> Baru
@@ -322,16 +352,24 @@ export default function AdminDashboard() {
 
               <div className="flex justify-between items-end border-b-2 border-dashed border-slate-200 pb-3">
                 <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Tingkat Penyelesaian</p>
-                  <p className="text-2xl font-display font-black text-black leading-none mt-1">{stats?.completionRate || 0}%</p>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    Tingkat Penyelesaian
+                  </p>
+                  <p className="text-2xl font-display font-black text-black leading-none mt-1">
+                    {stats?.completionRate || 0}%
+                  </p>
                 </div>
                 <div className="text-blue-500 font-black text-sm">Avg.</div>
               </div>
 
               <div className="flex justify-between items-end pb-1">
                 <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Antrean Rilis</p>
-                  <p className="text-xl font-display font-black text-slate-700 leading-none mt-1">{stats?.pendingMissionsCount || 0} Draft</p>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    Antrean Rilis
+                  </p>
+                  <p className="text-xl font-display font-black text-slate-700 leading-none mt-1">
+                    {stats?.pendingMissionsCount || 0} Draft
+                  </p>
                 </div>
               </div>
             </div>
@@ -374,16 +412,14 @@ export default function AdminDashboard() {
                 <h4 className="font-body font-black text-sm text-black">
                   {act.username}
                 </h4>
-                <p className="text-xs font-bold text-slate-500">
-                  {act.action}
-                </p>
+                <p className="text-xs font-bold text-slate-500">{act.action}</p>
               </div>
               <div className="text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">
                 {new Date(act.timestamp).toLocaleDateString("id-ID", {
                   day: "numeric",
                   month: "short",
                   hour: "2-digit",
-                  minute: "2-digit"
+                  minute: "2-digit",
                 })}
               </div>
             </div>
