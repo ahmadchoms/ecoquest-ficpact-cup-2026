@@ -82,7 +82,6 @@ export default function ShopItemsAdminPage() {
 
   const handleOpenModal = (item = null) => {
     setSelectedItem(item);
-
     reset(
       item
         ? {
@@ -246,7 +245,6 @@ export default function ShopItemsAdminPage() {
               {...register("name")}
               error={errors.name?.message}
             />
-
             <EcoTextarea
               icon={AlignLeft}
               label="Deskripsi (opsional)"

@@ -43,7 +43,6 @@ export default function EcoFile({
     // Set internal preview using object URL for performance
     const previewUrl = URL.createObjectURL(file);
     setPreview(previewUrl);
-
     // Pass raw file to parent
     if (onChange) {
       onChange(file);
