@@ -12,6 +12,13 @@ import {
 } from "@/lib/server/utils/response";
 import { logger } from "@/lib/server/utils/logger";
 import { adminUserSchema, paginationSchema } from "@/lib/validations/admin";
+import { parseFormData } from "@/lib/server/utils/formdata";
+import {
+  STORAGE_BUCKETS,
+  STORAGE_FOLDERS,
+  uploadToStorage,
+  deleteFromStorage,
+} from "@/lib/storage";
 import { listUsers, createUser } from "@/lib/server/services/user.service";
 
 export async function GET(request) {
@@ -59,20 +66,45 @@ export async function POST(request) {
   try {
     logger.apiRequest("POST", "/api/admin/users");
 
-    let body;
-    try {
-      body = await request.json();
-    } catch (e) {
-      return errorResponse("Format body JSON tidak valid", 400);
-    }
+    const formData = await request.formData();
+    const { fields, files } = parseFormData(formData, adminUserSchema);
 
-    const parsedData = adminUserSchema.safeParse(body);
+    const parsedData = adminUserSchema.safeParse(fields);
     if (!parsedData.success) return validationErrorResponse(parsedData.error);
 
-    const newUser = await createUser(parsedData.data);
+    let profileUrl = null;
+    let uploadPath = null;
+    const profileFile = files.profileImage;
 
-    logger.apiSuccess("POST", "/api/admin/users", { id: newUser.id });
-    return createdResponse(newUser);
+    try {
+      if (profileFile) {
+        const uploadResult = await uploadToStorage(
+          profileFile,
+          STORAGE_BUCKETS.GENERAL_ASSETS,
+          STORAGE_FOLDERS.USER_PROFILES,
+        );
+        if (!uploadResult.success) {
+          return errorResponse(uploadResult.message, 500);
+        }
+        profileUrl = uploadResult.url;
+        uploadPath = uploadResult.path;
+      }
+
+      const userData = { ...parsedData.data };
+      if (profileUrl) userData.profileImage = profileUrl;
+      // Add password property directly from fields if present as it's not in the main schema
+      if (fields.password) userData.password = fields.password;
+
+      const newUser = await createUser(userData);
+
+      logger.apiSuccess("POST", "/api/admin/users", { id: newUser.id });
+      return createdResponse(newUser);
+    } catch (dbError) {
+      if (profileUrl) {
+         await deleteFromStorage(profileUrl, STORAGE_BUCKETS.GENERAL_ASSETS);
+      }
+      throw dbError;
+    }
   } catch (error) {
     logger.apiError("POST", "/api/admin/users", error);
     if (error.code === "P2002")

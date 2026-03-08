@@ -18,6 +18,13 @@ const badgeVariants = {
   active: "bg-emerald-100 text-emerald-800 border-emerald-500",
   suspended: "bg-slate-200 text-slate-500 border-slate-400",
   banned: "bg-orange-100 text-orange-700 border-orange-400",
+  inactive: "bg-slate-100 text-slate-500 border-slate-300",
+
+  // Shop & Event
+  limited: "bg-purple-100 text-purple-700 border-purple-400",
+  permanent: "bg-blue-100 text-blue-700 border-blue-400",
+  banner: "bg-pink-100 text-pink-700 border-pink-400",
+  border: "bg-indigo-100 text-indigo-700 border-indigo-400",
 };
 
 export default function StatusBadge({

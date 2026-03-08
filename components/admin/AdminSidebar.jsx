@@ -12,6 +12,8 @@ import {
   LogOut,
   X,
   Leaf,
+  CalendarDays,
+  ShoppingBag,
 } from "lucide-react";
 import { useAdminStore } from "@/store/useAdminStore";
 
@@ -24,8 +26,10 @@ const menuItems = [
     icon: MapIcon,
     href: "/admin/provinces",
   },
+  { id: "events", label: "Event", icon: CalendarDays, href: "/admin/events" },
   { id: "missions", label: "Misi", icon: Target, href: "/admin/missions" },
   { id: "badges", label: "Badges", icon: Award, href: "/admin/badges" },
+  { id: "shop", label: "Shop", icon: ShoppingBag, href: "/admin/shop-items" },
 ];
 
 function SidebarContent({ pathname, setMobileSidebar }) {

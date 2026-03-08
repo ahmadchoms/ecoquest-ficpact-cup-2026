@@ -1,15 +1,58 @@
 import { PrismaClient, Region } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import fs from "fs";
+import path from "path";
+import { supabaseAdmin } from "../lib/supabase.js";
+import { STORAGE_BUCKETS, emptyBucket, uploadToStorage, getShopItemFolder } from "../lib/storage.js";
+
 const prisma = new PrismaClient();
+
+// Helper to seed file to storage
+async function seedFileToStorage(localFilePath, bucket, folder) {
+  try {
+    const fullPath = path.join(process.cwd(), "public", localFilePath);
+    if (!fs.existsSync(fullPath)) {
+      console.warn(`File not found: ${fullPath}`);
+      return null;
+    }
+
+    const fileBuffer = fs.readFileSync(fullPath);
+    const fileName = path.basename(localFilePath);
+    const mimeType = fileName.endsWith('.png') ? 'image/png' : 'image/jpeg';
+
+    // Mock a File object since we are in Node.js environment
+    const file = new File([fileBuffer], fileName, { type: mimeType });
+
+    const result = await uploadToStorage(file, bucket, folder);
+    if (result.success) {
+      return result.url;
+    } else {
+      console.error(`Upload failed for ${fileName}:`, result.message);
+      return null;
+    }
+  } catch (err) {
+    console.error(`Error uploading ${localFilePath}:`, err);
+    return null;
+  }
+}
 
 async function main() {
   console.log("Starting seed process...");
+
+  console.log("Emptying Supabase Storage Buckets...");
+  await emptyBucket(STORAGE_BUCKETS.EVENT_ASSETS);
+  await emptyBucket(STORAGE_BUCKETS.SHOP_ASSETS);
+  await emptyBucket(STORAGE_BUCKETS.GENERAL_ASSETS);
+  console.log("Storage buckets emptied.");
 
   await prisma.missionCompletion.deleteMany();
   await prisma.mission.deleteMany();
   await prisma.badge.deleteMany();
   await prisma.user.deleteMany();
   await prisma.province.deleteMany();
+  await prisma.event.deleteMany();
+  await prisma.shopItem.deleteMany();
+  await prisma.userItem.deleteMany();
   console.log("Cleared existing data.");
 
   const badges = await Promise.all([
@@ -617,6 +660,125 @@ async function main() {
   console.log(`Seeded ${completionsCount} mission completions for analytics.`);
 
   console.log("✅ Database ter-seed dengan sempurna sesuai skema terbaru!");
+
+  console.log("Seeding Events and Shop Items...");
+  
+  const now = new Date();
+  const nextWeek = new Date();
+  nextWeek.setDate(now.getDate() + 7);
+  
+  const lastWeek = new Date();
+  lastWeek.setDate(now.getDate() - 7);
+
+  // Default fallback URLs if upload fails
+  const earthDayDefault = "/images/events/earth-day-event.jpg";
+  const oceanWeekDefault = "/images/events/ocean-week-event.jpg";
+
+  // Upload Event Banners
+  const earthDayUrl = await seedFileToStorage("assets/images/events/earth-day-event.jpg", STORAGE_BUCKETS.EVENT_ASSETS, "banners") || earthDayDefault;
+  const oceanWeekUrl = await seedFileToStorage("assets/images/events/ocean-week-event.jpg", STORAGE_BUCKETS.EVENT_ASSETS, "banners") || oceanWeekDefault;
+
+  // Buat Event (Satu Event Aktif, Satu Event Masa Depan)
+  const events = await Promise.all([
+    prisma.event.create({
+      data: {
+        name: "Festival Hari Bumi 2026",
+        description: "Perayaan Hari Bumi dengan item eksklusif bertema alam dan pelestarian lingkungan.",
+        bannerUrl: earthDayUrl,
+        startDate: lastWeek,
+        endDate: nextWeek,
+        isActive: true,
+      }
+    }),
+    prisma.event.create({
+      data: {
+        name: "Pekan Peduli Lautan",
+        description: "Selamatkan terumbu karang. Kumpulkan poin dan dapatkan border laut!",
+        bannerUrl: oceanWeekUrl,
+        startDate: new Date("2026-06-01T00:00:00Z"),
+        endDate: new Date("2026-06-30T23:59:59Z"),
+        isActive: true,
+      }
+    })
+  ]);
+  console.log(`Seeded ${events.length} events.`);
+
+  // Upload Shop Items Content
+  const tropicalForestUrl = await seedFileToStorage("assets/images/shop/tropical-forest.jpg", STORAGE_BUCKETS.SHOP_ASSETS, "banners") || "/images/shop/tropical-forest.jpg";
+  const leafBorderUrl = await seedFileToStorage("assets/images/shop/leaf-border.png", STORAGE_BUCKETS.SHOP_ASSETS, "borders") || "/images/shop/leaf-border.png";
+  const earthDayShopUrl = await seedFileToStorage("assets/images/shop/earth-day.jpg", STORAGE_BUCKETS.SHOP_ASSETS, "banners") || "/images/shop/earth-day.jpg";
+  const rootsBorderUrl = await seedFileToStorage("assets/images/shop/roots-border.png", STORAGE_BUCKETS.SHOP_ASSETS, "borders") || "/images/shop/roots-border.png";
+  const deepOceanUrl = await seedFileToStorage("assets/images/shop/deep-ocean.jpg", STORAGE_BUCKETS.SHOP_ASSETS, "banners") || "/images/shop/deep-ocean.jpg";
+
+  // Buat Shop Items
+  const shopItems = await Promise.all([
+    // Item Permanen (Tanpa eventId)
+    prisma.shopItem.create({
+      data: {
+        name: "Hutan Tropis Banner",
+        description: "Banner dengan pemandangan hutan hujan tropis yang lebat.",
+        price: 150,
+        type: "BANNER",
+        content: tropicalForestUrl,
+        previewUrl: tropicalForestUrl,
+        isActive: true,
+      }
+    }),
+    prisma.shopItem.create({
+      data: {
+        name: "Daun Rimba Border",
+        description: "Border profil dengan hiasan dedaunan hijau alami.",
+        price: 100,
+        type: "BORDER",
+        content: leafBorderUrl,
+        previewUrl: leafBorderUrl,
+        isActive: true,
+      }
+    }),
+    
+    // Item Limited (Terikat pada Event Festival Hari Bumi)
+    prisma.shopItem.create({
+      data: {
+        name: "Earth Savior Banner",
+        description: "Banner edisi terbatas Festival Hari Bumi 2026.",
+        price: 300,
+        type: "BANNER",
+        content: earthDayShopUrl,
+        previewUrl: earthDayShopUrl,
+        isActive: true,
+        eventId: events[0].id, // Terhubung ke event pertama
+      }
+    }),
+    prisma.shopItem.create({
+      data: {
+        name: "Akar Bumi Border",
+        description: "Border profil edisi terbatas bertema akar pohon yang kokoh.",
+        price: 250,
+        type: "BORDER",
+        content: rootsBorderUrl,
+        previewUrl: rootsBorderUrl,
+        isActive: true,
+        eventId: events[0].id, // Terhubung ke event pertama
+      }
+    }),
+
+    // Item Limited (Terikat pada Event Pekan Peduli Lautan)
+    prisma.shopItem.create({
+      data: {
+        name: "Deep Ocean Banner",
+        description: "Banner eksklusif Pekan Peduli Lautan.",
+        price: 350,
+        type: "BANNER",
+        content: deepOceanUrl,
+        previewUrl: deepOceanUrl,
+        isActive: true,
+        eventId: events[1].id, // Terhubung ke event kedua
+      }
+    })
+  ]);
+  console.log(`Seeded ${shopItems.length} shop items.`);
+
+  console.log("✅ Database ter-seed dengan sempurna beserta assets Storage!");
 }
 
 main()

@@ -74,6 +74,11 @@ enum Region {
   MALUKU
 }
 
+enum ShopItemType {
+  BANNER
+  BORDER
+}
+
 model User {
   id           String     @id @default(cuid())
   email        String     @unique
@@ -94,6 +99,7 @@ model User {
   missionCompletions MissionCompletion[]
   accounts           Account[]
   sessions           Session[]
+  userItems          UserItem[]
 }
 
 model Province {
@@ -163,6 +169,51 @@ model MissionCompletion {
   mission   Mission @relation(fields: [missionId], references: [id], onDelete: Cascade)
 
   @@unique([userId, missionId])
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  bannerUrl   String?
+  startDate   DateTime
+  endDate     DateTime
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  items ShopItem[]
+}
+
+model ShopItem {
+  id          String       @id @default(cuid())
+  name        String
+  description String?
+  price       Int
+  type        ShopItemType
+  content     String
+  previewUrl  String?
+  isActive    Boolean      @default(true)
+
+  eventId String?
+  event   Event?  @relation(fields: [eventId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  purchases UserItem[]
+}
+
+model UserItem {
+  id         String   @id @default(cuid())
+  userId     String
+  itemId     String
+  acquiredAt DateTime @default(now())
+
+  user User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  item ShopItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, itemId])
 }
 
 model Account {
