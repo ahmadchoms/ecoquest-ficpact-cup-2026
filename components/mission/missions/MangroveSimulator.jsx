@@ -3,6 +3,7 @@
 import { useState, useMemo, useCallback } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, TreePine } from "lucide-react";
+import { calculateProgressReward } from "@/data/missions";
 
 const ROWS = 6;
 const COLS = 8;
@@ -86,12 +87,17 @@ export default function MangroveSimulator({
 
   const handleFinish = () => {
     setPhase("result");
-    const passed = restoredPercent >= 50;
-    const earnedXP = Math.round((restoredPercent / 100) * mission.xpReward);
+    const { earnedXP, earnedPoints } = calculateProgressReward(
+      restoredPercent,
+      mission.xpReward,
+      mission.pointReward
+    );
 
     onComplete({
       score: restoredPercent,
-      earnedXP: Math.max(earnedXP, 30),
+      earnedXP: earnedXP,
+      earnedPoints: earnedPoints,
+      performancePercent: restoredPercent,
       impactValues: {
         mangroveRestored: plantedCount,
         carbonSaved: plantedCount * 0.5,

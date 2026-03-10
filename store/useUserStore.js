@@ -9,6 +9,7 @@ export const useUserStore = create(
       explorerName: "",
       totalXP: 0,
       level: 1,
+      coins: 0,
       earnedBadges: [],
       completedMissions: [],
       exploredProvinces: [],
@@ -36,7 +37,21 @@ export const useUserStore = create(
         return { leveledUp, newLevel };
       },
 
-      completeMission: (missionId, provinceId, xpEarned, impactValues = {}) => {
+      addCoins: (amount) => {
+        const prev = get();
+        const newCoins = prev.coins + amount;
+        set({ coins: newCoins, lastActive: new Date().toISOString() });
+        return newCoins;
+      },
+
+      deductCoins: (amount) => {
+        const prev = get();
+        const newCoins = Math.max(0, prev.coins - amount);
+        set({ coins: newCoins, lastActive: new Date().toISOString() });
+        return newCoins;
+      },
+
+      completeMission: (missionId, provinceId, xpEarned, pointsEarned = 0, impactValues = {}) => {
         const key = `${missionId}:${provinceId}`;
         const prev = get();
         if (prev.completedMissions.includes(key)) return;
@@ -61,6 +76,7 @@ export const useUserStore = create(
         });
 
         get().addXP(xpEarned);
+        get().addCoins(pointsEarned);
         get().checkAchievements(newCompleted, newExplored);
       },
 

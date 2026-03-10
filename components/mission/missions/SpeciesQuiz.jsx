@@ -11,6 +11,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { generateQuizQuestions } from "@/services/ai";
+import { calculateQuizReward } from "@/data/missions";
 import AnimatedButton from "@/components/ui/AnimatedButton";
 
 // Fallback questions if AI fails or key missing
@@ -131,12 +132,17 @@ export default function SpeciesQuiz({ province, mission, onComplete, onBack }) {
       } else {
         setIsFinished(true);
         const score = newCorrect * 20;
-        const earnedXP = Math.round(
-          (newCorrect / questions.length) * mission.xpReward,
+        const { earnedXP, earnedPoints, performancePercent } = calculateQuizReward(
+          newCorrect,
+          questions.length,
+          mission.xpReward,
+          mission.pointReward
         );
         onComplete({
           score,
-          earnedXP: Math.max(earnedXP, 30),
+          earnedXP: earnedXP,
+          earnedPoints: earnedPoints,
+          performancePercent: performancePercent,
           impactValues: { speciesLearned: newCorrect },
           tips: [
             "Dukung organisasi konservasi seperti WWF Indonesia.",

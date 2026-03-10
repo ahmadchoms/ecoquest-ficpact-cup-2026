@@ -84,6 +84,7 @@ export default function MissionPage() {
         missionId,
         provinceId,
         resultData.earnedXP || mission.xpReward,
+        resultData.earnedPoints || mission.pointReward || 0,
         resultData.impactValues || {},
       );
 
@@ -195,6 +196,9 @@ export default function MissionPage() {
                   <div className="flex items-center gap-2 bg-amber-50 text-amber-600 border border-amber-100 rounded-xl px-4 py-2 font-bold">
                     <Zap size={18} fill="currentColor" /> +{mission.xpReward} XP
                   </div>
+                  <div className="flex items-center gap-2 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-xl px-4 py-2 font-bold">
+                    💰 +{mission.pointReward} Poin
+                  </div>
                   <div className="flex items-center gap-2 bg-slate-100 text-slate-600 rounded-xl px-4 py-2 font-medium">
                     <Clock size={18} /> {mission.timeEstimate}
                   </div>
@@ -282,6 +286,8 @@ export default function MissionPage() {
       <CelebrationOverlay
         show={showCelebration}
         xpEarned={missionResult?.earnedXP || mission?.xpReward}
+        pointsEarned={missionResult?.earnedPoints || mission?.pointReward || 0}
+        performancePercent={missionResult?.performancePercent}
         badgeEarned={newBadge}
         onClose={() => setShowCelebration(false)}
       />

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, Calculator } from "lucide-react";
 import { calculateCarbonFootprint } from "@/utils/calculations";
+import { calculateProgressReward } from "@/data/missions";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 
 const COLORS = ["#f97316", "#0ea5e9", "#22c55e"];
@@ -123,9 +124,33 @@ export default function CarbonCalculator({
     if (tips.length === 0)
       tips.push("Pertahankan gaya hidupmu yang ramah lingkungan!");
 
+    // Calculate performance score (lower carbon = better performance)
+    // If carbon footprint is low (< 5 ton/year), give full points
+    // If carbon footprint is high (> 15 ton/year), give minimum points
+    const maxCarbonForFullScore = 5;
+    const minCarbonForMinScore = 15;
+    let performancePercent = 100;
+    
+    if (result.total > maxCarbonForFullScore) {
+      const carbonOverMax = result.total - maxCarbonForFullScore;
+      const carbonRange = minCarbonForMinScore - maxCarbonForFullScore;
+      performancePercent = Math.max(
+        30,
+        100 - (carbonOverMax / carbonRange) * 70
+      );
+    }
+
+    const { earnedXP, earnedPoints } = calculateProgressReward(
+      performancePercent,
+      mission.xpReward,
+      mission.pointReward
+    );
+
     onComplete({
       score: Math.max(0, 100 - Math.round(result.total * 5)),
-      earnedXP: mission.xpReward,
+      earnedXP: earnedXP,
+      earnedPoints: earnedPoints,
+      performancePercent: Math.round(performancePercent),
       impactValues: { carbonSaved: result.total * 0.3 },
       tips,
     });

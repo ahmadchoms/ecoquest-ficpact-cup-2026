@@ -3,6 +3,7 @@
 import { useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Check, X } from "lucide-react";
+import { calculateQuizReward } from "@/data/missions";
 
 const allWasteItems = [
   {
@@ -212,12 +213,17 @@ export default function WasteSorting({
         } else {
           setIsFinished(true);
           const finalScore = newScore * 10;
-          const earnedXP = Math.round(
-            (newScore / items.length) * mission.xpReward,
+          const { earnedXP, earnedPoints, performancePercent } = calculateQuizReward(
+            newScore,
+            items.length,
+            mission.xpReward,
+            mission.pointReward
           );
           onComplete({
             score: finalScore,
-            earnedXP: Math.max(earnedXP, 30),
+            earnedXP: earnedXP,
+            earnedPoints: earnedPoints,
+            performancePercent: performancePercent,
             impactValues: { wasteClassified: newScore },
             tips: [
               "Selalu pisahkan sampah organik dan anorganik di rumah",

@@ -51,6 +51,8 @@ function Confetti() {
 export default function CelebrationOverlay({
   show,
   xpEarned,
+  pointsEarned,
+  performancePercent,
   badgeEarned,
   onClose,
 }) {
@@ -94,16 +96,50 @@ export default function CelebrationOverlay({
               Misi Selesai!
             </h2>
 
+            {performancePercent && (
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.1, type: "spring" }}
+                className="mb-4"
+              >
+                <p className="text-sm text-gray-600 mb-2">Performa Anda</p>
+                <div className="w-full bg-gray-200 rounded-full h-3">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${performancePercent}%` }}
+                    transition={{ delay: 0.3, duration: 0.8 }}
+                    className="bg-gradient-to-r from-emerald-400 to-emerald-500 h-full rounded-full"
+                  />
+                </div>
+                <p className="text-xs text-gray-500 mt-1">{performancePercent}% Sempurna</p>
+              </motion.div>
+            )}
+
             {xpEarned && (
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ delay: 0.3, type: "spring" }}
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full px-6 py-2 mb-4"
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full px-6 py-2 mb-3"
               >
                 <span className="text-xl">⚡</span>
                 <span className="font-heading font-bold text-lg">
                   +{xpEarned} XP
+                </span>
+              </motion.div>
+            )}
+
+            {pointsEarned && (
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.45, type: "spring" }}
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-full px-6 py-2 ml-2 mb-4"
+              >
+                <span className="text-xl">💰</span>
+                <span className="font-heading font-bold text-lg">
+                  +{pointsEarned} Poin
                 </span>
               </motion.div>
             )}

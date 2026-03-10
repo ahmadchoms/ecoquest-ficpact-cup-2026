@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, Droplets } from "lucide-react";
 import { calculateWaterUsage } from "@/utils/calculations";
+import { calculateProgressReward } from "@/data/missions";
 import {
   BarChart,
   Bar,
@@ -122,9 +123,32 @@ export default function WaterConservation({
     if (tips.length === 0)
       tips.push("Penggunaan airmu sudah sangat hemat — pertahankan!");
 
+    // Calculate performance score based on water usage efficiency
+    // Ideal usage is < 100L per day, less is better
+    const idealUsage = 100;
+    const maxUsage = 300;
+    let performancePercent = 100;
+    
+    if (result.total > idealUsage) {
+      const usageOverIdeal = result.total - idealUsage;
+      const usageRange = maxUsage - idealUsage;
+      performancePercent = Math.max(
+        30,
+        100 - (usageOverIdeal / usageRange) * 70
+      );
+    }
+
+    const { earnedXP, earnedPoints } = calculateProgressReward(
+      performancePercent,
+      mission.xpReward,
+      mission.pointReward
+    );
+
     onComplete({
       score: Math.max(0, 100 - Math.round((result.total / 300) * 100)),
-      earnedXP: mission?.xpReward || 0,
+      earnedXP: earnedXP,
+      earnedPoints: earnedPoints,
+      performancePercent: Math.round(performancePercent),
       impactValues: { waterSaved: Math.max(0, result.total * 0.2) },
       tips,
     });

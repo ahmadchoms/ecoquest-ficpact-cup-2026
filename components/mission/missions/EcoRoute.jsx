@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, RefreshCw, Zap } from "lucide-react";
+import { calculateProgressReward } from "@/data/missions";
 
 const VEHICLES = {
   walk: { name: "Jalan Kaki", emoji: "🚶", emissionPerTile: 0, color: "bg-green-400" },
@@ -280,12 +281,35 @@ export default function EcoRoute({ province, mission, onComplete, onBack }) {
               </div>
             </div>
 
-            <div className="space-y-3">
+              <div className="space-y-3">
               <button
                 onClick={() => {
+                  // Calculate performance: lower carbon = better performance
+                  // Max carbon for full score is 0.2, max carbon for min score is 1.0
+                  const maxCarbonForFull = 0.2;
+                  const maxCarbonForMin = 1.0;
+                  let performancePercent = 100;
+                  
+                  if (result.totalCarbon > maxCarbonForFull) {
+                    const carbonOverMax = result.totalCarbon - maxCarbonForFull;
+                    const carbonRange = maxCarbonForMin - maxCarbonForFull;
+                    performancePercent = Math.max(
+                      30,
+                      100 - (carbonOverMax / carbonRange) * 70
+                    );
+                  }
+
+                  const { earnedXP, earnedPoints } = calculateProgressReward(
+                    performancePercent,
+                    mission.xpReward,
+                    mission.pointReward
+                  );
+
                   onComplete({
                     score: Math.max(0, 100 - Math.round(result.totalCarbon * 50)),
-                    earnedXP: mission.xpReward,
+                    earnedXP: earnedXP,
+                    earnedPoints: earnedPoints,
+                    performancePercent: Math.round(performancePercent),
                     impactValues: { carbonReduced: 100 - result.totalCarbon * 10 },
                     tips: [
                       result.totalCarbon === 0

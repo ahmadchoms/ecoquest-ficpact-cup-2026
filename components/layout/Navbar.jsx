@@ -6,11 +6,11 @@ import { useUserStore } from "@/store/useUserStore";
 import XPBar from "@/components/ui/XPBar";
 import LevelBadge from "@/components/ui/LevelBadge";
 import { motion, AnimatePresence } from "framer-motion";
-import { Leaf, User, Map, LogOut, Award, Menu, X } from "lucide-react";
+import { Leaf, User, Map, LogOut, Award, Menu, X, ShoppingBag } from "lucide-react";
 import { useState, useEffect, useTransition } from "react";
 
 export default function Navbar() {
-  const { totalXP, level, explorerName, resetProgress } = useUserStore();
+  const { totalXP, level, explorerName, coins, resetProgress } = useUserStore();
   const pathname = usePathname();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -32,6 +32,7 @@ export default function Navbar() {
     { href: "/map", icon: <Map size={18} />, label: "Peta" },
     { href: "/dashboard", icon: <User size={18} />, label: "Dashboard" },
     { href: "/leaderboard", icon: <Award size={18} />, label: "Peringkat" },
+    { href: "/shop", icon: <ShoppingBag size={18} />, label: "Shop" },
   ];
 
   const NavLink = ({ href, icon, label }) => {
@@ -82,6 +83,15 @@ export default function Navbar() {
 
           {/* Right section */}
           <div className="flex items-center gap-3">
+            {/* Coins Display */}
+            <div className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50/80">
+              <span className="text-lg">💰</span>
+              <div>
+                <p className="text-xs font-bold text-slate-600">Poin</p>
+                <p className="font-bold text-sm text-emerald-700">{coins}</p>
+              </div>
+            </div>
+
             {/* XP Bar (desktop only) */}
             <div className="hidden lg:block">
               <XPBar currentXP={totalXP} />
