@@ -236,6 +236,7 @@ export default function EventsAdminPage() {
             {...register("name")}
             error={errors.name?.message}
           />
+          
           <EcoTextarea
             icon={AlignLeft}
             label="Deskripsi Event (opsional)"
