@@ -28,14 +28,6 @@ export const useProvinces = (filters) => {
   });
 };
 
-export const useCreateAdminProvince = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (data) => AdminAPI.createProvince(data),
-    onSuccess: () => invalidateProvinceQueries(queryClient),
-  });
-};
-
 export const useUpdateAdminProvince = () => {
   const queryClient = useQueryClient();
   return useMutation({

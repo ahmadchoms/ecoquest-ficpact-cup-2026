@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import {
-  Plus,
   Map,
   Info,
   AlertTriangle,
@@ -24,7 +23,6 @@ import ConfirmModal from "@/components/admin/ConfirmModal";
 import { adminProvinceSchema } from "@/lib/validations/admin";
 import {
   useProvinces,
-  useCreateAdminProvince,
   useUpdateAdminProvince,
   useDeleteAdminProvince,
 } from "@/hooks/useProvinces";
@@ -44,13 +42,10 @@ export default function ProvincesAdminPage() {
   const [selectedProvince, setSelectedProvince] = useState(null);
   const [provinceToDelete, setProvinceToDelete] = useState(null);
 
-  const isEditMode = Boolean(selectedProvince);
-
   const { data: response, isLoading, isError, error } = useProvinces(filters);
   const provinces = response?.data || [];
   const meta = response?.meta || { total: 0, page: 1, totalPages: 1 };
 
-  const createMutation = useCreateAdminProvince();
   const updateMutation = useUpdateAdminProvince();
   const deleteMutation = useDeleteAdminProvince();
 
@@ -71,21 +66,18 @@ export default function ProvincesAdminPage() {
     setValue(fieldName, val, { shouldValidate: true, shouldDirty: true });
   };
 
-  const handleOpenModal = (province = null) => {
+  const handleOpenModal = (province) => {
+    if (!province) return;
     setSelectedProvince(province);
-    reset(
-      province
-        ? {
-            name: province.name,
-            region: province.region || "JAWA",
-            threatLevel: province.threatLevel || "LOW",
-            description: province.description || "",
-            funFact: province.funFact || "",
-            ecosystems: province.ecosystems?.join(", ") || "",
-            species: province.species?.join(", ") || "",
-          }
-        : DEFAULT_FORM_VALUES,
-    );
+    reset({
+      name: province.name,
+      region: province.region || "JAWA",
+      threatLevel: province.threatLevel || "LOW",
+      description: province.description || "",
+      funFact: province.funFact || "",
+      ecosystems: province.ecosystems?.join(", ") || "",
+      species: province.species?.join(", ") || "",
+    });
     setIsModalOpen(true);
   };
 
@@ -104,7 +96,6 @@ export default function ProvincesAdminPage() {
 
     deleteMutation.mutate(provinceToDelete.id, {
       onSuccess: () => {
-        handleCloseModal();
         toast.success(
           "Berhasil Hapus!",
           `Provinsi ${provinceToDelete.name} telah dihapus.`,
@@ -119,34 +110,22 @@ export default function ProvincesAdminPage() {
   };
 
   const onSubmit = (data) => {
-    if (isEditMode) {
-      updateMutation.mutate(
-        { id: selectedProvince.id, data },
-        {
-          onSuccess: () => {
-            handleCloseModal();
-            toast.success(
-              "Berhasil Update!",
-              `Data provinsi ${data.name} sukses diperbarui.`,
-            );
-          },
-          onError: (err) =>
-            toast.error("Gagal Update!", `Terjadi kesalahan: ${err.message}`),
-        },
-      );
-    } else {
-      createMutation.mutate(data, {
+    if (!selectedProvince) return;
+
+    updateMutation.mutate(
+      { id: selectedProvince.id, data },
+      {
         onSuccess: () => {
           handleCloseModal();
           toast.success(
-            "Berhasil Tambah!",
-            `Provinsi ${data.name} telah ditambahkan.`,
+            "Berhasil Update!",
+            `Data provinsi ${data.name} sukses diperbarui.`,
           );
         },
         onError: (err) =>
-          toast.error("Gagal Tambah!", `Terjadi kesalahan: ${err.message}`),
-      });
-    }
+          toast.error("Gagal Update!", `Terjadi kesalahan: ${err.message}`),
+      },
+    );
   };
 
   const updateFilter = (key, value) => {
@@ -162,8 +141,7 @@ export default function ProvincesAdminPage() {
     [],
   );
 
-  const isActionPending =
-    isSubmitting || createMutation.isPending || updateMutation.isPending;
+  const isActionPending = isSubmitting || updateMutation.isPending;
 
   return (
     <div className="space-y-8">
@@ -177,12 +155,6 @@ export default function ProvincesAdminPage() {
             Indonesia.
           </p>
         </div>
-        <button
-          onClick={() => handleOpenModal()}
-          className="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-purple text-white border-3 border-black rounded-2xl font-display font-black text-xs uppercase tracking-widest shadow-hard hover:shadow-hard-lg hover:-translate-y-1 active:translate-x-1 active:translate-y-1 active:shadow-none transition-all"
-        >
-          <Plus size={20} /> Tambah Provinsi
-        </button>
       </div>
 
       {isError ? (
@@ -210,12 +182,8 @@ export default function ProvincesAdminPage() {
       <FormModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        title={
-          isEditMode
-            ? `Edit Data: ${selectedProvince.name}`
-            : "Tambah Provinsi Baru"
-        }
-        submitLabel={isEditMode ? "Update Data" : "Tambahkan"}
+        title={`Edit Data: ${selectedProvince?.name || ""}`}
+        submitLabel="Update Data"
         onSubmit={handleSubmit(onSubmit)}
         isLoading={isActionPending}
       >

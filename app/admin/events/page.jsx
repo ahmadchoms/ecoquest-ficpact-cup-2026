@@ -1,7 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Plus, Tag, AlignLeft, Calendar as CalendarIcon, Activity } from "lucide-react";
+import {
+  Plus,
+  Tag,
+  AlignLeft,
+  Calendar as CalendarIcon,
+  Activity,
+} from "lucide-react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -29,6 +35,7 @@ import {
 } from "@/constants/eventAdmin";
 import { toast } from "@/lib/toast";
 import ConfirmModal from "@/components/admin/ConfirmModal";
+import EcoCalendar from "@/components/ui/EcoCalender";
 
 export default function EventsAdminPage() {
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
@@ -61,14 +68,20 @@ export default function EventsAdminPage() {
 
   const handleOpenModal = (event = null) => {
     setSelectedEvent(event);
-    
+
     // Format dates to YYYY-MM-DD for native input
-    const initialValues = event ? {
-      ...DEFAULT_FORM_VALUES,
-      ...event,
-      startDate: event.startDate ? new Date(event.startDate).toISOString().split("T")[0] : undefined,
-      endDate: event.endDate ? new Date(event.endDate).toISOString().split("T")[0] : undefined,
-    } : DEFAULT_FORM_VALUES;
+    const initialValues = event
+      ? {
+          ...DEFAULT_FORM_VALUES,
+          ...event,
+          startDate: event.startDate
+            ? new Date(event.startDate).toISOString().split("T")[0]
+            : undefined,
+          endDate: event.endDate
+            ? new Date(event.endDate).toISOString().split("T")[0]
+            : undefined,
+        }
+      : DEFAULT_FORM_VALUES;
 
     reset(initialValues);
     setIsModalOpen(true);
@@ -88,11 +101,13 @@ export default function EventsAdminPage() {
     if (!eventToDelete) return;
 
     deleteMutation.mutate(eventToDelete.id, {
-      onSuccess: () =>
+      onSuccess: () => {
         toast.success(
           "Berhasil Hapus!",
           `Event ${eventToDelete.name} telah dihapus.`,
-        ),
+        );
+        setEventToDelete(null);
+      },
       onError: (err) =>
         toast.error("Gagal Hapus!", `Terjadi kesalahan: ${err.message}`),
     });
@@ -101,15 +116,14 @@ export default function EventsAdminPage() {
   const onSubmit = (data) => {
     // Construct FormData
     const formData = new FormData();
-    
+
     // Append standard fields
     formData.append("name", data.name);
     if (data.description) formData.append("description", data.description);
-    
     // Append ISO dates
     formData.append("startDate", new Date(data.startDate).toISOString());
     formData.append("endDate", new Date(data.endDate).toISOString());
-    
+
     formData.append("isActive", data.isActive);
 
     // Append file if it's a File object (new upload)
@@ -167,7 +181,8 @@ export default function EventsAdminPage() {
             Manajemen <span className="text-emerald-600">Event</span>
           </h1>
           <p className="font-body font-bold text-slate-500 mt-1">
-            Buat dan kelola event berbatas waktu, serta tentukan periode aktifnya.
+            Buat dan kelola event berbatas waktu, serta tentukan periode
+            aktifnya.
           </p>
         </div>
         <button
@@ -221,7 +236,7 @@ export default function EventsAdminPage() {
             {...register("name")}
             error={errors.name?.message}
           />
-          
+
           <EcoTextarea
             icon={AlignLeft}
             label="Deskripsi Event (opsional)"
@@ -245,19 +260,34 @@ export default function EventsAdminPage() {
           />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <EcoInput
-              type="date"
-              icon={CalendarIcon}
-              label="Tanggal Mulai"
-              {...register("startDate")}
-              error={errors.startDate?.message}
+            <Controller
+              name="startDate"
+              control={control}
+              render={({ field }) => (
+                <EcoCalendar
+                  icon={CalendarIcon}
+                  label="Tanggal Mulai"
+                  value={field.value}
+                  onChange={field.onChange}
+                  ref={field.ref}
+                  error={errors.startDate?.message}
+                />
+              )}
             />
-            <EcoInput
-              type="date"
-              icon={CalendarIcon}
-              label="Tanggal Selesai"
-              {...register("endDate")}
-              error={errors.endDate?.message}
+
+            <Controller
+              name="endDate"
+              control={control}
+              render={({ field }) => (
+                <EcoCalendar
+                  icon={CalendarIcon}
+                  label="Tanggal Selesai"
+                  value={field.value}
+                  onChange={field.onChange}
+                  ref={field.ref}
+                  error={errors.endDate?.message}
+                />
+              )}
             />
           </div>
 
@@ -272,7 +302,7 @@ export default function EventsAdminPage() {
                   className="sr-only peer"
                   {...register("isActive")}
                 />
-                <div className="w-14 h-7 bg-slate-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-yellow rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-emerald-500 border-2 border-black" />
+                <div className="w-14 h-7 bg-slate-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-yellow rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-slate-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-emerald-500 border-2 border-black" />
               </label>
               <span className="font-body font-bold text-sm text-slate-600">
                 {watch("isActive") ? "Event Sedang Aktif" : "Event Tidak Aktif"}

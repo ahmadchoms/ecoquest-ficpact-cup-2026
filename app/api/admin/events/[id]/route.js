@@ -10,7 +10,7 @@ import {
   serverErrorResponse,
 } from "@/lib/server/utils/response";
 import { logger } from "@/lib/server/utils/logger";
-import { adminEventSchema } from "@/lib/validations/admin";
+import { adminEventBaseSchema, paginationSchema } from "@/lib/validations/admin";
 import { parseFormData } from "@/lib/server/utils/formdata";
 import {
   STORAGE_BUCKETS,
@@ -56,10 +56,21 @@ export async function PATCH(request, { params }) {
     if (!event) return notFoundResponse("Event");
 
     const formData = await request.formData();
-    const { fields, files } = parseFormData(formData, adminEventSchema.partial());
+    const { fields, files } = parseFormData(formData);
 
-    const parsedData = adminEventSchema.partial().safeParse(fields);
+    const parsedData = adminEventBaseSchema.partial().safeParse(fields);
     if (!parsedData.success) return validationErrorResponse(parsedData.error);
+
+    // Manual date refinement if both are sent in the PATCH
+    if (parsedData.data.startDate && parsedData.data.endDate) {
+      if (parsedData.data.endDate < parsedData.data.startDate) {
+        return validationErrorResponse({
+          issues: [
+            { path: ["endDate"], message: "Tanggal selesai harus setelah tanggal mulai" },
+          ],
+        });
+      }
+    }
 
     let bannerUrl = null;
     let oldBannerUrl = event.bannerUrl;
@@ -86,7 +97,10 @@ export async function PATCH(request, { params }) {
       const updatedEvent = await updateEvent(id, updateData);
 
       // Cleanup old file if a new one was uploaded, or if it was explicitly removed
-      if ((bannerUrl && oldBannerUrl) || (fields.bannerUrl === null && oldBannerUrl)) {
+      if (
+        (bannerUrl && oldBannerUrl) ||
+        (fields.bannerUrl === null && oldBannerUrl)
+      ) {
         await deleteFromStorage(oldBannerUrl, STORAGE_BUCKETS.EVENT_ASSETS);
       }
 

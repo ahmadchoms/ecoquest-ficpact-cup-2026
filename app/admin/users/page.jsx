@@ -206,46 +206,54 @@ export default function UsersAdminPage() {
         onSubmit={handleSubmit(onSubmit)}
         isSubmitting={isActionPending}
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <EcoInput
-            icon={User}
-            label="Username"
-            {...register("username")}
-            error={errors.username?.message}
-            placeholder="eco_explorer_01"
-          />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+          <div className="min-w-0">
+            <EcoInput
+              icon={User}
+              label="Username"
+              {...register("username")}
+              error={errors.username?.message}
+              placeholder="eco_explorer_01"
+            />
+          </div>
 
-          <EcoInput
-            icon={User}
-            label="Nama"
-            {...register("name")}
-            error={errors.name?.message}
-            placeholder="John Doe"
-          />
+          <div className="min-w-0">
+            <EcoInput
+              icon={User}
+              label="Nama"
+              {...register("name")}
+              error={errors.name?.message}
+              placeholder="John Doe"
+            />
+          </div>
 
-          <EcoInput
-            icon={Mail}
-            label="Email"
-            type="email"
-            {...register("email")}
-            error={errors.email?.message}
-            placeholder="explorer@ecoquest.id"
-          />
+          <div className="min-w-0">
+            <EcoInput
+              icon={Mail}
+              label="Email"
+              type="email"
+              {...register("email")}
+              error={errors.email?.message}
+              placeholder="explorer@ecoquest.id"
+            />
+          </div>
 
-          <EcoInput
-            icon={Key}
-            label={isEditMode ? "Password Baru (opsional)" : "Password"}
-            type="password"
-            {...register("password")}
-            error={errors.password?.message}
-            placeholder={
-              isEditMode
-                ? "(kosongkan jika tidak ingin ubah)"
-                : "minimal 6 karakter"
-            }
-          />
+          <div className="min-w-0">
+            <EcoInput
+              icon={Key}
+              label={isEditMode ? "Password Baru (opsional)" : "Password"}
+              type="password"
+              {...register("password")}
+              error={errors.password?.message}
+              placeholder={
+                isEditMode
+                  ? "(kosongkan jika tidak ubah)"
+                  : "minimal 6 karakter"
+              }
+            />
+          </div>
 
-          <div className="space-y-2 col-span-2">
+          <div className="space-y-2 col-span-1 md:col-span-2 min-w-0">
             <label className="font-display font-bold text-sm text-black ml-1">
               Role
             </label>
@@ -258,30 +266,36 @@ export default function UsersAdminPage() {
             />
           </div>
 
-          <div className="col-span-2 grid grid-cols-3 gap-6">
-            <EcoInput
-              label="Level"
-              type="number"
-              {...register("level", { valueAsNumber: true })}
-              error={errors.level?.message}
-              min={1}
-            />
+          <div className="col-span-1 md:col-span-2 grid grid-cols-3 gap-4 md:gap-6">
+            <div className="min-w-0">
+              <EcoInput
+                label="Level"
+                type="number"
+                {...register("level", { valueAsNumber: true })}
+                error={errors.level?.message}
+                min={1}
+              />
+            </div>
 
-            <EcoInput
-              label="XP Awal"
-              type="number"
-              {...register("xp", { valueAsNumber: true })}
-              error={errors.xp?.message}
-              min={0}
-            />
+            <div className="min-w-0">
+              <EcoInput
+                label="XP Awal"
+                type="number"
+                {...register("xp", { valueAsNumber: true })}
+                error={errors.xp?.message}
+                min={0}
+              />
+            </div>
 
-            <EcoInput
-              label="Poin Awal"
-              type="number"
-              {...register("points", { valueAsNumber: true })}
-              error={errors.points?.message}
-              min={0}
-            />
+            <div className="min-w-0">
+              <EcoInput
+                label="Poin Awal"
+                type="number"
+                {...register("points", { valueAsNumber: true })}
+                error={errors.points?.message}
+                min={0}
+              />
+            </div>
           </div>
         </div>
       </FormModal>

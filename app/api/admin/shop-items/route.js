@@ -75,9 +75,9 @@ export async function POST(request) {
     logger.apiRequest("POST", "/api/admin/shop-items");
 
     const formData = await request.formData();
-    const { fields, files } = parseFormData(formData, adminShopItemSchema);
+    const { fields, files } = parseFormData(formData);
 
-    const parsedData = adminShopItemSchema.safeParse(fields);
+    const parsedData = adminShopItemSchema.omit({ content: true, previewUrl: true }).safeParse(fields);
     if (!parsedData.success) return validationErrorResponse(parsedData.error);
 
     let contentUrl = null;

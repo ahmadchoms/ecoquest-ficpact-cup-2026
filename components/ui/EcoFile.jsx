@@ -14,6 +14,7 @@ export default function EcoFile({
 }) {
   const [preview, setPreview] = useState(null);
   const [isHovering, setIsHovering] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -42,8 +43,25 @@ export default function EcoFile({
     // Set internal preview using object URL for performance
     const previewUrl = URL.createObjectURL(file);
     setPreview(previewUrl);
-    
+
     // Pass raw file to parent
+    if (onChange) {
+      onChange(file);
+    }
+  };
+
+  const processFile = (file) => {
+    if (!file) return;
+
+    if (file.size > maxSizeMB * 1024 * 1024) {
+      alert(`Ukuran file maksimal ${maxSizeMB}MB!`);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(file);
+    setPreview(previewUrl);
+
     if (onChange) {
       onChange(file);
     }
@@ -59,6 +77,29 @@ export default function EcoFile({
     }
   };
 
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      processFile(e.dataTransfer.files[0]);
+      e.dataTransfer.clearData();
+    }
+  };
+
   return (
     <div className="w-full flex flex-col gap-2">
       {label && (
@@ -69,10 +110,15 @@ export default function EcoFile({
 
       <div
         className={`relative w-full border-[2.5px] border-dashed border-black rounded-2xl overflow-hidden cursor-pointer transition-all ${
-          isHovering ? "bg-yellow/20" : "bg-white"
-        } ${error ? "border-pink bg-pink/10" : ""} ${className}`}
+          isHovering || isDragging ? "bg-yellow/20" : "bg-white"
+        } ${isDragging ? "border-yellow" : ""} ${
+          error ? "border-pink bg-pink/10" : ""
+        } ${className}`}
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
         onClick={() => fileInputRef.current?.click()}
       >
         <input
@@ -84,14 +130,14 @@ export default function EcoFile({
         />
 
         {preview ? (
-          <div className="relative w-full w-full aspect-[21/9] flex items-center justify-center bg-slate-100 group">
+          <div className="relative w-full aspect-21/9 flex items-center justify-center bg-slate-100 group">
             <img
               src={preview}
               alt="Preview"
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-              <span className="text-white font-bold text-sm bg-black/50 px-3 py-1.5 rounded-xl border border-white/20">
+              <span className="text-white font-bold text-sm bg-black/50 px-3 py-1.5 rounded-xl border border-white/20 pointer-events-none">
                 Ganti Gambar
               </span>
             </div>
@@ -104,12 +150,14 @@ export default function EcoFile({
             </button>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-8 px-4 text-center aspect-[21/9]">
+          <div className="flex flex-col items-center justify-center py-8 px-4 text-center aspect-21/9 pointer-events-none">
             <div className="w-12 h-12 bg-yellow/30 text-yellow-700 rounded-full flex items-center justify-center mb-3">
               <UploadCloud size={24} />
             </div>
             <p className="font-body font-bold text-sm text-black">
-              Klik untuk mengunggah gambar
+              {isDragging
+                ? "Lepaskan file di sini"
+                : "Klik atau seret gambar ke sini"}
             </p>
             <p className="text-xs text-slate-500 mt-1 font-medium">
               Maks {maxSizeMB}MB. Format: JPG, PNG, GIF

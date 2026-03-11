@@ -56,9 +56,9 @@ export async function PATCH(request, { params }) {
     if (!item) return notFoundResponse("Shop Item");
 
     const formData = await request.formData();
-    const { fields, files } = parseFormData(formData, adminShopItemSchema.partial());
+    const { fields, files } = parseFormData(formData);
 
-    const parsedData = adminShopItemSchema.partial().safeParse(fields);
+    const parsedData = adminShopItemSchema.omit({ content: true, previewUrl: true }).partial().safeParse(fields);
     if (!parsedData.success) return validationErrorResponse(parsedData.error);
 
     let contentUrl = null;
@@ -82,16 +82,19 @@ export async function PATCH(request, { params }) {
 
       const updateData = { ...parsedData.data };
       if (contentUrl) {
-          updateData.content = contentUrl;
+        updateData.content = contentUrl;
       } else if (fields.content) {
-          // It was submitted as text (e.g. they cleared it or it's a raw class string incorrectly)
-          updateData.content = fields.content;
+        // It was submitted as text (e.g. they cleared it or it's a raw class string incorrectly)
+        updateData.content = fields.content;
       }
 
       const updatedItem = await updateShopItem(id, updateData);
 
       // Cleanup old file if a new file was uploaded, or if the field was changed to text
-      if (oldContentUrl && (contentUrl || (fields.content && fields.content !== oldContentUrl))) {
+      if (
+        oldContentUrl &&
+        (contentUrl || (fields.content && fields.content !== oldContentUrl))
+      ) {
         await deleteFromStorage(oldContentUrl, STORAGE_BUCKETS.SHOP_ASSETS);
       }
 
@@ -99,7 +102,7 @@ export async function PATCH(request, { params }) {
       return successResponse(updatedItem);
     } catch (dbError) {
       if (contentUrl) {
-          await deleteFromStorage(contentUrl, STORAGE_BUCKETS.SHOP_ASSETS);
+        await deleteFromStorage(contentUrl, STORAGE_BUCKETS.SHOP_ASSETS);
       }
       throw dbError;
     }

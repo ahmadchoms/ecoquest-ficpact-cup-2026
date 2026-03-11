@@ -93,11 +93,11 @@ export default function BadgesAdminPage() {
 
     deleteMutation.mutate(badgeToDelete.id, {
       onSuccess: () => {
-        handleCloseModal();
         toast.success(
           "Berhasil Hapus!",
           `Badge ${badgeToDelete.name} telah dihapus.`,
         );
+        setBadgeToDelete(null);
       },
       onError: (err) =>
         toast.error("Gagal Hapus!", `Terjadi kesalahan: ${err.message}`),

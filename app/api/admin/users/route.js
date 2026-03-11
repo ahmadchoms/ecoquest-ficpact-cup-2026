@@ -66,51 +66,40 @@ export async function POST(request) {
   try {
     logger.apiRequest("POST", "/api/admin/users");
 
-    const formData = await request.formData();
-    const { fields, files } = parseFormData(formData, adminUserSchema);
+    let body;
+    try {
+      body = await request.json();
+    } catch (e) {
+      return errorResponse("Format body JSON tidak valid", 400);
+    }
 
-    const parsedData = adminUserSchema.safeParse(fields);
+    const parsedData = adminUserSchema.safeParse(body);
     if (!parsedData.success) return validationErrorResponse(parsedData.error);
 
-    let profileUrl = null;
-    let uploadPath = null;
-    const profileFile = files.profileImage;
+    const userData = { ...parsedData.data };
 
-    try {
-      if (profileFile) {
-        const uploadResult = await uploadToStorage(
-          profileFile,
-          STORAGE_BUCKETS.GENERAL_ASSETS,
-          STORAGE_FOLDERS.USER_PROFILES,
-        );
-        if (!uploadResult.success) {
-          return errorResponse(uploadResult.message, 500);
-        }
-        profileUrl = uploadResult.url;
-        uploadPath = uploadResult.path;
-      }
-
-      const userData = { ...parsedData.data };
-      if (profileUrl) userData.profileImage = profileUrl;
-      // Add password property directly from fields if present as it's not in the main schema
-      if (fields.password) userData.password = fields.password;
-
-      const newUser = await createUser(userData);
-
-      logger.apiSuccess("POST", "/api/admin/users", { id: newUser.id });
-      return createdResponse(newUser);
-    } catch (dbError) {
-      if (profileUrl) {
-         await deleteFromStorage(profileUrl, STORAGE_BUCKETS.GENERAL_ASSETS);
-      }
-      throw dbError;
+    if (body.password) {
+      userData.password = body.password;
     }
+
+    if (body.profileImage && typeof body.profileImage === "string") {
+      userData.profileImage = body.profileImage;
+    }
+
+    const newUser = await createUser(userData);
+
+    logger.apiSuccess("POST", "/api/admin/users", { id: newUser.id });
+    return createdResponse(newUser);
   } catch (error) {
     logger.apiError("POST", "/api/admin/users", error);
-    if (error.code === "P2002")
+
+    if (error.code === "P2002") {
       return conflictResponse("Username atau Email sudah terdaftar.");
-    if (error.message?.includes("Password wajib"))
+    }
+    if (error.message?.includes("Password wajib")) {
       return errorResponse(error.message, 400);
+    }
+
     return serverErrorResponse("Gagal membuat pengguna.");
   }
 }

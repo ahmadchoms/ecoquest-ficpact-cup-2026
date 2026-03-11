@@ -1,7 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Plus, Tag, AlignLeft, Calendar as CalendarIcon, Package, Sparkles } from "lucide-react";
+import {
+  Plus,
+  Tag,
+  AlignLeft,
+  Calendar as CalendarIcon,
+  Package,
+  Sparkles,
+} from "lucide-react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -43,7 +50,8 @@ export default function ShopItemsAdminPage() {
   const items = response?.data || [];
   const meta = response?.meta || { total: 0, page: 1, totalPages: 1 };
 
-  const { data: eventOptions = [], isLoading: isLoadingEvents } = useEventOptions();
+  const { data: eventOptions = [], isLoading: isLoadingEvents } =
+    useEventOptions();
 
   const createMutation = useCreateAdminShopItem();
   const updateMutation = useUpdateAdminShopItem();
@@ -74,7 +82,7 @@ export default function ShopItemsAdminPage() {
 
   const handleOpenModal = (item = null) => {
     setSelectedItem(item);
-    
+
     reset(
       item
         ? {
@@ -101,11 +109,13 @@ export default function ShopItemsAdminPage() {
     if (!itemToDelete) return;
 
     deleteMutation.mutate(itemToDelete.id, {
-      onSuccess: () =>
+      onSuccess: () => {
         toast.success(
           "Berhasil Hapus!",
           `Item ${itemToDelete.name} telah dihapus.`,
-        ),
+        );
+        setItemToDelete(null);
+      },
       onError: (err) =>
         toast.error("Gagal Hapus!", `Terjadi kesalahan: ${err.message}`),
     });
@@ -113,15 +123,15 @@ export default function ShopItemsAdminPage() {
 
   const onSubmit = (data) => {
     const formData = new FormData();
-    
+
     formData.append("name", data.name);
     if (data.description) formData.append("description", data.description);
-    formData.append("price", data.price);
+    formData.append("price", Number(data.price));
     formData.append("type", data.type);
     formData.append("isActive", data.isActive);
-    
+
     if (data.eventId) {
-        formData.append("eventId", data.eventId);
+      formData.append("eventId", data.eventId);
     }
 
     // Append content logic depending on if it's a file
@@ -236,7 +246,7 @@ export default function ShopItemsAdminPage() {
               {...register("name")}
               error={errors.name?.message}
             />
-            
+
             <EcoTextarea
               icon={AlignLeft}
               label="Deskripsi (opsional)"
@@ -297,7 +307,11 @@ export default function ShopItemsAdminPage() {
               control={control}
               render={({ field }) => (
                 <EcoFile
-                  label={selectedType === "BANNER" ? "Unggah Gambar Banner" : "Unggah Gambar Border (PNG/SVG Transparan)"}
+                  label={
+                    selectedType === "BANNER"
+                      ? "Unggah Gambar Banner"
+                      : "Unggah Gambar Border (PNG/SVG Transparan)"
+                  }
                   value={field.value}
                   onChange={field.onChange}
                   error={errors.content?.message}
@@ -316,7 +330,7 @@ export default function ShopItemsAdminPage() {
                     className="sr-only peer"
                     {...register("isActive")}
                   />
-                  <div className="w-14 h-7 bg-slate-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-yellow rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-emerald-500 border-2 border-black" />
+                  <div className="w-14 h-7 bg-slate-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-yellow rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-slate-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-emerald-500 border-2 border-black" />
                 </label>
                 <span className="font-body font-bold text-sm text-slate-600">
                   {watch("isActive") ? "Tersedia di Toko" : "Disembunyikan"}

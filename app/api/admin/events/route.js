@@ -74,7 +74,7 @@ export async function POST(request) {
     logger.apiRequest("POST", "/api/admin/events");
 
     const formData = await request.formData();
-    const { fields, files } = parseFormData(formData, adminEventSchema);
+    const { fields, files } = parseFormData(formData);
 
     const parsedData = adminEventSchema.safeParse(fields);
     if (!parsedData.success) return validationErrorResponse(parsedData.error);

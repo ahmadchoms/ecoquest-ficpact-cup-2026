@@ -112,11 +112,13 @@ export default function MissionsAdminPage() {
     if (!missionToDelete) return;
 
     deleteMutation.mutate(missionToDelete.id, {
-      onSuccess: () =>
+      onSuccess: () => {
         toast.success(
           "Berhasil Hapus!",
           `Misi ${missionToDelete.title} telah dihapus.`,
-        ),
+        );
+        setMissionToDelete(null);
+      },
       onError: (err) =>
         toast.error("Gagal Hapus!", `Terjadi kesalahan: ${err.message}`),
     });
