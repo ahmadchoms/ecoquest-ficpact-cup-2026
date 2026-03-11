@@ -37,8 +37,17 @@ export default function ProfilePage() {
         {/* Header Profile */}
         <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 flex flex-col md:flex-row items-center gap-8 mb-8">
           <div className="relative">
-            <div className="w-32 h-32 rounded-full bg-slate-100 flex items-center justify-center text-6xl shadow-inner">
-              🧑‍🚀
+            <div className="relative w-36 h-36 flex items-center justify-center">
+              {/* Profile */}
+              <div className="w-28 h-28 rounded-full bg-slate-100 flex items-center justify-center text-6xl shadow-inner">
+                🧑‍🚀
+              </div>
+              {/* Border PNG (di depan) */}
+              <img
+                src="/borderavatar.png"
+                alt="avatar border"
+                className="absolute inset-0 w-full h-full object-contain pointer-events-none"
+              />
             </div>
             <div className="absolute -bottom-2 -right-2">
               <LevelBadge level={level} size="md" />

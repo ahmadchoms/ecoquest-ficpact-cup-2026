@@ -131,15 +131,15 @@ export default function SpecialShop({ banners = [] }) {
                     )}
                   </div>
 
-                  <h3 className="font-display text-2xl sm:text-4xl font-extrabold text-black mb-1">
+                  <h3 className="font-display text-2xl sm:text-4xl font-extrabold text-white mb-1">
                     {currentBanner.title}
                   </h3>
 
-                  <p className="text-sm sm:text-lg font-bold text-black/80 mb-4">
+                  <p className="text-sm sm:text-lg font-bold text-white/90 mb-4">
                     {currentBanner.subtitle}
                   </p>
 
-                  <p className="text-sm sm:text-base text-black/70 mb-6">
+                  <p className="text-sm sm:text-base text-white/90 mb-6">
                     {currentBanner.description}
                   </p>
 
