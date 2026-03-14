@@ -89,6 +89,27 @@ export default function MissionPage() {
     }
   };
 
+  const getMissionColor = () => {
+    switch (mission.category) {
+      case "WASTE":
+        return "from-orange-400 to-red-500";
+      case "WATER":
+        return "from-sky-400 to-blue-500";
+      case "BIODIVERSITY":
+        return "from-purple-400 to-indigo-500";
+      case "OCEAN":
+        return "from-blue-500 to-cyan-600";
+      case "TRANSPORT":
+        return "from-green-400 to-emerald-600";
+      case "CLIMATE":
+        return "from-orange-400 to-red-500";
+      case "COASTAL":
+        return "from-blue-400 to-cyan-500";
+      default:
+        return "from-slate-400 to-slate-600";
+    }
+  };
+
   return (
     <PageWrapper className="min-h-screen bg-white bg-grid-pattern pt-16 md:pt-20 pb-24 md:pb-8 text-black">
       <AnimatePresence mode="wait">
