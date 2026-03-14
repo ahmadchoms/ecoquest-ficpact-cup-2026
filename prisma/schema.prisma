@@ -193,6 +193,7 @@ model ShopItem {
   type        ShopItemType
   content     String
   previewUrl  String?
+  rarity      String       @default("common")
   isActive    Boolean      @default(true)
 
   eventId String?

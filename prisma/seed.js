@@ -1,4 +1,5 @@
-import { PrismaClient, Region } from "@prisma/client";
+import pkg from "@prisma/client";
+const { PrismaClient, Region } = pkg;
 import bcrypt from "bcryptjs";
 import fs from "fs";
 import path from "path";

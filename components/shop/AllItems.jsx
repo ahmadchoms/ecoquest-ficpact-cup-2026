@@ -3,14 +3,19 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 import ItemCard from "./ItemCard";
-import { itemCategories } from "@/data/shop";
+
+const ITEM_CATEGORIES = [
+  { id: "all", label: "Semua" },
+  { id: "BANNER", label: "Banner" },
+  { id: "BORDER", label: "Border" },
+];
 
 export default function AllItems({ items = [] }) {
   const [activeCategory, setActiveCategory] = useState("all");
 
   const filteredItems = items.filter((item) => {
     if (activeCategory === "all") return true;
-    return item.category === activeCategory;
+    return item.type === activeCategory;
   });
 
   const staggerContainer = {
@@ -36,7 +41,7 @@ export default function AllItems({ items = [] }) {
 
       {/* Category Filter Tabs */}
       <div className="flex flex-wrap gap-2 sm:gap-3">
-        {itemCategories.map((category) => (
+        {ITEM_CATEGORIES.map((category) => (
           <motion.button
             key={category.id}
             onClick={() => setActiveCategory(category.id)}

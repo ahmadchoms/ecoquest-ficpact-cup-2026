@@ -6,9 +6,9 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import PageWrapper from "@/components/layout/PageWrapper";
 import { provinces } from "@/data/provinces";
-import { missions } from "@/data/missions";
 import { badges } from "@/data/badges";
 import { useUserStore } from "@/store/useUserStore";
+import { useUserMission, useCompleteMission } from "@/hooks/useUserMissions";
 import {
   ArrowLeft,
   Clock,
@@ -47,6 +47,8 @@ export default function MissionPage() {
   const missionId = params?.missionId;
 
   const { completeMission, isMissionDone, unlockBadge } = useUserStore();
+  const { data: mission, isLoading: isMissionLoading } = useUserMission(missionId);
+  const completeMissionMutation = useCompleteMission();
 
   const [phase, setPhase] = useState("briefing");
   const [missionResult, setMissionResult] = useState(null);
@@ -54,7 +56,14 @@ export default function MissionPage() {
   const [newBadge, setNewBadge] = useState(null);
 
   const province = provinces.find((p) => p.id === provinceId);
-  const mission = missions[missionId];
+
+  if (isMissionLoading) {
+    return (
+      <PageWrapper className="min-h-screen flex items-center justify-center pt-16">
+        <p className="text-slate-600 font-medium">Memuat misi...</p>
+      </PageWrapper>
+    );
+  }
 
   if (!province || !mission) {
     return (
@@ -76,41 +85,86 @@ export default function MissionPage() {
   }
 
   const alreadyDone = isMissionDone(missionId, provinceId);
-  const MissionComponent = missionComponents[mission.component];
+  const MissionComponent = missionComponents[mission.type?.replace(/_/g, "")];
 
-  const handleMissionComplete = (resultData) => {
-    if (!alreadyDone) {
-      completeMission(
-        missionId,
-        provinceId,
-        resultData.earnedXP || mission.xpReward,
-        resultData.earnedPoints || mission.pointReward || 0,
-        resultData.impactValues || {},
-      );
+  const handleMissionComplete = async (resultData) => {
+    try {
+      // Submit to database
+      await completeMissionMutation.mutateAsync({
+        missionId: mission.id,
+        performanceScore: resultData.performancePercent || 80,
+      });
 
-      if (mission.badgeReward) {
-        const wasNew = unlockBadge(mission.badgeReward);
-        if (wasNew) {
-          setNewBadge(badges[mission.badgeReward]);
+      // Update local store
+      if (!alreadyDone) {
+        completeMission(
+          missionId,
+          provinceId,
+          resultData.earnedXP || mission.xpReward,
+          resultData.earnedPoints || mission.pointReward || 0,
+          resultData.impactValues || {},
+        );
+
+        if (mission.badgeReward?.id) {
+          const wasNew = unlockBadge(mission.badgeReward.id);
+          if (wasNew) {
+            setNewBadge(mission.badgeReward);
+          }
         }
       }
-    }
 
-    setMissionResult(resultData);
-    setPhase("result");
-    setShowCelebration(true);
+      setMissionResult(resultData);
+      setPhase("result");
+      setShowCelebration(true);
+    } catch (error) {
+      console.error("Gagal menyelesaikan misi:", error);
+      // Fallback ke local completion jika API gagal
+      if (!alreadyDone) {
+        completeMission(
+          missionId,
+          provinceId,
+          resultData.earnedXP || mission.xpReward,
+          resultData.earnedPoints || mission.pointReward || 0,
+          resultData.impactValues || {},
+        );
+      }
+      setMissionResult(resultData);
+      setPhase("result");
+      setShowCelebration(true);
+    }
   };
 
   const getThemeBg = () => {
     switch (mission.category) {
-      case "waste":
+      case "WASTE":
         return "bg-orange-50";
-      case "water":
+      case "WATER":
         return "bg-blue-50";
-      case "species":
+      case "BIODIVERSITY":
         return "bg-emerald-50";
       default:
         return "bg-slate-50";
+    }
+  };
+
+  const getMissionColor = () => {
+    switch (mission.category) {
+      case "WASTE":
+        return "from-orange-400 to-red-500";
+      case "WATER":
+        return "from-sky-400 to-blue-500";
+      case "BIODIVERSITY":
+        return "from-purple-400 to-indigo-500";
+      case "OCEAN":
+        return "from-blue-500 to-cyan-600";
+      case "TRANSPORT":
+        return "from-green-400 to-emerald-600";
+      case "CLIMATE":
+        return "from-orange-400 to-red-500";
+      case "COASTAL":
+        return "from-blue-400 to-cyan-500";
+      default:
+        return "from-slate-400 to-slate-600";
     }
   };
 
@@ -150,10 +204,10 @@ export default function MissionPage() {
                 className="relative group perspective-1000"
               >
                 <div
-                  className={`absolute inset-0 bg-linear-to-br ${mission.color} opacity-20 blur-3xl rounded-full transform scale-110 group-hover:scale-125 transition-transform duration-700`}
+                  className={`absolute inset-0 bg-linear-to-br ${getMissionColor()} opacity-20 blur-3xl rounded-full transform scale-110 group-hover:scale-125 transition-transform duration-700`}
                 />
                 <div
-                  className={`relative w-full aspect-square rounded-[3rem] bg-linear-to-br ${mission.color} flex items-center justify-center text-9xl shadow-2xl shadow-emerald-500/20 ring-8 ring-white/50 backdrop-blur-sm transform group-hover:rotate-3 transition-transform duration-500`}
+                  className={`relative w-full aspect-square rounded-[3rem] bg-linear-to-br ${getMissionColor()} flex items-center justify-center text-9xl shadow-2xl shadow-emerald-500/20 ring-8 ring-white/50 backdrop-blur-sm transform group-hover:rotate-3 transition-transform duration-500`}
                 >
                   <motion.span
                     animate={{ y: [0, -20, 0] }}
@@ -197,7 +251,7 @@ export default function MissionPage() {
                     <Zap size={18} fill="currentColor" /> +{mission.xpReward} XP
                   </div>
                   <div className="flex items-center gap-2 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-xl px-4 py-2 font-bold">
-                    💰 +{mission.pointReward} Poin
+                    💰 +{mission.pointsReward} Poin
                   </div>
                   <div className="flex items-center gap-2 bg-slate-100 text-slate-600 rounded-xl px-4 py-2 font-medium">
                     <Clock size={18} /> {mission.timeEstimate}

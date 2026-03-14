@@ -6,11 +6,19 @@ import PageWrapper from "@/components/layout/PageWrapper";
 import SpecialShop from "@/components/shop/SpecialShop";
 import DailyRefresh from "@/components/shop/DailyRefresh";
 import AllItems from "@/components/shop/AllItems";
-import { shopBanners, getDailyExclusiveItems, commonItems } from "@/data/shop";
+import { shopBanners } from "@/data/shop";
 import { staggerContainer, fadeIn } from "@/utils/motion-variants";
+import { useAvailableShopItems } from "@/hooks/useUserMissions";
 
 export default function ShopPage() {
-  const dailyItems = useMemo(() => getDailyExclusiveItems(4), []);
+  const { data: shopItems = [], isLoading } = useAvailableShopItems();
+  
+  // Shuffle items for daily refresh
+  const dailyItems = useMemo(() => {
+    if (shopItems.length === 0) return [];
+    const shuffled = [...shopItems].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, 4);
+  }, [shopItems]);
 
   return (
     <PageWrapper className="min-h-screen bg-white pt-20 pb-24 font-body">
@@ -54,7 +62,13 @@ export default function ShopPage() {
 
         {/* All Items Section */}
         <motion.div variants={fadeIn("up", 0.35)}>
-          <AllItems items={commonItems} />
+          {isLoading ? (
+            <div className="text-center py-8">
+              <p className="text-slate-600 font-medium">Memuat item...</p>
+            </div>
+          ) : (
+            <AllItems items={shopItems} />
+          )}
         </motion.div>
       </motion.div>
     </PageWrapper>
