@@ -260,7 +260,7 @@ export default function SpeciesQuiz({ province, mission, onComplete, onBack }) {
 
       <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
         <div
-          className="h-full bg-gradient-to-r from-purple-400 to-indigo-500 rounded-full transition-all"
+          className="h-full bg-linear-to-r from-purple-400 to-indigo-500 rounded-full transition-all"
           style={{ width: `${((currentQ + 1) / questions.length) * 100}%` }}
         />
       </div>
@@ -309,7 +309,7 @@ export default function SpeciesQuiz({ province, mission, onComplete, onBack }) {
                   className={`w-full text-left p-4 rounded-xl border-2 ${bgClass} transition-all flex items-center gap-3 relative overflow-hidden`}
                 >
                   <span
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 transition-colors ${
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0 transition-colors ${
                       selected !== null && i === q.correct
                         ? "bg-green-200 text-green-700"
                         : selected !== null && i === selected

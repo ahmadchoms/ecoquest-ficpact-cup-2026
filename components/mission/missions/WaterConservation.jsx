@@ -253,7 +253,7 @@ export default function WaterConservation({
 
         <button
           onClick={handleSubmit}
-          className="w-full py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
+          className="w-full py-3 bg-linear-to-r from-sky-400 to-blue-500 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
         >
           Selesai & Klaim XP ⚡
         </button>
@@ -279,7 +279,7 @@ export default function WaterConservation({
 
       <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
         <div
-          className="h-full bg-gradient-to-r from-sky-400 to-blue-500 rounded-full transition-all"
+          className="h-full bg-linear-to-r from-sky-400 to-blue-500 rounded-full transition-all"
           style={{ width: `${((step + 1) / steps.length) * 100}%` }}
         />
       </div>

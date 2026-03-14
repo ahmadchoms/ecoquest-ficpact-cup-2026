@@ -150,10 +150,10 @@ export default function MissionPage() {
                 className="relative group perspective-1000"
               >
                 <div
-                  className={`absolute inset-0 bg-gradient-to-br ${mission.color} opacity-20 blur-3xl rounded-full transform scale-110 group-hover:scale-125 transition-transform duration-700`}
+                  className={`absolute inset-0 bg-linear-to-br ${mission.color} opacity-20 blur-3xl rounded-full transform scale-110 group-hover:scale-125 transition-transform duration-700`}
                 />
                 <div
-                  className={`relative w-full aspect-square rounded-[3rem] bg-gradient-to-br ${mission.color} flex items-center justify-center text-9xl shadow-2xl shadow-emerald-500/20 ring-8 ring-white/50 backdrop-blur-sm transform group-hover:rotate-3 transition-transform duration-500`}
+                  className={`relative w-full aspect-square rounded-[3rem] bg-linear-to-br ${mission.color} flex items-center justify-center text-9xl shadow-2xl shadow-emerald-500/20 ring-8 ring-white/50 backdrop-blur-sm transform group-hover:rotate-3 transition-transform duration-500`}
                 >
                   <motion.span
                     animate={{ y: [0, -20, 0] }}

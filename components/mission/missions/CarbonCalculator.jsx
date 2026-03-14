@@ -327,7 +327,7 @@ export default function CarbonCalculator({
         ) : (
           <button
             onClick={handleCalculate}
-            className="flex-1 py-3 bg-gradient-to-r from-orange-400 to-red-500 text-white rounded-xl font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2"
+            className="flex-1 py-3 bg-linear-to-r from-orange-400 to-red-500 text-white rounded-xl font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2"
           >
             <Calculator size={18} /> Hitung Jejak Karbon
           </button>

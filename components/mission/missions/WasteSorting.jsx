@@ -269,7 +269,7 @@ export default function WasteSorting({
 
       <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
         <div
-          className="h-full bg-gradient-to-r from-green-400 to-teal-500 rounded-full transition-all"
+          className="h-full bg-linear-to-r from-green-400 to-teal-500 rounded-full transition-all"
           style={{ width: `${((currentIndex + 1) / items.length) * 100}%` }}
         />
       </div>
@@ -305,9 +305,9 @@ export default function WasteSorting({
             }`}
           >
             {feedback.correct ? (
-              <Check size={18} className="mt-0.5 flex-shrink-0" />
+              <Check size={18} className="mt-0.5 shrink-0" />
             ) : (
-              <X size={18} className="mt-0.5 flex-shrink-0" />
+              <X size={18} className="mt-0.5 shrink-0" />
             )}
             <div>
               <p className="font-semibold">
@@ -328,7 +328,7 @@ export default function WasteSorting({
             whileTap={{ scale: 0.97 }}
             onClick={() => handleDrop(bin.id)}
             disabled={!!feedback}
-            className={`bg-gradient-to-br ${bin.color} text-white rounded-2xl p-4 text-center transition-all
+            className={`bg-linear-to-br ${bin.color} text-white rounded-2xl p-4 text-center transition-all
               ${feedback ? "opacity-60 cursor-not-allowed" : "hover:shadow-lg cursor-pointer"}`}
           >
             <div className="text-3xl mb-1">{bin.emoji}</div>

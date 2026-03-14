@@ -24,9 +24,14 @@ export default function Navbar() {
     });
   }, [pathname]);
 
-  // Hide navbar on landing page and auth pages
-  const hiddenRoutes = ["/", "/login", "/register"];
-  if (hiddenRoutes.includes(pathname)) return null;
+  // Hide navbar on landing page, auth pages, and admin pages
+  if (
+    pathname === "/" ||
+    pathname === "/auth/login" ||
+    pathname === "/auth/register" ||
+    pathname.startsWith("/admin")
+  )
+    return null;
 
   const navLinks = [
     { href: "/map", icon: <Map size={18} />, label: "Peta" },
@@ -62,11 +67,8 @@ export default function Navbar() {
       >
         <div className="h-full flex items-center justify-between max-w-7xl mx-auto">
           {/* Logo */}
-          <Link
-            href="/"
-            className="flex items-center gap-2 group flex-shrink-0"
-          >
-            <div className="w-9 h-9 md:w-10 md:h-10 bg-gradient-to-br from-emerald-400 to-teal-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-transform">
+          <Link href="/" className="flex items-center gap-2 group shrink-0">
+            <div className="w-9 h-9 md:w-10 md:h-10 bg-linear-to-br from-emerald-400 to-teal-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-transform">
               <Leaf size={18} />
             </div>
             <span className="font-display font-bold text-lg md:text-xl text-slate-800 hidden sm:block">
