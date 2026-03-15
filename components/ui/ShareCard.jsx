@@ -1,21 +1,25 @@
 "use client";
 
 import { useRef, useCallback } from "react";
-import { useUserStore } from "@/store/useUserStore";
 import { IMPACT_LABELS } from "@/utils/constants";
 import EcoButton from "@/components/design-system/EcoButton";
 
-export default function ShareCard() {
+export default function ShareCard({
+  explorerName = "Eco Explorer",
+  level = 1,
+  totalXP = 0,
+  earnedBadges = [],
+  completedMissions = 0,
+  exploredProvinces = [],
+  impactData = {
+    carbonSaved: 0,
+    waterSaved: 0,
+    wasteClassified: 0,
+    speciesLearned: 0,
+    mangroveRestored: 0,
+  },
+}) {
   const cardRef = useRef(null);
-  const {
-    explorerName,
-    level,
-    totalXP,
-    earnedBadges,
-    completedMissions,
-    exploredProvinces,
-    impactData,
-  } = useUserStore();
 
   const handleShare = useCallback(async () => {
     if (!cardRef.current) return;

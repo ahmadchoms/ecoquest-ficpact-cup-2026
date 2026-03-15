@@ -1,12 +1,12 @@
 "use client";
 
 import PageWrapper from "@/components/layout/PageWrapper";
-import { useUserStore } from "@/store/useUserStore";
+import { useDashboard } from "@/hooks/useDashboard";
+import { useUserBadges } from "@/hooks/useUserBadges";
 import LevelBadge from "@/components/ui/LevelBadge";
 import BadgeCard from "@/components/ui/BadgeCard";
-import { badgeList } from "@/data/badges";
-import { Calendar, Award, TrendingUp, Settings } from "lucide-react";
-import { formatDate } from "@/utils/formatters";
+import { Calendar, Award, TrendingUp, Settings, Loader } from "lucide-react";
+
 import AnimatedButton from "@/components/ui/AnimatedButton";
 import Link from "next/link";
 import { useState } from "react";
@@ -14,24 +14,57 @@ import EditProfileModal from "@/components/ui/EditProfileModal";
 
 export default function ProfilePage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const {
-    explorerName,
-    totalXP,
-    level,
-    earnedBadges,
-    completedMissions,
-    lastActive,
-  } = useUserStore();
+  const { data, isLoading, error } = useDashboard();
+  const { data: allBadges, isLoading: badgesLoading } = useUserBadges();
 
-  const history = [
-    {
-      date: "2024-02-15",
-      action: "Menyelesaikan misi: Carbon Calculator",
-      xp: "+100",
-    },
-    { date: "2024-02-14", action: "Naik ke Level 2!", xp: "" },
-    { date: "2024-02-14", action: "Mendapatkan badge: Early Adopter", xp: "" },
-  ];
+  // Map hook data to component variables
+  const explorerName = data?.name || "Explorer";
+  const totalXP = data?.xp || 0;
+  const level = data?.level || 1;
+  const earnedBadges = data?.badges?.map((badge) => badge.id) || [];
+  const completedMissions = Array.from({ length: data?.completedMissions || 0 });
+  const joinedDate = data?.createdAt ? new Date(data.createdAt) : null;
+  const activityHistory = data?.activityHistory || [];
+
+  // Loading state UI
+  if (isLoading) {
+    return (
+      <PageWrapper className="min-h-screen bg-slate-50 bg-grid-pattern pt-20 pb-24 flex items-center justify-center">
+        <div className="text-center">
+          <Loader className="w-12 h-12 animate-spin mx-auto mb-4 text-black" />
+          <p className="font-display font-black text-2xl text-black uppercase">
+            Loading Profile...
+          </p>
+        </div>
+      </PageWrapper>
+    );
+  }
+
+  // Error state UI
+  if (error) {
+    return (
+      <PageWrapper className="min-h-screen bg-slate-50 bg-grid-pattern pt-20 pb-24 flex items-center justify-center">
+        <div className="text-center">
+          <div className="bg-white border-3 border-black rounded-3xl p-8 shadow-hard max-w-md">
+            <p className="font-display font-black text-3xl text-red-600 uppercase mb-3">
+              Oops!
+            </p>
+            <p className="text-black text-sm mb-6">
+              Failed to load profile. Please try refreshing the page.
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="w-full py-3 px-4 bg-yellow border-3 border-black rounded-xl shadow-hard hover:bg-orange transition-all font-display font-black uppercase"
+            >
+              Refresh Page
+            </button>
+          </div>
+        </div>
+      </PageWrapper>
+    );
+  }
+
+
 
   return (
     <PageWrapper className="min-h-screen bg-slate-50 bg-grid-pattern pt-20 md:pb-12 pb-24">
@@ -57,7 +90,7 @@ export default function ProfilePage() {
               {explorerName || "Explorer"}
             </h1>
             <p className="text-black font-medium flex items-center justify-center md:justify-start gap-2 mb-6">
-              <Calendar size={18} strokeWidth={2.5} /> Bergabung sejak 2024
+              <Calendar size={18} strokeWidth={2.5} /> Bergabung sejak {joinedDate ? joinedDate.getFullYear() : "2024"}
             </p>
 
             <div className="flex justify-center md:justify-start gap-4">
@@ -103,13 +136,19 @@ export default function ProfilePage() {
                 Koleksi Badge Terbaru
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                {badgeList.slice(0, 4).map((badge) => (
-                  <BadgeCard
-                    key={badge.id}
-                    badge={badge}
-                    earned={earnedBadges.includes(badge.id)}
-                  />
-                ))}
+                {badgesLoading ? (
+                  <div className="col-span-full flex items-center justify-center py-8">
+                    <Loader className="w-6 h-6 animate-spin text-black" />
+                  </div>
+                ) : (
+                  (allBadges || []).slice(0, 4).map((badge) => (
+                    <BadgeCard
+                      key={badge.id}
+                      badge={badge}
+                      earned={badge.earned}
+                    />
+                  ))
+                )}
               </div>
             </section>
 
@@ -125,26 +164,36 @@ export default function ProfilePage() {
                 Aktivitas Terakhir
               </h2>
               <div className="bg-white rounded-4xl border-3 border-black shadow-hard overflow-hidden">
-                {history.map((item, i) => (
-                  <div
-                    key={i}
-                    className="p-5 border-b-3 border-black last:border-0 hover:bg-mint transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4 group cursor-pointer"
-                  >
-                    <div>
-                      <p className="font-bold text-black text-lg group-hover:translate-x-1 transition-transform duration-200">
-                        {item.action}
-                      </p>
-                      <p className="text-xs font-bold text-gray-600 mt-1 uppercase tracking-wider">
-                        {formatDate(item.date)}
-                      </p>
-                    </div>
-                    {item.xp && (
-                      <span className="inline-block text-sm font-black text-black bg-green border-3 border-black px-4 py-1.5 rounded-xl shadow-[3px_3px_0_#0f0f0f] -rotate-3 group-hover:rotate-0 transition-transform">
-                        {item.xp}
-                      </span>
-                    )}
+                {activityHistory.length === 0 ? (
+                  <div className="p-8 text-center text-gray-600 font-medium uppercase">
+                    Belum ada aktivitas
                   </div>
-                ))}
+                ) : (
+                  activityHistory.map((item, i) => (
+                    <div
+                      key={item.id || i}
+                      className="p-5 border-b-3 border-black last:border-0 hover:bg-mint transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4 group cursor-pointer"
+                    >
+                      <div>
+                        <p className="font-bold text-black text-lg group-hover:translate-x-1 transition-transform duration-200">
+                          {item.action}
+                        </p>
+                        <p className="text-xs font-bold text-gray-600 mt-1 uppercase tracking-wider">
+                          {new Date(item.date).toLocaleDateString("id-ID", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })}
+                        </p>
+                      </div>
+                      {item.xp && (
+                        <span className="inline-block text-sm font-black text-black bg-green border-3 border-black px-4 py-1.5 rounded-xl shadow-[3px_3px_0_#0f0f0f] -rotate-3 group-hover:rotate-0 transition-transform">
+                          {item.xp}
+                        </span>
+                      )}
+                    </div>
+                  ))
+                )}
               </div>
             </section>
           </div>

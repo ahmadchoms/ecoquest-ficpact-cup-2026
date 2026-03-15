@@ -2,8 +2,8 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useUserStore } from "@/store/useUserStore";
-import { badgeList } from "@/data/badges";
+import { useDashboard } from "@/hooks/useDashboard";
+import { useUserBadges } from "@/hooks/useUserBadges";
 import { IMPACT_LABELS } from "@/utils/constants";
 import XPBar from "@/components/ui/XPBar";
 import LevelBadge from "@/components/ui/LevelBadge";
@@ -18,6 +18,7 @@ import {
   TreePine,
   BarChart3,
   Share2,
+  Loader,
 } from "lucide-react";
 import { staggerContainer, fadeIn, zoomIn } from "@/utils/motion-variants";
 
@@ -27,21 +28,77 @@ import EcoButton from "@/components/design-system/EcoButton";
 import PageWrapper from "@/components/layout/PageWrapper";
 
 export default function DashboardPage() {
-  const {
-    explorerName,
-    totalXP,
-    level,
-    earnedBadges,
-    completedMissions,
-    exploredProvinces,
-    impactData,
-    getXPProgress,
-    getTotalImpactSummary,
-    resetProgress,
-  } = useUserStore();
+  const { data, isLoading, error } = useDashboard();
+  const { data: allBadges, isLoading: badgesLoading } = useUserBadges();
 
-  const xpProgress = getXPProgress();
-  const impact = getTotalImpactSummary();
+  // Map hook data to component variables
+  const explorerName = data?.name || "Eco Explorer";
+  const totalXP = data?.xp || 0;
+  const level = data?.level || 1;
+  const earnedBadges = data?.badges?.map((badge) => badge.id) || [];
+  const completedMissions = Array.from({ length: data?.completedMissions || 0 });
+  const exploredProvinces = data?.exploredProvinces || [];
+
+  // Impact data calculated from mission completions
+  const impactData = data?.impactData || {
+    carbonSaved: 0,
+    waterSaved: 0,
+    wasteClassified: 0,
+    speciesLearned: 0,
+    mangroveRestored: 0,
+  };
+
+  // XP progress from API
+  const xpProgress = data?.xpProgress || {
+    current: totalXP % 500,
+    total: 500,
+    percentage: 0,
+  };
+
+  // Tree equivalent and activity history from API
+  const impact = {
+    treesEquivalent: data?.treesEquivalent || 0,
+  };
+
+  const activityHistory = data?.activityHistory || [];
+
+  // Loading state UI
+  if (isLoading) {
+    return (
+      <PageWrapper className="min-h-screen bg-white bg-grid-pattern pt-20 pb-24 font-body flex items-center justify-center">
+        <div className="text-center">
+          <Loader className="w-12 h-12 animate-spin mx-auto mb-4 text-black" />
+          <p className="font-display font-black text-2xl text-black uppercase">
+            Loading Dashboard...
+          </p>
+        </div>
+      </PageWrapper>
+    );
+  }
+
+  // Error state UI
+  if (error) {
+    return (
+      <PageWrapper className="min-h-screen bg-white bg-grid-pattern pt-20 pb-24 font-body flex items-center justify-center">
+        <div className="text-center">
+          <div className="bg-white border-3 border-black rounded-3xl p-8 shadow-hard max-w-md">
+            <p className="font-display font-black text-3xl text-red-600 uppercase mb-3">
+              Oops!
+            </p>
+            <p className="text-black text-sm mb-6">
+              Failed to load dashboard. Please try refreshing the page.
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="w-full py-3 px-4 bg-yellow border-3 border-black rounded-xl shadow-hard hover:bg-orange transition-all font-display font-black uppercase"
+            >
+              Refresh Page
+            </button>
+          </div>
+        </div>
+      </PageWrapper>
+    );
+  }
 
   const impactChartData = [
     { name: "Karbon", value: impactData.carbonSaved, color: "#f5e642" },
@@ -100,15 +157,14 @@ export default function DashboardPage() {
                 <div className="flex justify-between text-xs text-black font-black uppercase tracking-widest mb-3">
                   <span>Progress Level {level}</span>
                   <span className="bg-yellow px-2 py-0.5 rounded-md border border-black">
-                    {xpProgress.xpInCurrentLevel} / {xpProgress.xpToNextLevel}{" "}
-                    XP
+                    {xpProgress.current} / {xpProgress.total} XP
                   </span>
                 </div>
                 {/* Asumsi XPBar sudah punya styling yang tebal, jika belum, bisa dibungkus dengan border */}
                 <div className="rounded-full border-2 border-black overflow-hidden bg-gray-100">
                   <XPBar
-                    current={xpProgress.xpInCurrentLevel}
-                    max={xpProgress.xpToNextLevel}
+                    current={xpProgress.current}
+                    max={xpProgress.total}
                     level={level}
                     showLabel={false}
                   />
@@ -273,22 +329,30 @@ export default function DashboardPage() {
               </h2>
 
               <div className="bg-white border-3 border-black shadow-hard rounded-4xl p-5 grid grid-cols-3 sm:grid-cols-4 gap-4">
-                {badgeList.slice(0, 8).map((badge) => (
-                  <BadgeCard
-                    key={badge.id}
-                    badge={badge}
-                    earned={earnedBadges.includes(badge.id)}
-                  />
-                ))}
-                {badgeList.length > 8 && (
-                  <div className="flex flex-col items-center justify-center bg-gray-100 border-3 border-dashed border-black rounded-3xl h-full min-h-25">
-                    <span className="text-xl font-black text-black/50">
-                      +{badgeList.length - 8}
-                    </span>
-                    <span className="text-[10px] font-bold uppercase text-black/50">
-                      Lagi
-                    </span>
+                {badgesLoading ? (
+                  <div className="col-span-full flex items-center justify-center py-8">
+                    <Loader className="w-6 h-6 animate-spin text-black" />
                   </div>
+                ) : (
+                  <>
+                    {(allBadges || []).slice(0, 8).map((badge) => (
+                      <BadgeCard
+                        key={badge.id}
+                        badge={badge}
+                        earned={badge.earned}
+                      />
+                    ))}
+                    {allBadges && allBadges.length > 8 && (
+                      <div className="flex flex-col items-center justify-center bg-gray-100 border-3 border-dashed border-black rounded-3xl h-full min-h-25">
+                        <span className="text-xl font-black text-black/50">
+                          +{allBadges.length - 8}
+                        </span>
+                        <span className="text-[10px] font-bold uppercase text-black/50">
+                          Lagi
+                        </span>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </div>
@@ -305,7 +369,15 @@ export default function DashboardPage() {
                 </div>
                 Share Dampakmu
               </h2>
-              <ShareCard />
+              <ShareCard
+                explorerName={explorerName}
+                level={level}
+                totalXP={totalXP}
+                earnedBadges={earnedBadges}
+                completedMissions={completedMissions.length}
+                exploredProvinces={exploredProvinces}
+                impactData={impactData}
+              />
             </div>
           </motion.div>
         </div>
@@ -322,16 +394,9 @@ export default function DashboardPage() {
           </Link>
 
           <button
-            onClick={() => {
-              if (
-                window.confirm(
-                  "Yakin ingin reset semua progress? Data tidak bisa dikembalikan.",
-                )
-              ) {
-                resetProgress();
-              }
-            }}
-            className="px-6 py-4 rounded-2xl bg-white border-3 border-black shadow-hard hover:bg-red-500 hover:text-white hover:-translate-y-1 hover:shadow-hard-lg active:translate-x-1 active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-2 font-display font-black text-red-600 uppercase tracking-widest group"
+            disabled
+            title="Reset progress feature coming soon"
+            className="px-6 py-4 rounded-2xl bg-gray-300 border-3 border-black shadow-hard flex items-center justify-center gap-2 font-display font-black text-gray-600 uppercase tracking-widest group cursor-not-allowed opacity-60"
           >
             <RotateCcw
               size={20}

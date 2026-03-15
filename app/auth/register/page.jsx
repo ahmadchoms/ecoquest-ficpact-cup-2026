@@ -77,7 +77,7 @@ export default function RegisterPage() {
         });
   
         if (!result?.ok) {
-          setError(result?.error || "Terjadi kesalahan saat login dengan Google");
+          // setError(result?.error || "Terjadi kesalahan saat login dengan Google");
           setLoading(false);
           return;
         }
