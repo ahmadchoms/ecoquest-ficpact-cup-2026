@@ -667,61 +667,89 @@ async function main() {
   const now = new Date();
   const nextWeek = new Date();
   nextWeek.setDate(now.getDate() + 7);
+  const twoWeeksFromNow = new Date();
+  twoWeeksFromNow.setDate(now.getDate() + 14);
+  const oneMonthFromNow = new Date();
+  oneMonthFromNow.setMonth(now.getMonth() + 1);
   
   const lastWeek = new Date();
   lastWeek.setDate(now.getDate() - 7);
 
-  // Default fallback URLs if upload fails
-  const earthDayDefault = "/images/events/earth-day-event.jpg";
-  const oceanWeekDefault = "/images/events/ocean-week-event.jpg";
+  // Default fallback URLs
+  const defaultBannerUrl = "/images/events/default-banner.jpg";
+  const defaultItemUrl = "/images/shop/default-item.jpg";
 
-  // Upload Event Banners
-  const earthDayUrl = await seedFileToStorage("assets/images/events/earth-day-event.jpg", STORAGE_BUCKETS.EVENT_ASSETS, "banners") || earthDayDefault;
-  const oceanWeekUrl = await seedFileToStorage("assets/images/events/ocean-week-event.jpg", STORAGE_BUCKETS.EVENT_ASSETS, "banners") || oceanWeekDefault;
-
-  // Buat Event (Satu Event Aktif, Satu Event Masa Depan)
+  // Buat 5 Events
   const events = await Promise.all([
+    // Event 1: Aktif (masih berlangsung)
     prisma.event.create({
       data: {
         name: "Festival Hari Bumi 2026",
         description: "Perayaan Hari Bumi dengan item eksklusif bertema alam dan pelestarian lingkungan.",
-        bannerUrl: earthDayUrl,
+        bannerUrl: defaultBannerUrl,
         startDate: lastWeek,
         endDate: nextWeek,
         isActive: true,
       }
     }),
+    // Event 2: Aktif (baru saja dimulai)
     prisma.event.create({
       data: {
         name: "Pekan Peduli Lautan",
-        description: "Selamatkan terumbu karang. Kumpulkan poin dan dapatkan border laut!",
-        bannerUrl: oceanWeekUrl,
+        description: "Selamatkan terumbu karang. Kumpulkan poin dan dapatkan border laut eksklusif!",
+        bannerUrl: defaultBannerUrl,
+        startDate: lastWeek,
+        endDate: twoWeeksFromNow,
+        isActive: true,
+      }
+    }),
+    // Event 3: Aktif (akan berakhir akhir bulan)
+    prisma.event.create({
+      data: {
+        name: "Kampanye Reboisasi Nasional",
+        description: "Menanam pohon untuk masa depan yang hijau. Dapatkan item terbatas setiap pembelian.",
+        bannerUrl: defaultBannerUrl,
+        startDate: new Date("2026-03-01T00:00:00Z"),
+        endDate: new Date("2026-03-31T23:59:59Z"),
+        isActive: true,
+      }
+    }),
+    // Event 4: Akan datang (belum aktif, endDate di masa depan)
+    prisma.event.create({
+      data: {
+        name: "Summer Festival Eksklusif",
+        description: "Musim panas penuh warna dengan koleksi item musiman terbatas.",
+        bannerUrl: defaultBannerUrl,
         startDate: new Date("2026-06-01T00:00:00Z"),
-        endDate: new Date("2026-06-30T23:59:59Z"),
+        endDate: new Date("2026-08-31T23:59:59Z"),
+        isActive: true,
+      }
+    }),
+    // Event 5: Akan datang (endDate jauh di masa depan)
+    prisma.event.create({
+      data: {
+        name: "Program Konservasi Keanekaragaman Hayati",
+        description: "Mari bersama lindungi satwa langka Indonesia dengan koleksi eksklusif.",
+        bannerUrl: defaultBannerUrl,
+        startDate: new Date("2026-05-01T00:00:00Z"),
+        endDate: new Date("2026-12-31T23:59:59Z"),
         isActive: true,
       }
     })
   ]);
   console.log(`Seeded ${events.length} events.`);
 
-  // Upload Shop Items Content
-  const tropicalForestUrl = await seedFileToStorage("assets/images/shop/tropical-forest.jpg", STORAGE_BUCKETS.SHOP_ASSETS, "banners") || "/images/shop/tropical-forest.jpg";
-  const leafBorderUrl = await seedFileToStorage("assets/images/shop/leaf-border.png", STORAGE_BUCKETS.SHOP_ASSETS, "borders") || "/images/shop/leaf-border.png";
-  const earthDayShopUrl = await seedFileToStorage("assets/images/shop/earth-day.jpg", STORAGE_BUCKETS.SHOP_ASSETS, "banners") || "/images/shop/earth-day.jpg";
-  const rootsBorderUrl = await seedFileToStorage("assets/images/shop/roots-border.png", STORAGE_BUCKETS.SHOP_ASSETS, "borders") || "/images/shop/roots-border.png";
-  const deepOceanUrl = await seedFileToStorage("assets/images/shop/deep-ocean.jpg", STORAGE_BUCKETS.SHOP_ASSETS, "banners") || "/images/shop/deep-ocean.jpg";
-
-  // Buat Shop Items
+  // Buat 20 Shop Items (berbagai kombinasi dengan dan tanpa eventId)
   const shopItems = await Promise.all([
-    // Item Permanen (Tanpa eventId)
+    // PERMANENT ITEMS (Tanpa eventId) - 8 items
     prisma.shopItem.create({
       data: {
         name: "Hutan Tropis Banner",
         description: "Banner dengan pemandangan hutan hujan tropis yang lebat.",
         price: 150,
         type: "BANNER",
-        content: tropicalForestUrl,
-        previewUrl: tropicalForestUrl,
+        content: defaultItemUrl,
+        previewUrl: defaultItemUrl,
         isActive: true,
       }
     }),
@@ -731,49 +759,189 @@ async function main() {
         description: "Border profil dengan hiasan dedaunan hijau alami.",
         price: 100,
         type: "BORDER",
-        content: leafBorderUrl,
-        previewUrl: leafBorderUrl,
+        content: defaultItemUrl,
+        previewUrl: defaultItemUrl,
         isActive: true,
       }
     }),
-    
-    // Item Limited (Terikat pada Event Festival Hari Bumi)
+    prisma.shopItem.create({
+      data: {
+        name: "Gunung Hijau Banner",
+        description: "Banner bertema pegunungan dengan pemandangan alam yang indah.",
+        price: 180,
+        type: "BANNER",
+        content: defaultItemUrl,
+        previewUrl: defaultItemUrl,
+        isActive: true,
+      }
+    }),
+    prisma.shopItem.create({
+      data: {
+        name: "Rumput Liar Border",
+        description: "Border profil dengan motif rumput dan bunga liar.",
+        price: 120,
+        type: "BORDER",
+        content: defaultItemUrl,
+        previewUrl: defaultItemUrl,
+        isActive: true,
+      }
+    }),
+    prisma.shopItem.create({
+      data: {
+        name: "Bintang Malam Banner",
+        description: "Banner dengan langit malam penuh bintang yang memukau.",
+        price: 200,
+        type: "BANNER",
+        content: defaultItemUrl,
+        previewUrl: defaultItemUrl,
+        isActive: true,
+      }
+    }),
+    prisma.shopItem.create({
+      data: {
+        name: "Batu Karang Border",
+        description: "Border profil dengan tekstur batu karang yang kokoh.",
+        price: 130,
+        type: "BORDER",
+        content: defaultItemUrl,
+        previewUrl: defaultItemUrl,
+        isActive: true,
+      }
+    }),
+    prisma.shopItem.create({
+      data: {
+        name: "Taman Bunga Banner",
+        description: "Banner penuh dengan berbagai macam bunga berwarna-warni.",
+        price: 170,
+        type: "BANNER",
+        content: defaultItemUrl,
+        previewUrl: defaultItemUrl,
+        isActive: true,
+      }
+    }),
+    prisma.shopItem.create({
+      data: {
+        name: "Emas Murni Border",
+        description: "Border profil premium dengan aksen emas yang berkilau.",
+        price: 250,
+        type: "BORDER",
+        content: defaultItemUrl,
+        previewUrl: defaultItemUrl,
+        isActive: true,
+      }
+    }),
+
+    // LIMITED ITEMS - Event 1 (Festival Hari Bumi) - 3 items
     prisma.shopItem.create({
       data: {
         name: "Earth Savior Banner",
-        description: "Banner edisi terbatas Festival Hari Bumi 2026.",
+        description: "Banner edisi terbatas Festival Hari Bumi 2026 dengan tema penyelamatan bumi.",
         price: 300,
         type: "BANNER",
-        content: earthDayShopUrl,
-        previewUrl: earthDayShopUrl,
+        content: defaultItemUrl,
+        previewUrl: defaultItemUrl,
         isActive: true,
-        eventId: events[0].id, // Terhubung ke event pertama
+        eventId: events[0].id,
       }
     }),
     prisma.shopItem.create({
       data: {
         name: "Akar Bumi Border",
-        description: "Border profil edisi terbatas bertema akar pohon yang kokoh.",
+        description: "Border profil edisi terbatas bertema akar pohon yang kokoh dan kuat.",
         price: 250,
         type: "BORDER",
-        content: rootsBorderUrl,
-        previewUrl: rootsBorderUrl,
+        content: defaultItemUrl,
+        previewUrl: defaultItemUrl,
         isActive: true,
-        eventId: events[0].id, // Terhubung ke event pertama
+        eventId: events[0].id,
+      }
+    }),
+    prisma.shopItem.create({
+      data: {
+        name: "Green Planet Banner",
+        description: "Banner spektakuler menampilkan planet hijau yang sehat dan lestari.",
+        price: 320,
+        type: "BANNER",
+        content: defaultItemUrl,
+        previewUrl: defaultItemUrl,
+        isActive: true,
+        eventId: events[0].id,
       }
     }),
 
-    // Item Limited (Terikat pada Event Pekan Peduli Lautan)
+    // LIMITED ITEMS - Event 2 (Pekan Peduli Lautan) - 3 items
     prisma.shopItem.create({
       data: {
         name: "Deep Ocean Banner",
-        description: "Banner eksklusif Pekan Peduli Lautan.",
+        description: "Banner eksklusif Pekan Peduli Lautan dengan kedalaman laut yang misterius.",
         price: 350,
         type: "BANNER",
-        content: deepOceanUrl,
-        previewUrl: deepOceanUrl,
+        content: defaultItemUrl,
+        previewUrl: defaultItemUrl,
         isActive: true,
-        eventId: events[1].id, // Terhubung ke event kedua
+        eventId: events[1].id,
+      }
+    }),
+    prisma.shopItem.create({
+      data: {
+        name: "Coral Guardian Border",
+        description: "Border profil edisi terbatas dengan motif terumbu karang yang indah.",
+        price: 280,
+        type: "BORDER",
+        content: defaultItemUrl,
+        previewUrl: defaultItemUrl,
+        isActive: true,
+        eventId: events[1].id,
+      }
+    }),
+    prisma.shopItem.create({
+      data: {
+        name: "Waves of Hope Banner",
+        description: "Banner bertema gelombang laut dengan pesan harapan dan perubahan.",
+        price: 340,
+        type: "BANNER",
+        content: defaultItemUrl,
+        previewUrl: defaultItemUrl,
+        isActive: true,
+        eventId: events[1].id,
+      }
+    }),
+
+    // LIMITED ITEMS - Event 3 (Reboisasi) - 3 items
+    prisma.shopItem.create({
+      data: {
+        name: "Forest Champion Banner",
+        description: "Banner kampanye reboisasi dengan semangat penanaman pohon.",
+        price: 310,
+        type: "BANNER",
+        content: defaultItemUrl,
+        previewUrl: defaultItemUrl,
+        isActive: true,
+        eventId: events[2].id,
+      }
+    }),
+    prisma.shopItem.create({
+      data: {
+        name: "Tree Hugger Border",
+        description: "Border profil edisi terbatas untuk pecinta pohon dan alam.",
+        price: 260,
+        type: "BORDER",
+        content: defaultItemUrl,
+        previewUrl: defaultItemUrl,
+        isActive: true,
+        eventId: events[2].id,
+      }
+    }),
+    prisma.shopItem.create({
+      data: {
+        name: "Seedling Dreams Banner",
+        description: "Banner penuh harapan tentang masa depan hijau dari benih kecil.",
+        price: 330,
+        type: "BANNER",
+        content: defaultItemUrl,
+        previewUrl: defaultItemUrl,
+        isActive: true,
+        eventId: events[2].id,
       }
     })
   ]);

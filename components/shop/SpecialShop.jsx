@@ -114,44 +114,35 @@ export default function SpecialShop({ banners = [] }) {
                 <div className="relative z-10 max-w-2xl">
                   <div className="flex items-center gap-2 mb-2">
                     <span
-                      className={`inline-block px-3 py-1 text-xs font-extrabold rounded-lg shadow-hard border-2 border-black ${
-                        currentBanner.badgeColor === "emerald"
-                          ? "bg-emerald-400 text-black"
-                          : currentBanner.badgeColor === "yellow"
-                            ? "bg-yellow-400 text-black"
-                            : "bg-cyan-300 text-black"
-                      }`}
+                      className={`inline-block px-3 py-1 text-xs font-extrabold rounded-lg shadow-hard border-2 border-black bg-purple-400 text-black`}
                     >
-                      {currentBanner.badgeText}
+                      {currentBanner.badgeText || "EVENT"}
                     </span>
-                    {currentBanner.discount && (
-                      <span className="inline-block px-3 py-1 text-xs font-extrabold rounded-lg bg-red-400 text-white shadow-hard border-2 border-black">
-                        Diskon {currentBanner.discount}
-                      </span>
-                    )}
                   </div>
 
                   <h3 className="font-display text-2xl sm:text-4xl font-extrabold text-white mb-1">
-                    {currentBanner.title}
+                    {currentBanner.title || currentBanner.name}
                   </h3>
 
                   <p className="text-sm sm:text-lg font-bold text-white/90 mb-4">
-                    {currentBanner.subtitle}
+                    {currentBanner.subtitle || currentBanner.description}
                   </p>
 
                   <p className="text-sm sm:text-base text-white/90 mb-6">
                     {currentBanner.description}
                   </p>
 
-                  <Link href={`/shop/collection/${currentBanner.collectionId}`}>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="px-6 sm:px-8 py-2 sm:py-3 bg-black text-yellow-400 font-display font-extrabold rounded-xl shadow-hard hover:shadow-hard-lg border-3 border-black transition-all"
-                    >
-                      Lihat Koleksi
-                    </motion.button>
-                  </Link>
+                  {currentBanner.name && (
+                    <Link href={`/shop/collection/${currentBanner.name.toLowerCase().replace(/\s+/g, '-')}`}>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="px-6 sm:px-8 py-2 sm:py-3 bg-black text-yellow-400 font-display font-extrabold rounded-xl shadow-hard hover:shadow-hard-lg border-3 border-black transition-all"
+                      >
+                        Lihat Koleksi
+                      </motion.button>
+                    </Link>
+                  )}
                 </div>
               </div>
             )}

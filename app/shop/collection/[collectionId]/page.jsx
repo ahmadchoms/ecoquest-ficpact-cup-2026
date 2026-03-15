@@ -8,7 +8,7 @@ import ItemCard from "@/components/shop/ItemCard";
 import PurchaseConfirmation from "@/components/shop/PurchaseConfirmation";
 import Toast from "@/components/ui/Toast";
 import { useUserStore } from "@/store/useUserStore";
-import { specialCollections } from "@/data/shop";
+import { usePurchaseShopItem } from "@/hooks/useUserMissions";
 import { staggerContainer, fadeIn } from "@/utils/motion-variants";
 import { ChevronLeft } from "lucide-react";
 
@@ -16,18 +16,52 @@ export default function CollectionDetailPage() {
   const router = useRouter();
   const params = useParams();
   const collectionId = params.collectionId;
-  const { coins, deductCoins } = useUserStore();
+  const { points: userPoints, deductCoins } = useUserStore();
+  const purchaseMutation = usePurchaseShopItem();
 
-  console.log("CollectionDetailPage - collectionId:", collectionId);
-  console.log("specialCollections:", specialCollections);
-  
-  const collection = specialCollections.find((c) => c.id === collectionId);
-  console.log("Found collection:", collection);
+  const [collection, setCollection] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+
+  // Fetch event + items dari API
+  useEffect(() => {
+    const fetchCollection = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch(`/api/events/${collectionId}`);
+        
+        if (!response.ok) {
+          console.error("Collection not found");
+          setCollection(null);
+          return;
+        }
+
+        const data = await response.json();
+        setCollection(data.data);
+      } catch (error) {
+        console.error("Error fetching collection:", error);
+        setCollection(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCollection();
+  }, [collectionId]);
+
+  if (isLoading) {
+    return (
+      <PageWrapper className="min-h-screen bg-white pt-20 pb-24 font-body">
+        <div className="max-w-4xl mx-auto px-4 py-12 text-center">
+          <p className="text-slate-600 font-medium">Memuat koleksi...</p>
+        </div>
+      </PageWrapper>
+    );
+  }
 
   if (!collection) {
     return (
@@ -48,8 +82,8 @@ export default function CollectionDetailPage() {
   }
 
   const handleBuyItem = (item) => {
-    if (coins < item.price) {
-      setToastMessage(`Poin tidak cukup! Kamu membutuhkan ${item.price - coins} poin lagi.`);
+    if (userPoints < item.price) {
+      setToastMessage(`Poin tidak cukup! Kamu membutuhkan ${item.price - userPoints} poin lagi.`);
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
       return;
@@ -61,39 +95,55 @@ export default function CollectionDetailPage() {
   const handleConfirmPurchase = async () => {
     if (!selectedItem) return;
     
-    setIsProcessing(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    deductCoins(selectedItem.price);
-    setIsProcessing(false);
-    setShowConfirmation(false);
-    setToastMessage(`${selectedItem.name} berhasil dibeli!`);
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 2000);
+    try {
+      setIsProcessing(true);
+      await purchaseMutation.mutateAsync(selectedItem.id);
+      deductCoins(selectedItem.price);
+      setShowConfirmation(false);
+      setToastMessage(`${selectedItem.name} berhasil dibeli!`);
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 2000);
+    } catch (error) {
+      setToastMessage(error.response?.data?.message || "Gagal membeli item. Silakan coba lagi.");
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleBuyAll = async () => {
-    if (!collection) return;
+    if (!collection || !collection.items || collection.items.length === 0) return;
     
     // Calculate total cost
     const totalCost = collection.items.reduce((sum, item) => sum + item.price, 0);
     
-    if (coins < totalCost) {
-      setToastMessage(`Poin tidak cukup! Total kebutuhan ${totalCost} poin, kamu kekurangan ${totalCost - coins} poin.`);
+    if (userPoints < totalCost) {
+      setToastMessage(`Poin tidak cukup! Total kebutuhan ${totalCost} poin, kamu kekurangan ${totalCost - userPoints} poin.`);
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
       return;
     }
-    setIsProcessing(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    deductCoins(totalCost);
-    setIsProcessing(false);
-    setToastMessage(
-      `${collection.items.length} item berhasil dibeli! Selamat berbelanja!`
-    );
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 2000);
+    
+    try {
+      setIsProcessing(true);
+      // Beli semua item satu per satu
+      for (const item of collection.items) {
+        await purchaseMutation.mutateAsync(item.id);
+      }
+      deductCoins(totalCost);
+      setToastMessage(
+        `${collection.items.length} item berhasil dibeli! Selamat berbelanja!`
+      );
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 2000);
+    } catch (error) {
+      setToastMessage("Gagal membeli beberapa item. Silakan coba lagi.");
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const staggerContainer2 = {
@@ -156,16 +206,9 @@ export default function CollectionDetailPage() {
               </div>
 
               <div className="space-y-3">
-                <div className="flex items-center gap-3 flex-wrap">
-                  <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-black">
-                    {collection.subtitle}
-                  </h2>
-                  {collection.discount && (
-                    <span className="inline-block px-4 py-2 bg-red-400 text-white font-extrabold rounded-lg shadow-hard border-2 border-black">
-                      Diskon {collection.discount}
-                    </span>
-                  )}
-                </div>
+                <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-black">
+                  {collection.subtitle}
+                </h2>
                 <p className="text-slate-600 text-base sm:text-lg font-medium">
                   {collection.description}
                 </p>

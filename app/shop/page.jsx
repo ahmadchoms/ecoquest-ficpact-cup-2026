@@ -1,23 +1,49 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useMemo } from "react";
+import { useMemo, useEffect, useState } from "react";
 import PageWrapper from "@/components/layout/PageWrapper";
 import SpecialShop from "@/components/shop/SpecialShop";
 import DailyRefresh from "@/components/shop/DailyRefresh";
 import AllItems from "@/components/shop/AllItems";
-import { shopBanners } from "@/data/shop";
 import { staggerContainer, fadeIn } from "@/utils/motion-variants";
 import { useAvailableShopItems } from "@/hooks/useUserMissions";
 
 export default function ShopPage() {
   const { data: shopItems = [], isLoading } = useAvailableShopItems();
-  
-  // Shuffle items for daily refresh
+  const [activeEvents, setActiveEvents] = useState([]);
+  const [eventsLoading, setEventsLoading] = useState(true);
+
+  // Fetch active events untuk banner
+  useEffect(() => {
+    const fetchActiveEvents = async () => {
+      try {
+        const response = await fetch("/api/events/active");
+        if (response.ok) {
+          const data = await response.json();
+          setActiveEvents(data.data || []);
+        }
+      } catch (error) {
+        console.error("Error fetching active events:", error);
+      } finally {
+        setEventsLoading(false);
+      }
+    };
+
+    fetchActiveEvents();
+  }, []);
+
+  // Daily Refresh: Items dengan eventId (limited items)
   const dailyItems = useMemo(() => {
-    if (shopItems.length === 0) return [];
-    const shuffled = [...shopItems].sort(() => Math.random() - 0.5);
+    const itemsWithEvent = shopItems.filter((item) => item.eventId);
+    if (itemsWithEvent.length === 0) return [];
+    const shuffled = [...itemsWithEvent].sort(() => Math.random() - 0.5);
     return shuffled.slice(0, 4);
+  }, [shopItems]);
+
+  // All Items: Items tanpa eventId (permanent items)
+  const permanentItems = useMemo(() => {
+    return shopItems.filter((item) => !item.eventId);
   }, [shopItems]);
 
   return (
@@ -38,9 +64,19 @@ export default function ShopPage() {
           </p>
         </motion.div>
 
-        {/* Special Shop Section */}
+        {/* Special Shop Section - dengan Active Events */}
         <motion.div variants={fadeIn("up", 0.15)}>
-          <SpecialShop banners={shopBanners} />
+          {eventsLoading ? (
+            <div className="text-center py-8">
+              <p className="text-slate-600 font-medium">Memuat event...</p>
+            </div>
+          ) : activeEvents.length > 0 ? (
+            <SpecialShop banners={activeEvents} />
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-slate-600 font-medium">Tidak ada event aktif saat ini</p>
+            </div>
+          )}
         </motion.div>
 
         {/* Divider */}
@@ -60,14 +96,14 @@ export default function ShopPage() {
           className="h-1 bg-gradient-to-r from-transparent via-slate-300 to-transparent rounded-full"
         />
 
-        {/* All Items Section */}
+        {/* All Items Section - dengan permanent items filter */}
         <motion.div variants={fadeIn("up", 0.35)}>
           {isLoading ? (
             <div className="text-center py-8">
               <p className="text-slate-600 font-medium">Memuat item...</p>
             </div>
           ) : (
-            <AllItems items={shopItems} />
+            <AllItems items={permanentItems} />
           )}
         </motion.div>
       </motion.div>
