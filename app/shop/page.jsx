@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useMemo, useEffect, useState } from "react";
+import { useMemo } from "react";
 import PageWrapper from "@/components/layout/PageWrapper";
 import SpecialShop from "@/components/shop/SpecialShop";
 import DailyRefresh from "@/components/shop/DailyRefresh";
