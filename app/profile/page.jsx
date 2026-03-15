@@ -25,7 +25,7 @@ export default function ProfilePage() {
   const completedMissions = Array.from({ length: data?.completedMissions || 0 });
   const joinedDate = data?.createdAt ? new Date(data.createdAt) : null;
   const activityHistory = data?.activityHistory || [];
-
+  console.log("Profile Data:", data);
   // Loading state UI
   if (isLoading) {
     return (
@@ -89,6 +89,7 @@ export default function ProfilePage() {
             <h1 className="text-4xl font-display font-black text-black uppercase tracking-wide mb-2">
               {explorerName || "Explorer"}
             </h1>
+            <p className="text-sm font-bold text-slate-600 mb-4">@{data?.username || "username"}</p>
             <p className="text-black font-medium flex items-center justify-center md:justify-start gap-2 mb-6">
               <Calendar size={18} strokeWidth={2.5} /> Bergabung sejak {joinedDate ? joinedDate.getFullYear() : "2024"}
             </p>
