@@ -1,46 +1,64 @@
-import { getServerSession } from "next-auth/next";
-import { successResponse, errorResponse, serverErrorResponse } from "@/lib/server/utils/response";
-import { logger } from "@/lib/server/utils/logger";
-import prisma from "@/lib/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import {
+  successResponse,
+  errorResponse,
+} from "@/lib/server/utils/response";
+import { getUserItems, updateUserItemSelection } from "@/lib/server/services/user.service";
 
 /**
  * GET /api/user/items
- * Get all items owned by current user
+ * Fetch user's owned items (banners, borders) grouped by type
  */
 export async function GET(request) {
   try {
-    const session = await getServerSession();
-    if (!session) {
-      return errorResponse("Tidak terautentikasi", 401);
+    const session = await getServerSession(authOptions);
+
+    if (!session || !session.user?.email) {
+      return errorResponse("Unauthorized", 401);
     }
 
-    logger.apiRequest("GET", "/api/user/items");
+    const items = await getUserItems(session.user.email);
 
-    const userItems = await prisma.userItem.findMany({
-      where: { userId: session.user.id },
-      include: {
-        item: {
-          select: {
-            id: true,
-            name: true,
-            description: true,
-            type: true,
-            price: true,
-            content: true,
-            previewUrl: true,
-          },
-        },
-      },
-      orderBy: { acquiredAt: "desc" },
-    });
+    if (!items) {
+      return errorResponse("User not found", 404);
+    }
 
-    logger.apiSuccess("GET", "/api/user/items", {
-      total: userItems.length,
-    });
-
-    return successResponse(userItems);
+    return successResponse(items);
   } catch (error) {
-    logger.apiError("GET", "/api/user/items", error);
-    return serverErrorResponse("Gagal memuat item milik Anda.");
+    console.error("[GET /api/user/items]", error);
+    return errorResponse(error.message, 500);
+  }
+}
+
+/**
+ * PUT /api/user/items
+ * Update user's active banner and border selections
+ * Body: { activeBannerId: string?, activeBorderId: string? }
+ */
+export async function PUT(request) {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session || !session.user?.email) {
+      return errorResponse("Unauthorized", 401);
+    }
+
+    const body = await request.json();
+    const { activeBannerId, activeBorderId } = body;
+
+    const result = await updateUserItemSelection(
+      session.user.email,
+      activeBannerId || null,
+      activeBorderId || null
+    );
+
+    return successResponse({
+      message: "Items updated successfully",
+      data: result,
+    });
+  } catch (error) {
+    console.error("[PUT /api/user/items]", error);
+    return errorResponse(error.message, 500);
   }
 }
