@@ -16,6 +16,7 @@ import {
   ShoppingBag,
 } from "lucide-react";
 import { useAdminStore } from "@/store/useAdminStore";
+import { signOut } from "next-auth/react";
 
 const menuItems = [
   { id: "dashboard", label: "Dashboard", icon: BarChart3, href: "/admin" },
@@ -33,6 +34,11 @@ const menuItems = [
 ];
 
 function SidebarContent({ pathname, setMobileSidebar }) {
+  const handleLogout = async () => {
+      await signOut({
+        callbackUrl: "/auth/login",
+      });
+    };
   return (
     <div className="flex flex-col h-full bg-white border-r-3 border-black">
       {/* Sidebar Header */}
@@ -89,7 +95,8 @@ function SidebarContent({ pathname, setMobileSidebar }) {
       {/* Sidebar Footer */}
       <div className="p-4 border-t-3 border-black space-y-2">
         <Link
-          href="/"
+          href=""
+          onClick={handleLogout}
           className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-50 text-red-500 transition-colors font-bold"
         >
           <LogOut size={20} />

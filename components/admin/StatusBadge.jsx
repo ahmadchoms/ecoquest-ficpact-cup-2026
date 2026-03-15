@@ -31,10 +31,22 @@ export default function StatusBadge({
   children,
   variant = "suspended",
   className = "",
+  children,
+  variant = "suspended",
+  className = "",
 }) {
   const variantStyles =
     badgeVariants[variant.toLowerCase()] || badgeVariants.suspended;
+  const variantStyles =
+    badgeVariants[variant.toLowerCase()] || badgeVariants.suspended;
 
+  return (
+    <span
+      className={`inline-flex items-center px-2.5 py-1 rounded-lg border-2 font-body font-black text-[10px] uppercase tracking-wider transition-all shadow-[2px_2px_0_rgba(0,0,0,0.1)] ${variantStyles} ${className}`}
+    >
+      {children}
+    </span>
+  );
   return (
     <span
       className={`inline-flex items-center px-2.5 py-1 rounded-lg border-2 font-body font-black text-[10px] uppercase tracking-wider transition-all shadow-[2px_2px_0_rgba(0,0,0,0.1)] ${variantStyles} ${className}`}

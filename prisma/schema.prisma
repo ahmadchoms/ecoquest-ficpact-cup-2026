@@ -84,17 +84,20 @@ model User {
   email        String     @unique
   password     String
   name         String
+  name         String
   username     String     @unique
   xp           Int        @default(0)
   points       Int        @default(0)
   level        Int        @default(1)
-  profileImage String?
+  profileImage String?   
   bio          String?
   role         Role       @default(USER)
   status       UserStatus @default(ACTIVE)
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
+  accounts           Account[]
+  sessions           Session[]
   badges             Badge[]             @relation("UserBadges")
   missionCompletions MissionCompletion[]
   accounts           Account[]
@@ -105,6 +108,7 @@ model User {
 model Province {
   id          String      @id @default(cuid())
   name        String      @unique
+  region      Region
   region      Region
   ecosystems  String[]
   threatLevel Difficulty?

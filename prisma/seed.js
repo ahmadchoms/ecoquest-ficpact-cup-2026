@@ -110,7 +110,9 @@ async function main() {
 
   const superAdmin = await prisma.user.create({
     data: {
+      name: "Super Admin",
       username: "superadmin",
+      name: "Super Admin",
       name: "Super Admin",
       email: "admin@ecoquest.id",
       password: passwordHash,
@@ -126,7 +128,9 @@ async function main() {
 
   const regionalAdmin = await prisma.user.create({
     data: {
+      name: "Admin Jawa Barat",
       username: "admin_jabar",
+      name: "Admin Jabar",
       name: "Admin Jabar",
       email: "jabar@ecoquest.id",
       password: passwordHash,
@@ -141,7 +145,9 @@ async function main() {
   for (let i = 0; i < 18; i++) {
     const newUser = await prisma.user.create({
       data: {
+        name: `Eco Explorer ${i + 1}`,
         username: `eco_explorer_${i + 1}`,
+        name: `Eco Explorer ${i + 1}`,
         name: `Eco Explorer ${i + 1}`,
         email: `user${i + 1}@example.com`,
         password: passwordHash,
@@ -166,6 +172,7 @@ async function main() {
     {
       name: "Nanggroe Aceh Darussalam",
       region: Region.SUMATERA,
+      region: Region.SUMATERA,
       threatLevel: "MEDIUM",
       ecosystems: ["Hutan Hujan Tropis", "Pegunungan", "Pesisir"],
       species: ["Harimau Sumatera", "Orangutan Sumatera", "Bunga Jeumpa"],
@@ -176,6 +183,7 @@ async function main() {
     },
     {
       name: "Sumatera Utara",
+      region: Region.SUMATERA,
       region: Region.SUMATERA,
       threatLevel: "HARD",
       ecosystems: ["Danau", "Hutan Tropis", "Pegunungan"],
@@ -188,6 +196,7 @@ async function main() {
     {
       name: "Sumatera Barat",
       region: Region.SUMATERA,
+      region: Region.SUMATERA,
       threatLevel: "MEDIUM",
       ecosystems: ["Hutan Tropis", "Lembah", "Pesisir"],
       species: ["Harimau Sumatera", "Kuau Raja", "Bunga Rafflesia Arnoldii"],
@@ -198,6 +207,7 @@ async function main() {
     },
     {
       name: "Riau",
+      region: Region.SUMATERA,
       region: Region.SUMATERA,
       threatLevel: "HARD",
       ecosystems: ["Hutan Gambut", "Hutan Tropis", "Sungai"],
@@ -210,6 +220,7 @@ async function main() {
     {
       name: "Kepulauan Riau",
       region: Region.SUMATERA,
+      region: Region.SUMATERA,
       threatLevel: "MEDIUM",
       ecosystems: ["Terumbu Karang", "Pesisir", "Hutan Bakau"],
       species: ["Penyu Sisik", "Dugong", "Burung Serindit"],
@@ -219,6 +230,7 @@ async function main() {
     },
     {
       name: "Jambi",
+      region: Region.SUMATERA,
       region: Region.SUMATERA,
       threatLevel: "HARD",
       ecosystems: ["Hutan Dataran Rendah", "Hutan Gambut", "Pegunungan"],
@@ -231,6 +243,7 @@ async function main() {
     {
       name: "Sumatera Selatan",
       region: Region.SUMATERA,
+      region: Region.SUMATERA,
       threatLevel: "HARD",
       ecosystems: ["Hutan Rawa", "Sungai", "Hutan Tropis"],
       species: ["Harimau Sumatera", "Ikan Belida", "Burung Belibis"],
@@ -241,6 +254,7 @@ async function main() {
     },
     {
       name: "Bangka Belitung",
+      region: Region.SUMATERA,
       region: Region.SUMATERA,
       threatLevel: "HARD",
       ecosystems: ["Pesisir", "Hutan Tropis", "Pulau Kecil"],
@@ -253,6 +267,7 @@ async function main() {
     {
       name: "Bengkulu",
       region: Region.SUMATERA,
+      region: Region.SUMATERA,
       threatLevel: "MEDIUM",
       ecosystems: ["Hutan Tropis", "Pesisir"],
       species: ["Beruang Madu", "Bunga Rafflesia Arnoldii", "Bunga Kibut"],
@@ -263,6 +278,7 @@ async function main() {
     },
     {
       name: "Lampung",
+      region: Region.SUMATERA,
       region: Region.SUMATERA,
       threatLevel: "MEDIUM",
       ecosystems: ["Hutan Hujan Tropis", "Savana", "Pesisir"],
@@ -277,6 +293,7 @@ async function main() {
     {
       name: "DKI Jakarta",
       region: Region.JAWA,
+      region: Region.JAWA,
       threatLevel: "HARD",
       ecosystems: ["Urban", "Pesisir", "Hutan Bakau"],
       species: ["Elang Bondol", "Salak Condet", "Kucing Hutan"],
@@ -286,6 +303,7 @@ async function main() {
     },
     {
       name: "Banten",
+      region: Region.JAWA,
       region: Region.JAWA,
       threatLevel: "MEDIUM",
       ecosystems: ["Pesisir", "Hutan Hujan Dataran Rendah", "Pegunungan"],
@@ -298,6 +316,7 @@ async function main() {
     {
       name: "Jawa Barat",
       region: Region.JAWA,
+      region: Region.JAWA,
       threatLevel: "HARD",
       ecosystems: ["Pegunungan", "Hutan Hujan", "Urban"],
       species: ["Macan Tutul Jawa", "Owa Jawa", "Surili"],
@@ -308,6 +327,7 @@ async function main() {
     },
     {
       name: "Jawa Tengah",
+      region: Region.JAWA,
       region: Region.JAWA,
       threatLevel: "MEDIUM",
       ecosystems: ["Pegunungan", "Pesisir", "Karst"],
@@ -320,6 +340,7 @@ async function main() {
     {
       name: "DI Yogyakarta",
       region: Region.JAWA,
+      region: Region.JAWA,
       threatLevel: "MEDIUM",
       ecosystems: ["Gunung Berapi", "Pesisir", "Karst"],
       species: ["Burung Kepodang", "Penyu Hijau", "Monyet Ekor Panjang"],
@@ -330,6 +351,7 @@ async function main() {
     },
     {
       name: "Jawa Timur",
+      region: Region.JAWA,
       region: Region.JAWA,
       threatLevel: "HARD",
       ecosystems: ["Savana", "Pegunungan", "Pesisir"],
@@ -344,6 +366,7 @@ async function main() {
     {
       name: "Bali",
       region: Region.BALI_NUSA_TENGGARA,
+      region: Region.BALI_NUSA_TENGGARA,
       threatLevel: "MEDIUM",
       ecosystems: ["Pesisir", "Terumbu Karang", "Hutan Hujan"],
       species: ["Jalak Bali", "Pari Manta", "Monyet Ekor Panjang"],
@@ -355,6 +378,7 @@ async function main() {
     {
       name: "Nusa Tenggara Barat",
       region: Region.BALI_NUSA_TENGGARA,
+      region: Region.BALI_NUSA_TENGGARA,
       threatLevel: "MEDIUM",
       ecosystems: ["Savana", "Hutan Musim", "Terumbu Karang"],
       species: ["Rusa Timor", "Kakatua Kecil Jambul Kuning", "Hiu Paus"],
@@ -362,9 +386,11 @@ async function main() {
         "Didominasi oleh Gunung Rinjani dan sabana luas dengan curah hujan yang lebih rendah.",
       funFact:
         "Gunung Tambora di NTB pernah meletus pada 1815, mengubah iklim global.",
+        "Gunung Tambora di NTB pernah meletus pada 1815, mengubah iklim global.",
     },
     {
       name: "Nusa Tenggara Timur",
+      region: Region.BALI_NUSA_TENGGARA,
       region: Region.BALI_NUSA_TENGGARA,
       threatLevel: "MEDIUM",
       ecosystems: ["Savana", "Pesisir", "Terumbu Karang"],
@@ -379,15 +405,18 @@ async function main() {
     {
       name: "Kalimantan Barat",
       region: Region.KALIMANTAN,
+      region: Region.KALIMANTAN,
       threatLevel: "HARD",
       ecosystems: ["Hutan Rawa Gambut", "Sungai", "Hutan Tropis"],
       species: ["Orangutan Kalimantan", "Bekantan", "Burung Enggang"],
       description:
         "Dijuluki Provinsi Seribu Sungai, namun menghadapi ancaman masif dari deforestasi.",
       funFact: "Kalimantan Barat dilewati tepat oleh garis Khatulistiwa.",
+      funFact: "Kalimantan Barat dilewati tepat oleh garis Khatulistiwa.",
     },
     {
       name: "Kalimantan Tengah",
+      region: Region.KALIMANTAN,
       region: Region.KALIMANTAN,
       threatLevel: "HARD",
       ecosystems: ["Hutan Rawa Gambut", "Hutan Tropis"],
@@ -399,10 +428,12 @@ async function main() {
     {
       name: "Kalimantan Selatan",
       region: Region.KALIMANTAN,
+      region: Region.KALIMANTAN,
       threatLevel: "HARD",
       ecosystems: ["Sungai", "Hutan Rawa", "Pesisir"],
       species: ["Bekantan", "Kucing Merah", "Burung Rangkong"],
       description:
+        "Provinsi yang sangat bergantung pada sungai, namun terancam oleh tambang batu bara.",
         "Provinsi yang sangat bergantung pada sungai, namun terancam oleh tambang batu bara.",
       funFact:
         "Bekantan (monyet berhidung panjang) adalah satwa maskot resmi provinsi ini.",
@@ -410,22 +441,28 @@ async function main() {
     {
       name: "Kalimantan Timur",
       region: Region.KALIMANTAN,
+      region: Region.KALIMANTAN,
       threatLevel: "MEDIUM",
       ecosystems: ["Hutan Hujan Tropis", "Sungai", "Karst"],
       species: ["Pesut Mahakam", "Orangutan", "Beruang Madu"],
       description: "Kaya akan keanekaragaman, lokasi Ibukota Nusantara (IKN).",
+      description: "Kaya akan keanekaragaman, lokasi Ibukota Nusantara (IKN).",
       funFact:
+        "Pesut Mahakam adalah mamalia air tawar langka yang tersisa kurang dari 100 ekor.",
         "Pesut Mahakam adalah mamalia air tawar langka yang tersisa kurang dari 100 ekor.",
     },
     {
       name: "Kalimantan Utara",
+      region: Region.KALIMANTAN,
       region: Region.KALIMANTAN,
       threatLevel: "EASY",
       ecosystems: ["Hutan Tropis Pegunungan", "Hutan Bakau", "Sungai"],
       species: ["Gajah Kalimantan", "Orangutan", "Rangkong Badak"],
       description:
         "Provinsi termuda di Kalimantan dengan ekosistem hutan perbatasan yang masih alami.",
+        "Provinsi termuda di Kalimantan dengan ekosistem hutan perbatasan yang masih alami.",
       funFact:
+        "Rumah bagi spesies gajah terkecil di dunia (Gajah Kerdil Borneo).",
         "Rumah bagi spesies gajah terkecil di dunia (Gajah Kerdil Borneo).",
     },
 
@@ -433,26 +470,33 @@ async function main() {
     {
       name: "Sulawesi Utara",
       region: Region.SULAWESI,
+      region: Region.SULAWESI,
       threatLevel: "MEDIUM",
       ecosystems: ["Terumbu Karang", "Pegunungan Vulkanik"],
+      species: ["Tarsius", "Yaki", "Burung Maleo"],
       species: ["Tarsius", "Yaki", "Burung Maleo"],
       description:
         "Surga bawah laut seperti Bunaken, berbatasan langsung dengan lautan Pasifik.",
       funFact: "Tarsius adalah primata terkecil di dunia.",
+      funFact: "Tarsius adalah primata terkecil di dunia.",
     },
     {
       name: "Gorontalo",
+      region: Region.SULAWESI,
       region: Region.SULAWESI,
       threatLevel: "EASY",
       ecosystems: ["Pesisir", "Hutan Tropis"],
       species: ["Hiu Paus", "Burung Maleo", "Babi Rusa"],
       description:
         "Memiliki ekosistem pesisir yang kaya dan pegunungan hijau yang luas.",
+        "Memiliki ekosistem pesisir yang kaya dan pegunungan hijau yang luas.",
       funFact:
+        "Gorontalo terkenal sebagai titik kemunculan hiu paus di Desa Botubarani.",
         "Gorontalo terkenal sebagai titik kemunculan hiu paus di Desa Botubarani.",
     },
     {
       name: "Sulawesi Tengah",
+      region: Region.SULAWESI,
       region: Region.SULAWESI,
       threatLevel: "MEDIUM",
       ecosystems: ["Hutan Hujan Pegunungan", "Danau", "Terumbu Karang"],
@@ -460,9 +504,12 @@ async function main() {
       description:
         "Kawasan dengan Taman Nasional Lore Lindu yang kaya flora endemik.",
       funFact: "Garis Wallace membelah wilayah perairan di sekitar Sulawesi.",
+        "Kawasan dengan Taman Nasional Lore Lindu yang kaya flora endemik.",
+      funFact: "Garis Wallace membelah wilayah perairan di sekitar Sulawesi.",
     },
     {
       name: "Sulawesi Barat",
+      region: Region.SULAWESI,
       region: Region.SULAWESI,
       threatLevel: "MEDIUM",
       ecosystems: ["Hutan Tropis", "Pesisir"],
@@ -470,23 +517,32 @@ async function main() {
       description:
         "Kawasan agraris yang alamnya masih alami namun rentan pembalakan liar.",
       funFact: "Terkenal dengan perahu Sandeq yang ramah lingkungan.",
+        "Kawasan agraris yang alamnya masih alami namun rentan pembalakan liar.",
+      funFact: "Terkenal dengan perahu Sandeq yang ramah lingkungan.",
     },
     {
       name: "Sulawesi Selatan",
       region: Region.SULAWESI,
+      region: Region.SULAWESI,
       threatLevel: "HARD",
+      ecosystems: ["Karst", "Pegunungan", "Pesisir"],
       ecosystems: ["Karst", "Pegunungan", "Pesisir"],
       species: ["Kupu-kupu Bantimurung", "Anoa", "Penyu Sisik"],
       description: "Kawasan karst terbesar kedua di dunia.",
+      description: "Kawasan karst terbesar kedua di dunia.",
       funFact:
+        "Taman Nasional Bantimurung dijuluki 'The Kingdom of Butterfly'.",
         "Taman Nasional Bantimurung dijuluki 'The Kingdom of Butterfly'.",
     },
     {
       name: "Sulawesi Tenggara",
       region: Region.SULAWESI,
+      region: Region.SULAWESI,
       threatLevel: "HARD",
       ecosystems: ["Terumbu Karang", "Hutan Tropis", "Pesisir"],
       species: ["Anoa", "Burung Kakatua", "Penyu Hijau"],
+      description: "Memiliki Wakatobi sebagai pusat segitiga karang dunia.",
+      funFact: "Wakatobi memiliki 750 dari 850 spesies koral dunia.",
       description: "Memiliki Wakatobi sebagai pusat segitiga karang dunia.",
       funFact: "Wakatobi memiliki 750 dari 850 spesies koral dunia.",
     },
@@ -495,20 +551,26 @@ async function main() {
     {
       name: "Maluku",
       region: Region.MALUKU,
+      region: Region.MALUKU,
       threatLevel: "MEDIUM",
       ecosystems: ["Terumbu Karang", "Laut Dalam", "Pulau Tropis"],
       species: ["Burung Nuri Maluku", "Kakatua Seram", "Dugong"],
       description:
         "Provinsi Kepulauan Rempah dengan kekayaan laut endemik tinggi.",
       funFact: "Pala dan Cengkeh dunia berasal dari sini.",
+        "Provinsi Kepulauan Rempah dengan kekayaan laut endemik tinggi.",
+      funFact: "Pala dan Cengkeh dunia berasal dari sini.",
     },
     {
       name: "Maluku Utara",
+      region: Region.MALUKU,
       region: Region.MALUKU,
       threatLevel: "HARD",
       ecosystems: ["Hutan Tropis", "Pesisir", "Gunung Berapi"],
       species: ["Bidadari Halmahera", "Kuskus", "Kupu-kupu Ornithoptera"],
       description:
+        "Lanskap vulkanik subur yang kini menjadi pusat tambang nikel.",
+      funFact: "Burung Bidadari Halmahera ditemukan oleh Alfred Wallace.",
         "Lanskap vulkanik subur yang kini menjadi pusat tambang nikel.",
       funFact: "Burung Bidadari Halmahera ditemukan oleh Alfred Wallace.",
     },
@@ -517,24 +579,31 @@ async function main() {
     {
       name: "Papua",
       region: Region.PAPUA,
+      region: Region.PAPUA,
       threatLevel: "MEDIUM",
       ecosystems: ["Hutan Hujan Tropis", "Rawa", "Pesisir"],
       species: ["Burung Cenderawasih", "Kanguru Pohon", "Kasuari"],
+      description: "Wilayah dengan hutan perawan terbesar di Indonesia.",
+      funFact: "Menyumbang hampir setengah biodiversitas Indonesia.",
       description: "Wilayah dengan hutan perawan terbesar di Indonesia.",
       funFact: "Menyumbang hampir setengah biodiversitas Indonesia.",
     },
     {
       name: "Papua Barat",
       region: Region.PAPUA,
+      region: Region.PAPUA,
       threatLevel: "EASY",
       ecosystems: ["Terumbu Karang", "Hutan Tropis", "Karst"],
       species: ["Burung Cenderawasih Merah", "Hiu Paus", "Penyu Belimbing"],
       description: "Kawasan dengan kebijakan konservasi laut yang sangat kuat.",
+      description: "Kawasan dengan kebijakan konservasi laut yang sangat kuat.",
       funFact:
+        "Teluk Cenderawasih adalah taman nasional laut terluas di Indonesia.",
         "Teluk Cenderawasih adalah taman nasional laut terluas di Indonesia.",
     },
     {
       name: "Papua Selatan",
+      region: Region.PAPUA,
       region: Region.PAPUA,
       threatLevel: "MEDIUM",
       ecosystems: ["Savana", "Rawa", "Hutan Musim"],
@@ -542,18 +611,24 @@ async function main() {
       description:
         "Habitat bagi burung migran dari Australia di Taman Nasional Wasur.",
       funFact: "Lanskapnya mirip daratan utara Australia.",
+        "Habitat bagi burung migran dari Australia di Taman Nasional Wasur.",
+      funFact: "Lanskapnya mirip daratan utara Australia.",
     },
     {
       name: "Papua Tengah",
+      region: Region.PAPUA,
       region: Region.PAPUA,
       threatLevel: "HARD",
       ecosystems: ["Pegunungan Salju", "Hutan Tropis Pegunungan"],
       species: ["Dingiso", "Burung Cenderawasih", "Echidna"],
       description: "Rumah bagi Puncak Jaya dan area tambang emas besar.",
       funFact: "Satu-satunya tempat di Asia Tenggara dengan gletser salju.",
+      description: "Rumah bagi Puncak Jaya dan area tambang emas besar.",
+      funFact: "Satu-satunya tempat di Asia Tenggara dengan gletser salju.",
     },
     {
       name: "Papua Pegunungan",
+      region: Region.PAPUA,
       region: Region.PAPUA,
       threatLevel: "EASY",
       ecosystems: ["Lembah Pegunungan", "Hutan Lumut"],
@@ -565,13 +640,18 @@ async function main() {
       description:
         "Satu-satunya provinsi landlocked (tanpa laut) di Indonesia.",
       funFact: "Lembah Baliem adalah pusat budaya purba yang menakjubkan.",
+        "Satu-satunya provinsi landlocked (tanpa laut) di Indonesia.",
+      funFact: "Lembah Baliem adalah pusat budaya purba yang menakjubkan.",
     },
     {
       name: "Papua Barat Daya",
       region: Region.PAPUA,
+      region: Region.PAPUA,
       threatLevel: "EASY",
       ecosystems: ["Terumbu Karang", "Kepulauan Karst", "Hutan Tropis"],
       species: ["Pari Manta", "Burung Cenderawasih Botak", "Hiu Karpet"],
+      description: "Gerbang utama menuju Raja Ampat.",
+      funFact: "Raja Ampat dijuluki 'The Last Paradise on Earth'.",
       description: "Gerbang utama menuju Raja Ampat.",
       funFact: "Raja Ampat dijuluki 'The Last Paradise on Earth'.",
     },
