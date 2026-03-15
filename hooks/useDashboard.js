@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { UserAPI } from "@/lib/api/user";
+import { API } from "@/lib/api/api";
 
 export const userDashboardKeys = {
   all: ["user", "dashboard"],
@@ -10,7 +10,7 @@ export const useDashboard = () => {
   return useQuery({
     queryKey: userDashboardKeys.dashboard(),
     queryFn: async () => {
-      const response = await UserAPI.getDashboard();
+      const response = await API.getDashboard();
       // Axios interceptor unwraps { success: true, data } → { data: {...}, ... }
       return response.data;
     },

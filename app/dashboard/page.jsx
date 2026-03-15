@@ -60,8 +60,6 @@ export default function DashboardPage() {
     treesEquivalent: data?.treesEquivalent || 0,
   };
 
-  const activityHistory = data?.activityHistory || [];
-
   // Loading state UI
   if (isLoading) {
     return (

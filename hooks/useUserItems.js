@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { UserAPI } from "@/lib/api/user";
+import { API } from "@/lib/api/api";
 
 export const userItemsKeys = {
   all: ["userItems"],
@@ -13,7 +13,7 @@ export const useUserItems = () => {
   return useQuery({
     queryKey: userItemsKeys.items(),
     queryFn: async () => {
-      const response = await UserAPI.getItems();
+      const response = await API.getUserItems();
       return response.data;
     },
     staleTime: 10 * 60 * 1000, // 10 minutes
@@ -29,7 +29,7 @@ export const useUpdateUserItems = () => {
 
   return useMutation({
     mutationFn: async (data) => {
-      const response = await UserAPI.updateItems(data);
+      const response = await API.updateUserItems(data);
       return response.data;
     },
     onSuccess: () => {
