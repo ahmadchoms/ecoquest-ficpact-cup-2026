@@ -51,8 +51,7 @@ export const useUpdateAdminBadge = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }) => API.updateBadge(id, data),
-    onSuccess: (_, variables) =>
-      invalidateBadgeQueries(queryClient, variables.id),
+    onSuccess: (_, variables) => invalidateBadgeQueries(queryClient, variables.id),
   });
 };
 

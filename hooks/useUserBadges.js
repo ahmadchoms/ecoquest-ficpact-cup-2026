@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { UserAPI } from "@/lib/api/user";
+import { API } from "@/lib/api/api";
 
 export const userBadgesKeys = {
   all: ["user", "badges"],
@@ -10,7 +10,7 @@ export const useUserBadges = () => {
   return useQuery({
     queryKey: userBadgesKeys.list(),
     queryFn: async () => {
-      const response = await UserAPI.getBadges();
+      const response = await API.getUserBadges();
       // Axios interceptor unwraps { success: true, data } → { data: {...}, ... }
       return response.data;
     },

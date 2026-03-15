@@ -169,3 +169,122 @@ export const calculateProgressReward = (
 ) => {
   return calculatePerformanceReward(completedPercent, baseXP, basePoints);
 };
+
+/**
+ * Calculate environmental impact from mission completion
+ * @param {string} category - Mission category (CLIMATE, WATER, WASTE, etc)
+ * @param {number} xpEarned - XP earned from mission
+ * @returns {object} Impact metrics { carbonSaved, waterSaved, wasteClassified, speciesLearned, mangroveRestored }
+ */
+export const calculateImpactFromMission = (category, xpEarned) => {
+  // Base impact value: 10% of XP earned
+  const baseValue = Math.ceil(xpEarned * 0.1);
+
+  const impact = {
+    carbonSaved: 0,
+    waterSaved: 0,
+    wasteClassified: 0,
+    speciesLearned: 0,
+    mangroveRestored: 0,
+  };
+
+  // Map mission categories to environmental impact using emission/water factors
+  const impactMap = {
+    CLIMATE: () => ({
+      ...impact,
+      carbonSaved: Math.ceil(baseValue * EMISSION_FACTORS.carKm * 10),
+    }),
+    WATER: () => ({
+      ...impact,
+      waterSaved: Math.ceil(baseValue * WATER_FACTORS.showerPerMin * 5),
+    }),
+    WASTE: () => ({
+      ...impact,
+      wasteClassified: baseValue,
+    }),
+    BIODIVERSITY: () => ({
+      ...impact,
+      speciesLearned: baseValue,
+    }),
+    COASTAL: () => ({
+      ...impact,
+      mangroveRestored: baseValue,
+    }),
+    OCEAN: () => ({
+      ...impact,
+      waterSaved: Math.ceil(baseValue * WATER_FACTORS.showerPerMin * 8),
+    }),
+    TRANSPORT: () => ({
+      ...impact,
+      carbonSaved: Math.ceil(baseValue * EMISSION_FACTORS.carKm * 8),
+      waterSaved: Math.ceil(baseValue * WATER_FACTORS.showerPerMin * 2),
+    }),
+  };
+
+  // Return mapped impact or distribute evenly if category unknown
+  if (impactMap[category]) {
+    return impactMap[category]();
+  }
+
+  const split = Math.ceil(baseValue / 5);
+  return {
+    carbonSaved: split,
+    waterSaved: split,
+    wasteClassified: split,
+    speciesLearned: split,
+    mangroveRestored: split,
+  };
+};
+
+/**
+ * Aggregate impact metrics from all mission completions
+ * @param {array} missionCompletions - Array of mission completion objects with mission.category and xpEarned
+ * @returns {object} Total aggregated impact across all metrics
+ */
+export const aggregateImpact = (missionCompletions) => {
+  const initialImpact = {
+    carbonSaved: 0,
+    waterSaved: 0,
+    wasteClassified: 0,
+    speciesLearned: 0,
+    mangroveRestored: 0,
+  };
+
+  return missionCompletions.reduce((totalImpact, completion) => {
+    const missionImpact = calculateImpactFromMission(
+      completion.mission.category,
+      completion.xpEarned
+    );
+
+    return {
+      carbonSaved: totalImpact.carbonSaved + missionImpact.carbonSaved,
+      waterSaved: totalImpact.waterSaved + missionImpact.waterSaved,
+      wasteClassified: totalImpact.wasteClassified + missionImpact.wasteClassified,
+      speciesLearned: totalImpact.speciesLearned + missionImpact.speciesLearned,
+      mangroveRestored: totalImpact.mangroveRestored + missionImpact.mangroveRestored,
+    };
+  }, initialImpact);
+};
+
+/**
+ * Convert impact metrics to tree equivalent
+ * Using environmental conversion ratios
+ * @param {object} impact - Impact metrics object
+ * @returns {number} Number of trees equivalent
+ */
+export const calculateTreeEquivalent = (impact) => {
+  // Tree equivalency conversions:
+  // ~21kg CO2 per tree per year
+  // ~1000L water per tree per year
+  // ~2 species per tree ecosystem
+  // ~2 mangroves = ~1 tree impact
+  const conversions = {
+    carbon: impact.carbonSaved / 21,
+    water: impact.waterSaved / 1000,
+    biodiversity: impact.speciesLearned / 2,
+    mangrove: impact.mangroveRestored * 0.5,
+  };
+
+  // Return the highest equivalent value
+  return Math.ceil(Math.max(...Object.values(conversions)));
+};
