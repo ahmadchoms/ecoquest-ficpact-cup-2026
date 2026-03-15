@@ -1,15 +1,64 @@
-import { PrismaClient, Region } from "@prisma/client";
+import pkg from "@prisma/client";
+const { PrismaClient, Region } = pkg;
 import bcrypt from "bcryptjs";
+import fs from "fs";
+import path from "path";
+import { supabaseAdmin } from "../lib/supabase.js";
+import {
+  STORAGE_BUCKETS,
+  emptyBucket,
+  uploadToStorage,
+  getShopItemFolder,
+} from "../lib/storage.js";
+
 const prisma = new PrismaClient();
+
+// Helper to seed file to storage
+async function seedFileToStorage(localFilePath, bucket, folder) {
+  try {
+    const fullPath = path.join(process.cwd(), "public", localFilePath);
+    if (!fs.existsSync(fullPath)) {
+      console.warn(`File not found: ${fullPath}`);
+      return null;
+    }
+
+    const fileBuffer = fs.readFileSync(fullPath);
+    const fileName = path.basename(localFilePath);
+    const mimeType = fileName.endsWith(".png") ? "image/png" : "image/jpeg";
+
+    // Mock a File object since we are in Node.js environment
+    const file = new File([fileBuffer], fileName, { type: mimeType });
+
+    const result = await uploadToStorage(file, bucket, folder);
+    if (result.success) {
+      return result.url;
+    } else {
+      console.error(`Upload failed for ${fileName}:`, result.message);
+      return null;
+    }
+  } catch (err) {
+    console.error(`Error uploading ${localFilePath}:`, err);
+    return null;
+  }
+}
 
 async function main() {
   console.log("Starting seed process...");
+
+  console.log("Emptying Supabase Storage Buckets...");
+  await emptyBucket(STORAGE_BUCKETS.EVENT_ASSETS);
+  await emptyBucket(STORAGE_BUCKETS.SHOP_ASSETS);
+  await emptyBucket(STORAGE_BUCKETS.GENERAL_ASSETS);
+  console.log("Storage buckets emptied.");
 
   await prisma.missionCompletion.deleteMany();
   await prisma.mission.deleteMany();
   await prisma.badge.deleteMany();
   await prisma.user.deleteMany();
   await prisma.province.deleteMany();
+  await prisma.event.deleteMany();
+  await prisma.shopItem.deleteMany();
+  await prisma.userItem.deleteMany();
   console.log("Cleared existing data.");
 
   const badges = await Promise.all([
@@ -59,6 +108,16 @@ async function main() {
         category: "OCEAN",
       },
     }),
+    prisma.badge.create({
+      data: {
+        name: "Eco Traveler",
+        description:
+          "Pakar transportasi hijau dan pelopor rute ramah lingkungan.",
+        icon: "🚗",
+        rarity: "CHALLENGER",
+        category: "TRANSPORT",
+      },
+    }),
   ]);
   console.log(`Seeded ${badges.length} badges.`);
 
@@ -68,6 +127,7 @@ async function main() {
     data: {
       name: "Super Admin",
       username: "superadmin",
+      name: "Super Admin",
       name: "Super Admin",
       email: "admin@ecoquest.id",
       password: passwordHash,
@@ -86,6 +146,7 @@ async function main() {
       name: "Admin Jawa Barat",
       username: "admin_jabar",
       name: "Admin Jabar",
+      name: "Admin Jabar",
       email: "jabar@ecoquest.id",
       password: passwordHash,
       role: "ADMIN",
@@ -101,6 +162,7 @@ async function main() {
       data: {
         name: `Eco Explorer ${i + 1}`,
         username: `eco_explorer_${i + 1}`,
+        name: `Eco Explorer ${i + 1}`,
         name: `Eco Explorer ${i + 1}`,
         email: `user${i + 1}@example.com`,
         password: passwordHash,
@@ -125,6 +187,7 @@ async function main() {
     {
       name: "Nanggroe Aceh Darussalam",
       region: Region.SUMATERA,
+      region: Region.SUMATERA,
       threatLevel: "MEDIUM",
       ecosystems: ["Hutan Hujan Tropis", "Pegunungan", "Pesisir"],
       species: ["Harimau Sumatera", "Orangutan Sumatera", "Bunga Jeumpa"],
@@ -135,6 +198,7 @@ async function main() {
     },
     {
       name: "Sumatera Utara",
+      region: Region.SUMATERA,
       region: Region.SUMATERA,
       threatLevel: "HARD",
       ecosystems: ["Danau", "Hutan Tropis", "Pegunungan"],
@@ -147,6 +211,7 @@ async function main() {
     {
       name: "Sumatera Barat",
       region: Region.SUMATERA,
+      region: Region.SUMATERA,
       threatLevel: "MEDIUM",
       ecosystems: ["Hutan Tropis", "Lembah", "Pesisir"],
       species: ["Harimau Sumatera", "Kuau Raja", "Bunga Rafflesia Arnoldii"],
@@ -157,6 +222,7 @@ async function main() {
     },
     {
       name: "Riau",
+      region: Region.SUMATERA,
       region: Region.SUMATERA,
       threatLevel: "HARD",
       ecosystems: ["Hutan Gambut", "Hutan Tropis", "Sungai"],
@@ -169,6 +235,7 @@ async function main() {
     {
       name: "Kepulauan Riau",
       region: Region.SUMATERA,
+      region: Region.SUMATERA,
       threatLevel: "MEDIUM",
       ecosystems: ["Terumbu Karang", "Pesisir", "Hutan Bakau"],
       species: ["Penyu Sisik", "Dugong", "Burung Serindit"],
@@ -178,6 +245,7 @@ async function main() {
     },
     {
       name: "Jambi",
+      region: Region.SUMATERA,
       region: Region.SUMATERA,
       threatLevel: "HARD",
       ecosystems: ["Hutan Dataran Rendah", "Hutan Gambut", "Pegunungan"],
@@ -190,6 +258,7 @@ async function main() {
     {
       name: "Sumatera Selatan",
       region: Region.SUMATERA,
+      region: Region.SUMATERA,
       threatLevel: "HARD",
       ecosystems: ["Hutan Rawa", "Sungai", "Hutan Tropis"],
       species: ["Harimau Sumatera", "Ikan Belida", "Burung Belibis"],
@@ -200,6 +269,7 @@ async function main() {
     },
     {
       name: "Bangka Belitung",
+      region: Region.SUMATERA,
       region: Region.SUMATERA,
       threatLevel: "HARD",
       ecosystems: ["Pesisir", "Hutan Tropis", "Pulau Kecil"],
@@ -212,6 +282,7 @@ async function main() {
     {
       name: "Bengkulu",
       region: Region.SUMATERA,
+      region: Region.SUMATERA,
       threatLevel: "MEDIUM",
       ecosystems: ["Hutan Tropis", "Pesisir"],
       species: ["Beruang Madu", "Bunga Rafflesia Arnoldii", "Bunga Kibut"],
@@ -222,6 +293,7 @@ async function main() {
     },
     {
       name: "Lampung",
+      region: Region.SUMATERA,
       region: Region.SUMATERA,
       threatLevel: "MEDIUM",
       ecosystems: ["Hutan Hujan Tropis", "Savana", "Pesisir"],
@@ -236,6 +308,7 @@ async function main() {
     {
       name: "DKI Jakarta",
       region: Region.JAWA,
+      region: Region.JAWA,
       threatLevel: "HARD",
       ecosystems: ["Urban", "Pesisir", "Hutan Bakau"],
       species: ["Elang Bondol", "Salak Condet", "Kucing Hutan"],
@@ -245,6 +318,7 @@ async function main() {
     },
     {
       name: "Banten",
+      region: Region.JAWA,
       region: Region.JAWA,
       threatLevel: "MEDIUM",
       ecosystems: ["Pesisir", "Hutan Hujan Dataran Rendah", "Pegunungan"],
@@ -257,6 +331,7 @@ async function main() {
     {
       name: "Jawa Barat",
       region: Region.JAWA,
+      region: Region.JAWA,
       threatLevel: "HARD",
       ecosystems: ["Pegunungan", "Hutan Hujan", "Urban"],
       species: ["Macan Tutul Jawa", "Owa Jawa", "Surili"],
@@ -267,6 +342,7 @@ async function main() {
     },
     {
       name: "Jawa Tengah",
+      region: Region.JAWA,
       region: Region.JAWA,
       threatLevel: "MEDIUM",
       ecosystems: ["Pegunungan", "Pesisir", "Karst"],
@@ -279,6 +355,7 @@ async function main() {
     {
       name: "DI Yogyakarta",
       region: Region.JAWA,
+      region: Region.JAWA,
       threatLevel: "MEDIUM",
       ecosystems: ["Gunung Berapi", "Pesisir", "Karst"],
       species: ["Burung Kepodang", "Penyu Hijau", "Monyet Ekor Panjang"],
@@ -289,6 +366,7 @@ async function main() {
     },
     {
       name: "Jawa Timur",
+      region: Region.JAWA,
       region: Region.JAWA,
       threatLevel: "HARD",
       ecosystems: ["Savana", "Pegunungan", "Pesisir"],
@@ -303,6 +381,7 @@ async function main() {
     {
       name: "Bali",
       region: Region.BALI_NUSA_TENGGARA,
+      region: Region.BALI_NUSA_TENGGARA,
       threatLevel: "MEDIUM",
       ecosystems: ["Pesisir", "Terumbu Karang", "Hutan Hujan"],
       species: ["Jalak Bali", "Pari Manta", "Monyet Ekor Panjang"],
@@ -314,6 +393,7 @@ async function main() {
     {
       name: "Nusa Tenggara Barat",
       region: Region.BALI_NUSA_TENGGARA,
+      region: Region.BALI_NUSA_TENGGARA,
       threatLevel: "MEDIUM",
       ecosystems: ["Savana", "Hutan Musim", "Terumbu Karang"],
       species: ["Rusa Timor", "Kakatua Kecil Jambul Kuning", "Hiu Paus"],
@@ -324,6 +404,7 @@ async function main() {
     },
     {
       name: "Nusa Tenggara Timur",
+      region: Region.BALI_NUSA_TENGGARA,
       region: Region.BALI_NUSA_TENGGARA,
       threatLevel: "MEDIUM",
       ecosystems: ["Savana", "Pesisir", "Terumbu Karang"],
@@ -338,6 +419,7 @@ async function main() {
     {
       name: "Kalimantan Barat",
       region: Region.KALIMANTAN,
+      region: Region.KALIMANTAN,
       threatLevel: "HARD",
       ecosystems: ["Hutan Rawa Gambut", "Sungai", "Hutan Tropis"],
       species: ["Orangutan Kalimantan", "Bekantan", "Burung Enggang"],
@@ -348,6 +430,7 @@ async function main() {
     {
       name: "Kalimantan Tengah",
       region: Region.KALIMANTAN,
+      region: Region.KALIMANTAN,
       threatLevel: "HARD",
       ecosystems: ["Hutan Rawa Gambut", "Hutan Tropis"],
       species: ["Orangutan Kalimantan", "Owa Kalimantan", "Beruang Madu"],
@@ -357,6 +440,7 @@ async function main() {
     },
     {
       name: "Kalimantan Selatan",
+      region: Region.KALIMANTAN,
       region: Region.KALIMANTAN,
       threatLevel: "HARD",
       ecosystems: ["Sungai", "Hutan Rawa", "Pesisir"],
@@ -369,15 +453,18 @@ async function main() {
     {
       name: "Kalimantan Timur",
       region: Region.KALIMANTAN,
+      region: Region.KALIMANTAN,
       threatLevel: "MEDIUM",
       ecosystems: ["Hutan Hujan Tropis", "Sungai", "Karst"],
       species: ["Pesut Mahakam", "Orangutan", "Beruang Madu"],
+      description: "Kaya akan keanekaragaman, lokasi Ibukota Nusantara (IKN).",
       description: "Kaya akan keanekaragaman, lokasi Ibukota Nusantara (IKN).",
       funFact:
         "Pesut Mahakam adalah mamalia air tawar langka yang tersisa kurang dari 100 ekor.",
     },
     {
       name: "Kalimantan Utara",
+      region: Region.KALIMANTAN,
       region: Region.KALIMANTAN,
       threatLevel: "EASY",
       ecosystems: ["Hutan Tropis Pegunungan", "Hutan Bakau", "Sungai"],
@@ -392,8 +479,10 @@ async function main() {
     {
       name: "Sulawesi Utara",
       region: Region.SULAWESI,
+      region: Region.SULAWESI,
       threatLevel: "MEDIUM",
       ecosystems: ["Terumbu Karang", "Pegunungan Vulkanik"],
+      species: ["Tarsius", "Yaki", "Burung Maleo"],
       species: ["Tarsius", "Yaki", "Burung Maleo"],
       description:
         "Surga bawah laut seperti Bunaken, berbatasan langsung dengan lautan Pasifik.",
@@ -401,6 +490,7 @@ async function main() {
     },
     {
       name: "Gorontalo",
+      region: Region.SULAWESI,
       region: Region.SULAWESI,
       threatLevel: "EASY",
       ecosystems: ["Pesisir", "Hutan Tropis"],
@@ -413,6 +503,7 @@ async function main() {
     {
       name: "Sulawesi Tengah",
       region: Region.SULAWESI,
+      region: Region.SULAWESI,
       threatLevel: "MEDIUM",
       ecosystems: ["Hutan Hujan Pegunungan", "Danau", "Terumbu Karang"],
       species: ["Anoa", "Babi Rusa", "Tarsius"],
@@ -422,6 +513,7 @@ async function main() {
     },
     {
       name: "Sulawesi Barat",
+      region: Region.SULAWESI,
       region: Region.SULAWESI,
       threatLevel: "MEDIUM",
       ecosystems: ["Hutan Tropis", "Pesisir"],
@@ -433,6 +525,7 @@ async function main() {
     {
       name: "Sulawesi Selatan",
       region: Region.SULAWESI,
+      region: Region.SULAWESI,
       threatLevel: "HARD",
       ecosystems: ["Karst", "Pegunungan", "Pesisir"],
       species: ["Kupu-kupu Bantimurung", "Anoa", "Penyu Sisik"],
@@ -442,6 +535,7 @@ async function main() {
     },
     {
       name: "Sulawesi Tenggara",
+      region: Region.SULAWESI,
       region: Region.SULAWESI,
       threatLevel: "HARD",
       ecosystems: ["Terumbu Karang", "Hutan Tropis", "Pesisir"],
@@ -454,6 +548,7 @@ async function main() {
     {
       name: "Maluku",
       region: Region.MALUKU,
+      region: Region.MALUKU,
       threatLevel: "MEDIUM",
       ecosystems: ["Terumbu Karang", "Laut Dalam", "Pulau Tropis"],
       species: ["Burung Nuri Maluku", "Kakatua Seram", "Dugong"],
@@ -463,6 +558,7 @@ async function main() {
     },
     {
       name: "Maluku Utara",
+      region: Region.MALUKU,
       region: Region.MALUKU,
       threatLevel: "HARD",
       ecosystems: ["Hutan Tropis", "Pesisir", "Gunung Berapi"],
@@ -476,6 +572,7 @@ async function main() {
     {
       name: "Papua",
       region: Region.PAPUA,
+      region: Region.PAPUA,
       threatLevel: "MEDIUM",
       ecosystems: ["Hutan Hujan Tropis", "Rawa", "Pesisir"],
       species: ["Burung Cenderawasih", "Kanguru Pohon", "Kasuari"],
@@ -484,6 +581,7 @@ async function main() {
     },
     {
       name: "Papua Barat",
+      region: Region.PAPUA,
       region: Region.PAPUA,
       threatLevel: "EASY",
       ecosystems: ["Terumbu Karang", "Hutan Tropis", "Karst"],
@@ -495,6 +593,7 @@ async function main() {
     {
       name: "Papua Selatan",
       region: Region.PAPUA,
+      region: Region.PAPUA,
       threatLevel: "MEDIUM",
       ecosystems: ["Savana", "Rawa", "Hutan Musim"],
       species: ["Burung Pelikan", "Kasuari", "Kanguru Sahul"],
@@ -505,6 +604,7 @@ async function main() {
     {
       name: "Papua Tengah",
       region: Region.PAPUA,
+      region: Region.PAPUA,
       threatLevel: "HARD",
       ecosystems: ["Pegunungan Salju", "Hutan Tropis Pegunungan"],
       species: ["Dingiso", "Burung Cenderawasih", "Echidna"],
@@ -513,6 +613,7 @@ async function main() {
     },
     {
       name: "Papua Pegunungan",
+      region: Region.PAPUA,
       region: Region.PAPUA,
       threatLevel: "EASY",
       ecosystems: ["Lembah Pegunungan", "Hutan Lumut"],
@@ -527,6 +628,7 @@ async function main() {
     },
     {
       name: "Papua Barat Daya",
+      region: Region.PAPUA,
       region: Region.PAPUA,
       threatLevel: "EASY",
       ecosystems: ["Terumbu Karang", "Kepulauan Karst", "Hutan Tropis"],
@@ -545,44 +647,116 @@ async function main() {
 
   const missionsData = [
     {
-      title: "Pilah Sampah Yuk!",
+      title: "Jejak Karbon Harianmu",
+      subtitle: "Hitung & kurangi emisi karbon sehari-hari",
       description:
-        "Pelajari cara memilah sampah yang benar agar bisa didaur ulang.",
+        "Rata-rata orang Indonesia menghasilkan 2.3 ton CO2 per tahun. Mari kita hitung jejakmu dan temukan cara menguranginya!",
+      type: "CALCULATOR",
+      difficulty: "EASY",
+      status: "ACTIVE",
+      pointsReward: 50,
+      xpReward: 100,
+      timeEstimate: "5 menit",
+      category: "CLIMATE",
+      icon: "🌡️",
+      provinceId: provinces[0].id,
+      badgeRewardId: badges[4].id, // Merujuk ke badge "Carbon Conscious"
+    },
+    {
+      title: "Pilah Sampah Yuk!",
+      subtitle: "Pelajari cara memilah sampah dengan benar",
+      description:
+        "Indonesia menghasilkan 67.8 juta ton sampah per tahun. Pelajari cara memilah sampah yang benar agar bisa didaur ulang.",
       type: "DRAG_DROP",
       difficulty: "EASY",
       status: "ACTIVE",
+      pointsReward: 60,
       xpReward: 120,
-      pointsReward: 50,
-      timeEstimate: "5 Menit",
+      timeEstimate: "5 menit",
       category: "WASTE",
-      provinceId: provinces[0].id,
-      badgeRewardId: badges[1].id,
+      icon: "♻️",
+      provinceId: provinces[1].id,
+      badgeRewardId: badges[2].id, // Merujuk ke badge "Waste Warrior"
     },
     {
       title: "Kenali Spesies Terancam",
-      description: "Uji pengetahuanmu tentang spesies terancam punah.",
+      subtitle: "Quiz seputar satwa liar Indonesia",
+      description:
+        "Indonesia adalah mega-biodiversity country. Uji pengetahuanmu tentang spesies terancam punah yang butuh perlindungan kita.",
       type: "QUIZ",
       difficulty: "MEDIUM",
       status: "ACTIVE",
-      xpReward: 150,
       pointsReward: 75,
-      timeEstimate: "10 Menit",
+      xpReward: 150,
+      timeEstimate: "7 menit",
       category: "BIODIVERSITY",
-      provinceId: provinces[1].id,
-      badgeRewardId: badges[2].id,
+      icon: "🦏",
+      provinceId: provinces[2].id,
+      badgeRewardId: badges[0].id, // Merujuk ke badge "Species Guardian"
     },
     {
       title: "Pulihkan Mangrove",
-      description: "Simulasi reboisasi hutan mangrove di garis pantai.",
+      subtitle: "Simulasi reboisasi hutan mangrove",
+      description:
+        "Indonesia kehilangan 40% hutan mangrove dalam 30 tahun terakhir. Bantu pulihkan ekosistem pesisir yang vital ini!",
       type: "SIMULATION",
       difficulty: "MEDIUM",
       status: "ACTIVE",
+      pointsReward: 90,
       xpReward: 180,
-      pointsReward: 100,
-      timeEstimate: "15 Menit",
+      timeEstimate: "8 menit",
       category: "COASTAL",
-      provinceId: provinces[2].id,
-      badgeRewardId: badges[3].id,
+      icon: "🌊",
+      provinceId: provinces[3].id,
+      badgeRewardId: badges[1].id, // Merujuk ke badge "Mangrove Hero"
+    },
+    {
+      title: "Hemat Air Setiap Hari",
+      subtitle: "Hitung & optimalkan konsumsi air harianmu",
+      description:
+        "Diperkirakan 27 juta orang Indonesia tidak memiliki akses air bersih. Seberapa efisien penggunaan airmu?",
+      type: "CALCULATOR",
+      difficulty: "EASY",
+      status: "ACTIVE",
+      pointsReward: 50,
+      xpReward: 100,
+      timeEstimate: "5 menit",
+      category: "WATER",
+      icon: "💧",
+      provinceId: provinces[4].id,
+      badgeRewardId: null, // Sesuai skema opsional
+    },
+    {
+      title: "Penyelamat Laut",
+      subtitle: "Bersihkan sampah laut sebelum waktu habis",
+      description:
+        "Setiap tahun 8 juta ton sampah plastik masuk ke lautan. Bantu bersihkan laut dan selamatkan kehidupan laut!",
+      type: "GAME",
+      difficulty: "MEDIUM",
+      status: "ACTIVE",
+      pointsReward: 75,
+      xpReward: 150,
+      timeEstimate: "2 menit",
+      category: "OCEAN",
+      icon: "🌊",
+      provinceId: provinces[5].id,
+      badgeRewardId: badges[3].id, // Merujuk ke badge "Indonesian Hero"
+    },
+    {
+      title: "EcoRoute - Smart Travel Simulator",
+      subtitle: "Pilih kendaraan ramah lingkungan untuk perjalananmu",
+      description:
+        "Sektor transportasi menghasilkan 27% emisi gas rumah kaca di Indonesia. Simulasikan perjalanan dengan kendaraan terbaik dan buat pilihan transportasi yang lebih hijau!",
+      type: "SIMULATION",
+      difficulty: "MEDIUM",
+      status: "ACTIVE",
+      pointsReward: 80,
+      xpReward: 160,
+      timeEstimate: "3 menit",
+      category: "TRANSPORT",
+      icon: "🚗",
+      provinceId: provinces[6].id,
+      badgeRewardId: badges[5].id, // Merujuk ke badge "Eco Traveler" (Challenger)
     },
   ];
 
@@ -620,6 +794,308 @@ async function main() {
   console.log(`Seeded ${completionsCount} mission completions for analytics.`);
 
   console.log("✅ Database ter-seed dengan sempurna sesuai skema terbaru!");
+
+  console.log("Seeding Events and Shop Items...");
+
+  const now = new Date();
+  const nextWeek = new Date();
+  nextWeek.setDate(now.getDate() + 7);
+  const twoWeeksFromNow = new Date();
+  twoWeeksFromNow.setDate(now.getDate() + 14);
+  const oneMonthFromNow = new Date();
+  oneMonthFromNow.setMonth(now.getMonth() + 1);
+
+  const lastWeek = new Date();
+  lastWeek.setDate(now.getDate() - 7);
+
+  // Default fallback URLs
+  const defaultBannerUrl = "/images/events/default-banner.jpg";
+  const defaultItemUrl = "/images/shop/default-item.jpg";
+
+  // Buat 5 Events
+  const events = await Promise.all([
+    // Event 1: Aktif (masih berlangsung)
+    prisma.event.create({
+      data: {
+        name: "Festival Hari Bumi 2026",
+        description:
+          "Perayaan Hari Bumi dengan item eksklusif bertema alam dan pelestarian lingkungan.",
+        bannerUrl: defaultBannerUrl,
+        startDate: lastWeek,
+        endDate: nextWeek,
+        isActive: true,
+      },
+    }),
+    // Event 2: Aktif (baru saja dimulai)
+    prisma.event.create({
+      data: {
+        name: "Pekan Peduli Lautan",
+        description:
+          "Selamatkan terumbu karang. Kumpulkan poin dan dapatkan border laut eksklusif!",
+        bannerUrl: defaultBannerUrl,
+        startDate: lastWeek,
+        endDate: twoWeeksFromNow,
+        isActive: true,
+      },
+    }),
+    // Event 3: Aktif (akan berakhir akhir bulan)
+    prisma.event.create({
+      data: {
+        name: "Kampanye Reboisasi Nasional",
+        description:
+          "Menanam pohon untuk masa depan yang hijau. Dapatkan item terbatas setiap pembelian.",
+        bannerUrl: defaultBannerUrl,
+        startDate: new Date("2026-03-01T00:00:00Z"),
+        endDate: new Date("2026-03-31T23:59:59Z"),
+        isActive: true,
+      },
+    }),
+    // Event 4: Akan datang (belum aktif, endDate di masa depan)
+    prisma.event.create({
+      data: {
+        name: "Summer Festival Eksklusif",
+        description:
+          "Musim panas penuh warna dengan koleksi item musiman terbatas.",
+        bannerUrl: defaultBannerUrl,
+        startDate: new Date("2026-06-01T00:00:00Z"),
+        endDate: new Date("2026-08-31T23:59:59Z"),
+        isActive: true,
+      },
+    }),
+    // Event 5: Akan datang (endDate jauh di masa depan)
+    prisma.event.create({
+      data: {
+        name: "Program Konservasi Keanekaragaman Hayati",
+        description:
+          "Mari bersama lindungi satwa langka Indonesia dengan koleksi eksklusif.",
+        bannerUrl: defaultBannerUrl,
+        startDate: new Date("2026-05-01T00:00:00Z"),
+        endDate: new Date("2026-12-31T23:59:59Z"),
+        isActive: true,
+      },
+    }),
+  ]);
+  console.log(`Seeded ${events.length} events.`);
+
+  // Buat 20 Shop Items (berbagai kombinasi dengan dan tanpa eventId)
+  const shopItems = await Promise.all([
+    // PERMANENT ITEMS (Tanpa eventId) - 8 items
+    prisma.shopItem.create({
+      data: {
+        name: "Hutan Tropis Banner",
+        description: "Banner dengan pemandangan hutan hujan tropis yang lebat.",
+        price: 150,
+        type: "BANNER",
+        content: defaultItemUrl,
+        previewUrl: defaultItemUrl,
+        isActive: true,
+      },
+    }),
+    prisma.shopItem.create({
+      data: {
+        name: "Daun Rimba Border",
+        description: "Border profil dengan hiasan dedaunan hijau alami.",
+        price: 100,
+        type: "BORDER",
+        content: defaultItemUrl,
+        previewUrl: defaultItemUrl,
+        isActive: true,
+      },
+    }),
+    prisma.shopItem.create({
+      data: {
+        name: "Gunung Hijau Banner",
+        description:
+          "Banner bertema pegunungan dengan pemandangan alam yang indah.",
+        price: 180,
+        type: "BANNER",
+        content: defaultItemUrl,
+        previewUrl: defaultItemUrl,
+        isActive: true,
+      },
+    }),
+    prisma.shopItem.create({
+      data: {
+        name: "Rumput Liar Border",
+        description: "Border profil dengan motif rumput dan bunga liar.",
+        price: 120,
+        type: "BORDER",
+        content: defaultItemUrl,
+        previewUrl: defaultItemUrl,
+        isActive: true,
+      },
+    }),
+    prisma.shopItem.create({
+      data: {
+        name: "Bintang Malam Banner",
+        description: "Banner dengan langit malam penuh bintang yang memukau.",
+        price: 200,
+        type: "BANNER",
+        content: defaultItemUrl,
+        previewUrl: defaultItemUrl,
+        isActive: true,
+      },
+    }),
+    prisma.shopItem.create({
+      data: {
+        name: "Batu Karang Border",
+        description: "Border profil dengan tekstur batu karang yang kokoh.",
+        price: 130,
+        type: "BORDER",
+        content: defaultItemUrl,
+        previewUrl: defaultItemUrl,
+        isActive: true,
+      },
+    }),
+    prisma.shopItem.create({
+      data: {
+        name: "Taman Bunga Banner",
+        description: "Banner penuh dengan berbagai macam bunga berwarna-warni.",
+        price: 170,
+        type: "BANNER",
+        content: defaultItemUrl,
+        previewUrl: defaultItemUrl,
+        isActive: true,
+      },
+    }),
+    prisma.shopItem.create({
+      data: {
+        name: "Emas Murni Border",
+        description: "Border profil premium dengan aksen emas yang berkilau.",
+        price: 250,
+        type: "BORDER",
+        content: defaultItemUrl,
+        previewUrl: defaultItemUrl,
+        isActive: true,
+      },
+    }),
+
+    // LIMITED ITEMS - Event 1 (Festival Hari Bumi) - 3 items
+    prisma.shopItem.create({
+      data: {
+        name: "Earth Savior Banner",
+        description:
+          "Banner edisi terbatas Festival Hari Bumi 2026 dengan tema penyelamatan bumi.",
+        price: 300,
+        type: "BANNER",
+        content: defaultItemUrl,
+        previewUrl: defaultItemUrl,
+        isActive: true,
+        eventId: events[0].id,
+      },
+    }),
+    prisma.shopItem.create({
+      data: {
+        name: "Akar Bumi Border",
+        description:
+          "Border profil edisi terbatas bertema akar pohon yang kokoh dan kuat.",
+        price: 250,
+        type: "BORDER",
+        content: defaultItemUrl,
+        previewUrl: defaultItemUrl,
+        isActive: true,
+        eventId: events[0].id,
+      },
+    }),
+    prisma.shopItem.create({
+      data: {
+        name: "Green Planet Banner",
+        description:
+          "Banner spektakuler menampilkan planet hijau yang sehat dan lestari.",
+        price: 320,
+        type: "BANNER",
+        content: defaultItemUrl,
+        previewUrl: defaultItemUrl,
+        isActive: true,
+        eventId: events[0].id,
+      },
+    }),
+
+    // LIMITED ITEMS - Event 2 (Pekan Peduli Lautan) - 3 items
+    prisma.shopItem.create({
+      data: {
+        name: "Deep Ocean Banner",
+        description:
+          "Banner eksklusif Pekan Peduli Lautan dengan kedalaman laut yang misterius.",
+        price: 350,
+        type: "BANNER",
+        content: defaultItemUrl,
+        previewUrl: defaultItemUrl,
+        isActive: true,
+        eventId: events[1].id,
+      },
+    }),
+    prisma.shopItem.create({
+      data: {
+        name: "Coral Guardian Border",
+        description:
+          "Border profil edisi terbatas dengan motif terumbu karang yang indah.",
+        price: 280,
+        type: "BORDER",
+        content: defaultItemUrl,
+        previewUrl: defaultItemUrl,
+        isActive: true,
+        eventId: events[1].id,
+      },
+    }),
+    prisma.shopItem.create({
+      data: {
+        name: "Waves of Hope Banner",
+        description:
+          "Banner bertema gelombang laut dengan pesan harapan dan perubahan.",
+        price: 340,
+        type: "BANNER",
+        content: defaultItemUrl,
+        previewUrl: defaultItemUrl,
+        isActive: true,
+        eventId: events[1].id,
+      },
+    }),
+
+    // LIMITED ITEMS - Event 3 (Reboisasi) - 3 items
+    prisma.shopItem.create({
+      data: {
+        name: "Forest Champion Banner",
+        description:
+          "Banner kampanye reboisasi dengan semangat penanaman pohon.",
+        price: 310,
+        type: "BANNER",
+        content: defaultItemUrl,
+        previewUrl: defaultItemUrl,
+        isActive: true,
+        eventId: events[2].id,
+      },
+    }),
+    prisma.shopItem.create({
+      data: {
+        name: "Tree Hugger Border",
+        description:
+          "Border profil edisi terbatas untuk pecinta pohon dan alam.",
+        price: 260,
+        type: "BORDER",
+        content: defaultItemUrl,
+        previewUrl: defaultItemUrl,
+        isActive: true,
+        eventId: events[2].id,
+      },
+    }),
+    prisma.shopItem.create({
+      data: {
+        name: "Seedling Dreams Banner",
+        description:
+          "Banner penuh harapan tentang masa depan hijau dari benih kecil.",
+        price: 330,
+        type: "BANNER",
+        content: defaultItemUrl,
+        previewUrl: defaultItemUrl,
+        isActive: true,
+        eventId: events[2].id,
+      },
+    }),
+  ]);
+  console.log(`Seeded ${shopItems.length} shop items.`);
+
+  console.log("✅ Database ter-seed dengan sempurna beserta assets Storage!");
 }
 
 main()
