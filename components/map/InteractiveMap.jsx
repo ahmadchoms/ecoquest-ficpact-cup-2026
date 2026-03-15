@@ -3,7 +3,6 @@
 import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import { MapContainer, TileLayer, GeoJSON, useMap } from "react-leaflet";
 import { useUserStore } from "@/store/useUserStore";
-import { provinces } from "@/data/provinces";
 import {
   TILE_URL,
   TILE_ATTRIBUTION,
@@ -20,9 +19,9 @@ function MapController({ center, zoom }) {
   }, [center, zoom, map]);
   return null;
 }
-
 export default function InteractiveMap({
   provinces: filteredProvinces,
+  allProvinces = [],
   onProvinceClick,
 }) {
   const [geoData, setGeoData] = useState(null);
@@ -44,16 +43,14 @@ export default function InteractiveMap({
 
   const getProvinceId = useCallback((feature) => {
     const props = feature.properties;
-    // Natural Earth uses 'name' field for province names
     const name = (props.name || props.NAME_1 || props.Propinsi || "").toLowerCase();
 
     if (!name) return null;
 
-    for (const p of provinces) {
+    for (const p of allProvinces) {
       const pName = p.name.toLowerCase();
       const pId = p.id.toLowerCase();
       
-      // Exact match or close match
       if (
         name === pName ||
         name.includes(pName) ||
@@ -65,9 +62,8 @@ export default function InteractiveMap({
       }
     }
 
-    // Fuzzy match for similar names
     const nameNorm = name.replace(/\s+/g, "").replace(/-/g, "");
-    for (const p of provinces) {
+    for (const p of allProvinces) {
       const pNorm = p.name.toLowerCase().replace(/\s+/g, "").replace(/-/g, "");
       if (nameNorm.includes(pNorm) || pNorm.includes(nameNorm)) {
         return p.id;
@@ -75,7 +71,7 @@ export default function InteractiveMap({
     }
 
     return null;
-  }, []);
+  }, [allProvinces]);
 
   const style = useCallback(
     (feature) => {
@@ -89,10 +85,10 @@ export default function InteractiveMap({
         };
       }
 
-      const province = provinces.find((p) => p.id === provinceId);
+      const province = allProvinces.find((p) => p.id === provinceId);
       const progress = getProvinceProgress(
         provinceId,
-        province?.missions?.length || 3,
+        province?.missionsCount || 3,
       );
 
       let fillColor = PROGRESS_COLORS.notStarted;
@@ -106,7 +102,7 @@ export default function InteractiveMap({
         fillOpacity: 0.7,
       };
     },
-    [filteredIds, getProvinceProgress, getProvinceId, completedMissions],
+    [filteredIds, getProvinceProgress, getProvinceId, allProvinces],
   );
 
   const onEachFeature = useCallback(
@@ -114,18 +110,18 @@ export default function InteractiveMap({
       const provinceId = getProvinceId(feature);
       if (!provinceId) return;
 
-      const province = provinces.find((p) => p.id === provinceId);
+      const province = allProvinces.find((p) => p.id === provinceId);
       if (!province) return;
 
       const progress = getProvinceProgress(
         provinceId,
-        province.missions.length,
+        province.missionsCount || 0,
       );
 
       layer.bindTooltip(
         `<div style="font-family:Poppins,sans-serif;padding:4px 0">
-        <strong>${province.illustration} ${province.name}</strong><br/>
-        <span style="color:#6b7280;font-size:11px">${province.region} · Progress: ${progress}%</span>
+        <strong>${province.illustration || "🗺️"} ${province.name}</strong><br/>
+        <span style="color:#6b7280;font-size:11px">${province.region || "Indonesia"} · Progress: ${progress}%</span>
       </div>`,
         { sticky: true, className: "province-tooltip" },
       );
@@ -148,7 +144,7 @@ export default function InteractiveMap({
         },
       });
     },
-    [getProvinceId, getProvinceProgress, onProvinceClick, completedMissions],
+    [getProvinceId, getProvinceProgress, onProvinceClick, allProvinces],
   );
 
   // Force re-render GeoJSON on state changes

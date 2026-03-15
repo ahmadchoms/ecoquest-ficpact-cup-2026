@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
 import { Globe, Target, Leaf, Users } from "lucide-react";
 import EcoBadge from "@/components/design-system/EcoBadge";
-import { features } from "@/data/landing";
 
 const iconMap = {
   Globe: <Globe size={28} />,
@@ -10,7 +9,7 @@ const iconMap = {
   Users: <Users size={28} />,
 };
 
-export default function FeaturesSection() {
+export default function FeaturesSection({ features = [] }) {
   return (
     <section className="bg-white py-[100px]">
       <div className="max-w-[1100px] mx-auto px-6">

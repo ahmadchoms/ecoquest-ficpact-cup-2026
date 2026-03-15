@@ -4,7 +4,12 @@ import bcrypt from "bcryptjs";
 import fs from "fs";
 import path from "path";
 import { supabaseAdmin } from "../lib/supabase.js";
-import { STORAGE_BUCKETS, emptyBucket, uploadToStorage, getShopItemFolder } from "../lib/storage.js";
+import {
+  STORAGE_BUCKETS,
+  emptyBucket,
+  uploadToStorage,
+  getShopItemFolder,
+} from "../lib/storage.js";
 
 const prisma = new PrismaClient();
 
@@ -19,7 +24,7 @@ async function seedFileToStorage(localFilePath, bucket, folder) {
 
     const fileBuffer = fs.readFileSync(fullPath);
     const fileName = path.basename(localFilePath);
-    const mimeType = fileName.endsWith('.png') ? 'image/png' : 'image/jpeg';
+    const mimeType = fileName.endsWith(".png") ? "image/png" : "image/jpeg";
 
     // Mock a File object since we are in Node.js environment
     const file = new File([fileBuffer], fileName, { type: mimeType });
@@ -101,6 +106,16 @@ async function main() {
         icon: "🇮🇩",
         rarity: "DIAMOND",
         category: "OCEAN",
+      },
+    }),
+    prisma.badge.create({
+      data: {
+        name: "Eco Traveler",
+        description:
+          "Pakar transportasi hijau dan pelopor rute ramah lingkungan.",
+        icon: "🚗",
+        rarity: "CHALLENGER",
+        category: "TRANSPORT",
       },
     }),
   ]);
@@ -386,7 +401,6 @@ async function main() {
         "Didominasi oleh Gunung Rinjani dan sabana luas dengan curah hujan yang lebih rendah.",
       funFact:
         "Gunung Tambora di NTB pernah meletus pada 1815, mengubah iklim global.",
-        "Gunung Tambora di NTB pernah meletus pada 1815, mengubah iklim global.",
     },
     {
       name: "Nusa Tenggara Timur",
@@ -412,7 +426,6 @@ async function main() {
       description:
         "Dijuluki Provinsi Seribu Sungai, namun menghadapi ancaman masif dari deforestasi.",
       funFact: "Kalimantan Barat dilewati tepat oleh garis Khatulistiwa.",
-      funFact: "Kalimantan Barat dilewati tepat oleh garis Khatulistiwa.",
     },
     {
       name: "Kalimantan Tengah",
@@ -434,7 +447,6 @@ async function main() {
       species: ["Bekantan", "Kucing Merah", "Burung Rangkong"],
       description:
         "Provinsi yang sangat bergantung pada sungai, namun terancam oleh tambang batu bara.",
-        "Provinsi yang sangat bergantung pada sungai, namun terancam oleh tambang batu bara.",
       funFact:
         "Bekantan (monyet berhidung panjang) adalah satwa maskot resmi provinsi ini.",
     },
@@ -449,7 +461,6 @@ async function main() {
       description: "Kaya akan keanekaragaman, lokasi Ibukota Nusantara (IKN).",
       funFact:
         "Pesut Mahakam adalah mamalia air tawar langka yang tersisa kurang dari 100 ekor.",
-        "Pesut Mahakam adalah mamalia air tawar langka yang tersisa kurang dari 100 ekor.",
     },
     {
       name: "Kalimantan Utara",
@@ -460,9 +471,7 @@ async function main() {
       species: ["Gajah Kalimantan", "Orangutan", "Rangkong Badak"],
       description:
         "Provinsi termuda di Kalimantan dengan ekosistem hutan perbatasan yang masih alami.",
-        "Provinsi termuda di Kalimantan dengan ekosistem hutan perbatasan yang masih alami.",
       funFact:
-        "Rumah bagi spesies gajah terkecil di dunia (Gajah Kerdil Borneo).",
         "Rumah bagi spesies gajah terkecil di dunia (Gajah Kerdil Borneo).",
     },
 
@@ -478,7 +487,6 @@ async function main() {
       description:
         "Surga bawah laut seperti Bunaken, berbatasan langsung dengan lautan Pasifik.",
       funFact: "Tarsius adalah primata terkecil di dunia.",
-      funFact: "Tarsius adalah primata terkecil di dunia.",
     },
     {
       name: "Gorontalo",
@@ -489,9 +497,7 @@ async function main() {
       species: ["Hiu Paus", "Burung Maleo", "Babi Rusa"],
       description:
         "Memiliki ekosistem pesisir yang kaya dan pegunungan hijau yang luas.",
-        "Memiliki ekosistem pesisir yang kaya dan pegunungan hijau yang luas.",
       funFact:
-        "Gorontalo terkenal sebagai titik kemunculan hiu paus di Desa Botubarani.",
         "Gorontalo terkenal sebagai titik kemunculan hiu paus di Desa Botubarani.",
     },
     {
@@ -502,8 +508,6 @@ async function main() {
       ecosystems: ["Hutan Hujan Pegunungan", "Danau", "Terumbu Karang"],
       species: ["Anoa", "Babi Rusa", "Tarsius"],
       description:
-        "Kawasan dengan Taman Nasional Lore Lindu yang kaya flora endemik.",
-      funFact: "Garis Wallace membelah wilayah perairan di sekitar Sulawesi.",
         "Kawasan dengan Taman Nasional Lore Lindu yang kaya flora endemik.",
       funFact: "Garis Wallace membelah wilayah perairan di sekitar Sulawesi.",
     },
@@ -517,8 +521,6 @@ async function main() {
       description:
         "Kawasan agraris yang alamnya masih alami namun rentan pembalakan liar.",
       funFact: "Terkenal dengan perahu Sandeq yang ramah lingkungan.",
-        "Kawasan agraris yang alamnya masih alami namun rentan pembalakan liar.",
-      funFact: "Terkenal dengan perahu Sandeq yang ramah lingkungan.",
     },
     {
       name: "Sulawesi Selatan",
@@ -526,12 +528,9 @@ async function main() {
       region: Region.SULAWESI,
       threatLevel: "HARD",
       ecosystems: ["Karst", "Pegunungan", "Pesisir"],
-      ecosystems: ["Karst", "Pegunungan", "Pesisir"],
       species: ["Kupu-kupu Bantimurung", "Anoa", "Penyu Sisik"],
       description: "Kawasan karst terbesar kedua di dunia.",
-      description: "Kawasan karst terbesar kedua di dunia.",
       funFact:
-        "Taman Nasional Bantimurung dijuluki 'The Kingdom of Butterfly'.",
         "Taman Nasional Bantimurung dijuluki 'The Kingdom of Butterfly'.",
     },
     {
@@ -541,8 +540,6 @@ async function main() {
       threatLevel: "HARD",
       ecosystems: ["Terumbu Karang", "Hutan Tropis", "Pesisir"],
       species: ["Anoa", "Burung Kakatua", "Penyu Hijau"],
-      description: "Memiliki Wakatobi sebagai pusat segitiga karang dunia.",
-      funFact: "Wakatobi memiliki 750 dari 850 spesies koral dunia.",
       description: "Memiliki Wakatobi sebagai pusat segitiga karang dunia.",
       funFact: "Wakatobi memiliki 750 dari 850 spesies koral dunia.",
     },
@@ -558,8 +555,6 @@ async function main() {
       description:
         "Provinsi Kepulauan Rempah dengan kekayaan laut endemik tinggi.",
       funFact: "Pala dan Cengkeh dunia berasal dari sini.",
-        "Provinsi Kepulauan Rempah dengan kekayaan laut endemik tinggi.",
-      funFact: "Pala dan Cengkeh dunia berasal dari sini.",
     },
     {
       name: "Maluku Utara",
@@ -569,8 +564,6 @@ async function main() {
       ecosystems: ["Hutan Tropis", "Pesisir", "Gunung Berapi"],
       species: ["Bidadari Halmahera", "Kuskus", "Kupu-kupu Ornithoptera"],
       description:
-        "Lanskap vulkanik subur yang kini menjadi pusat tambang nikel.",
-      funFact: "Burung Bidadari Halmahera ditemukan oleh Alfred Wallace.",
         "Lanskap vulkanik subur yang kini menjadi pusat tambang nikel.",
       funFact: "Burung Bidadari Halmahera ditemukan oleh Alfred Wallace.",
     },
@@ -585,8 +578,6 @@ async function main() {
       species: ["Burung Cenderawasih", "Kanguru Pohon", "Kasuari"],
       description: "Wilayah dengan hutan perawan terbesar di Indonesia.",
       funFact: "Menyumbang hampir setengah biodiversitas Indonesia.",
-      description: "Wilayah dengan hutan perawan terbesar di Indonesia.",
-      funFact: "Menyumbang hampir setengah biodiversitas Indonesia.",
     },
     {
       name: "Papua Barat",
@@ -596,9 +587,7 @@ async function main() {
       ecosystems: ["Terumbu Karang", "Hutan Tropis", "Karst"],
       species: ["Burung Cenderawasih Merah", "Hiu Paus", "Penyu Belimbing"],
       description: "Kawasan dengan kebijakan konservasi laut yang sangat kuat.",
-      description: "Kawasan dengan kebijakan konservasi laut yang sangat kuat.",
       funFact:
-        "Teluk Cenderawasih adalah taman nasional laut terluas di Indonesia.",
         "Teluk Cenderawasih adalah taman nasional laut terluas di Indonesia.",
     },
     {
@@ -611,8 +600,6 @@ async function main() {
       description:
         "Habitat bagi burung migran dari Australia di Taman Nasional Wasur.",
       funFact: "Lanskapnya mirip daratan utara Australia.",
-        "Habitat bagi burung migran dari Australia di Taman Nasional Wasur.",
-      funFact: "Lanskapnya mirip daratan utara Australia.",
     },
     {
       name: "Papua Tengah",
@@ -621,8 +608,6 @@ async function main() {
       threatLevel: "HARD",
       ecosystems: ["Pegunungan Salju", "Hutan Tropis Pegunungan"],
       species: ["Dingiso", "Burung Cenderawasih", "Echidna"],
-      description: "Rumah bagi Puncak Jaya dan area tambang emas besar.",
-      funFact: "Satu-satunya tempat di Asia Tenggara dengan gletser salju.",
       description: "Rumah bagi Puncak Jaya dan area tambang emas besar.",
       funFact: "Satu-satunya tempat di Asia Tenggara dengan gletser salju.",
     },
@@ -640,8 +625,6 @@ async function main() {
       description:
         "Satu-satunya provinsi landlocked (tanpa laut) di Indonesia.",
       funFact: "Lembah Baliem adalah pusat budaya purba yang menakjubkan.",
-        "Satu-satunya provinsi landlocked (tanpa laut) di Indonesia.",
-      funFact: "Lembah Baliem adalah pusat budaya purba yang menakjubkan.",
     },
     {
       name: "Papua Barat Daya",
@@ -650,8 +633,6 @@ async function main() {
       threatLevel: "EASY",
       ecosystems: ["Terumbu Karang", "Kepulauan Karst", "Hutan Tropis"],
       species: ["Pari Manta", "Burung Cenderawasih Botak", "Hiu Karpet"],
-      description: "Gerbang utama menuju Raja Ampat.",
-      funFact: "Raja Ampat dijuluki 'The Last Paradise on Earth'.",
       description: "Gerbang utama menuju Raja Ampat.",
       funFact: "Raja Ampat dijuluki 'The Last Paradise on Earth'.",
     },
@@ -666,44 +647,116 @@ async function main() {
 
   const missionsData = [
     {
-      title: "Pilah Sampah Yuk!",
+      title: "Jejak Karbon Harianmu",
+      subtitle: "Hitung & kurangi emisi karbon sehari-hari",
       description:
-        "Pelajari cara memilah sampah yang benar agar bisa didaur ulang.",
+        "Rata-rata orang Indonesia menghasilkan 2.3 ton CO2 per tahun. Mari kita hitung jejakmu dan temukan cara menguranginya!",
+      type: "CALCULATOR",
+      difficulty: "EASY",
+      status: "ACTIVE",
+      pointsReward: 50,
+      xpReward: 100,
+      timeEstimate: "5 menit",
+      category: "CLIMATE",
+      icon: "🌡️",
+      provinceId: provinces[0].id,
+      badgeRewardId: badges[4].id, // Merujuk ke badge "Carbon Conscious"
+    },
+    {
+      title: "Pilah Sampah Yuk!",
+      subtitle: "Pelajari cara memilah sampah dengan benar",
+      description:
+        "Indonesia menghasilkan 67.8 juta ton sampah per tahun. Pelajari cara memilah sampah yang benar agar bisa didaur ulang.",
       type: "DRAG_DROP",
       difficulty: "EASY",
       status: "ACTIVE",
+      pointsReward: 60,
       xpReward: 120,
-      pointsReward: 50,
-      timeEstimate: "5 Menit",
+      timeEstimate: "5 menit",
       category: "WASTE",
-      provinceId: provinces[0].id,
-      badgeRewardId: badges[1].id,
+      icon: "♻️",
+      provinceId: provinces[1].id,
+      badgeRewardId: badges[2].id, // Merujuk ke badge "Waste Warrior"
     },
     {
       title: "Kenali Spesies Terancam",
-      description: "Uji pengetahuanmu tentang spesies terancam punah.",
+      subtitle: "Quiz seputar satwa liar Indonesia",
+      description:
+        "Indonesia adalah mega-biodiversity country. Uji pengetahuanmu tentang spesies terancam punah yang butuh perlindungan kita.",
       type: "QUIZ",
       difficulty: "MEDIUM",
       status: "ACTIVE",
-      xpReward: 150,
       pointsReward: 75,
-      timeEstimate: "10 Menit",
+      xpReward: 150,
+      timeEstimate: "7 menit",
       category: "BIODIVERSITY",
-      provinceId: provinces[1].id,
-      badgeRewardId: badges[2].id,
+      icon: "🦏",
+      provinceId: provinces[2].id,
+      badgeRewardId: badges[0].id, // Merujuk ke badge "Species Guardian"
     },
     {
       title: "Pulihkan Mangrove",
-      description: "Simulasi reboisasi hutan mangrove di garis pantai.",
+      subtitle: "Simulasi reboisasi hutan mangrove",
+      description:
+        "Indonesia kehilangan 40% hutan mangrove dalam 30 tahun terakhir. Bantu pulihkan ekosistem pesisir yang vital ini!",
       type: "SIMULATION",
       difficulty: "MEDIUM",
       status: "ACTIVE",
+      pointsReward: 90,
       xpReward: 180,
-      pointsReward: 100,
-      timeEstimate: "15 Menit",
+      timeEstimate: "8 menit",
       category: "COASTAL",
-      provinceId: provinces[2].id,
-      badgeRewardId: badges[3].id,
+      icon: "🌊",
+      provinceId: provinces[3].id,
+      badgeRewardId: badges[1].id, // Merujuk ke badge "Mangrove Hero"
+    },
+    {
+      title: "Hemat Air Setiap Hari",
+      subtitle: "Hitung & optimalkan konsumsi air harianmu",
+      description:
+        "Diperkirakan 27 juta orang Indonesia tidak memiliki akses air bersih. Seberapa efisien penggunaan airmu?",
+      type: "CALCULATOR",
+      difficulty: "EASY",
+      status: "ACTIVE",
+      pointsReward: 50,
+      xpReward: 100,
+      timeEstimate: "5 menit",
+      category: "WATER",
+      icon: "💧",
+      provinceId: provinces[4].id,
+      badgeRewardId: null, // Sesuai skema opsional
+    },
+    {
+      title: "Penyelamat Laut",
+      subtitle: "Bersihkan sampah laut sebelum waktu habis",
+      description:
+        "Setiap tahun 8 juta ton sampah plastik masuk ke lautan. Bantu bersihkan laut dan selamatkan kehidupan laut!",
+      type: "GAME",
+      difficulty: "MEDIUM",
+      status: "ACTIVE",
+      pointsReward: 75,
+      xpReward: 150,
+      timeEstimate: "2 menit",
+      category: "OCEAN",
+      icon: "🌊",
+      provinceId: provinces[5].id,
+      badgeRewardId: badges[3].id, // Merujuk ke badge "Indonesian Hero"
+    },
+    {
+      title: "EcoRoute - Smart Travel Simulator",
+      subtitle: "Pilih kendaraan ramah lingkungan untuk perjalananmu",
+      description:
+        "Sektor transportasi menghasilkan 27% emisi gas rumah kaca di Indonesia. Simulasikan perjalanan dengan kendaraan terbaik dan buat pilihan transportasi yang lebih hijau!",
+      type: "SIMULATION",
+      difficulty: "MEDIUM",
+      status: "ACTIVE",
+      pointsReward: 80,
+      xpReward: 160,
+      timeEstimate: "3 menit",
+      category: "TRANSPORT",
+      icon: "🚗",
+      provinceId: provinces[6].id,
+      badgeRewardId: badges[5].id, // Merujuk ke badge "Eco Traveler" (Challenger)
     },
   ];
 
@@ -743,7 +796,7 @@ async function main() {
   console.log("✅ Database ter-seed dengan sempurna sesuai skema terbaru!");
 
   console.log("Seeding Events and Shop Items...");
-  
+
   const now = new Date();
   const nextWeek = new Date();
   nextWeek.setDate(now.getDate() + 7);
@@ -751,7 +804,7 @@ async function main() {
   twoWeeksFromNow.setDate(now.getDate() + 14);
   const oneMonthFromNow = new Date();
   oneMonthFromNow.setMonth(now.getMonth() + 1);
-  
+
   const lastWeek = new Date();
   lastWeek.setDate(now.getDate() - 7);
 
@@ -765,57 +818,62 @@ async function main() {
     prisma.event.create({
       data: {
         name: "Festival Hari Bumi 2026",
-        description: "Perayaan Hari Bumi dengan item eksklusif bertema alam dan pelestarian lingkungan.",
+        description:
+          "Perayaan Hari Bumi dengan item eksklusif bertema alam dan pelestarian lingkungan.",
         bannerUrl: defaultBannerUrl,
         startDate: lastWeek,
         endDate: nextWeek,
         isActive: true,
-      }
+      },
     }),
     // Event 2: Aktif (baru saja dimulai)
     prisma.event.create({
       data: {
         name: "Pekan Peduli Lautan",
-        description: "Selamatkan terumbu karang. Kumpulkan poin dan dapatkan border laut eksklusif!",
+        description:
+          "Selamatkan terumbu karang. Kumpulkan poin dan dapatkan border laut eksklusif!",
         bannerUrl: defaultBannerUrl,
         startDate: lastWeek,
         endDate: twoWeeksFromNow,
         isActive: true,
-      }
+      },
     }),
     // Event 3: Aktif (akan berakhir akhir bulan)
     prisma.event.create({
       data: {
         name: "Kampanye Reboisasi Nasional",
-        description: "Menanam pohon untuk masa depan yang hijau. Dapatkan item terbatas setiap pembelian.",
+        description:
+          "Menanam pohon untuk masa depan yang hijau. Dapatkan item terbatas setiap pembelian.",
         bannerUrl: defaultBannerUrl,
         startDate: new Date("2026-03-01T00:00:00Z"),
         endDate: new Date("2026-03-31T23:59:59Z"),
         isActive: true,
-      }
+      },
     }),
     // Event 4: Akan datang (belum aktif, endDate di masa depan)
     prisma.event.create({
       data: {
         name: "Summer Festival Eksklusif",
-        description: "Musim panas penuh warna dengan koleksi item musiman terbatas.",
+        description:
+          "Musim panas penuh warna dengan koleksi item musiman terbatas.",
         bannerUrl: defaultBannerUrl,
         startDate: new Date("2026-06-01T00:00:00Z"),
         endDate: new Date("2026-08-31T23:59:59Z"),
         isActive: true,
-      }
+      },
     }),
     // Event 5: Akan datang (endDate jauh di masa depan)
     prisma.event.create({
       data: {
         name: "Program Konservasi Keanekaragaman Hayati",
-        description: "Mari bersama lindungi satwa langka Indonesia dengan koleksi eksklusif.",
+        description:
+          "Mari bersama lindungi satwa langka Indonesia dengan koleksi eksklusif.",
         bannerUrl: defaultBannerUrl,
         startDate: new Date("2026-05-01T00:00:00Z"),
         endDate: new Date("2026-12-31T23:59:59Z"),
         isActive: true,
-      }
-    })
+      },
+    }),
   ]);
   console.log(`Seeded ${events.length} events.`);
 
@@ -831,7 +889,7 @@ async function main() {
         content: defaultItemUrl,
         previewUrl: defaultItemUrl,
         isActive: true,
-      }
+      },
     }),
     prisma.shopItem.create({
       data: {
@@ -842,18 +900,19 @@ async function main() {
         content: defaultItemUrl,
         previewUrl: defaultItemUrl,
         isActive: true,
-      }
+      },
     }),
     prisma.shopItem.create({
       data: {
         name: "Gunung Hijau Banner",
-        description: "Banner bertema pegunungan dengan pemandangan alam yang indah.",
+        description:
+          "Banner bertema pegunungan dengan pemandangan alam yang indah.",
         price: 180,
         type: "BANNER",
         content: defaultItemUrl,
         previewUrl: defaultItemUrl,
         isActive: true,
-      }
+      },
     }),
     prisma.shopItem.create({
       data: {
@@ -864,7 +923,7 @@ async function main() {
         content: defaultItemUrl,
         previewUrl: defaultItemUrl,
         isActive: true,
-      }
+      },
     }),
     prisma.shopItem.create({
       data: {
@@ -875,7 +934,7 @@ async function main() {
         content: defaultItemUrl,
         previewUrl: defaultItemUrl,
         isActive: true,
-      }
+      },
     }),
     prisma.shopItem.create({
       data: {
@@ -886,7 +945,7 @@ async function main() {
         content: defaultItemUrl,
         previewUrl: defaultItemUrl,
         isActive: true,
-      }
+      },
     }),
     prisma.shopItem.create({
       data: {
@@ -897,7 +956,7 @@ async function main() {
         content: defaultItemUrl,
         previewUrl: defaultItemUrl,
         isActive: true,
-      }
+      },
     }),
     prisma.shopItem.create({
       data: {
@@ -908,122 +967,131 @@ async function main() {
         content: defaultItemUrl,
         previewUrl: defaultItemUrl,
         isActive: true,
-      }
+      },
     }),
 
     // LIMITED ITEMS - Event 1 (Festival Hari Bumi) - 3 items
     prisma.shopItem.create({
       data: {
         name: "Earth Savior Banner",
-        description: "Banner edisi terbatas Festival Hari Bumi 2026 dengan tema penyelamatan bumi.",
+        description:
+          "Banner edisi terbatas Festival Hari Bumi 2026 dengan tema penyelamatan bumi.",
         price: 300,
         type: "BANNER",
         content: defaultItemUrl,
         previewUrl: defaultItemUrl,
         isActive: true,
         eventId: events[0].id,
-      }
+      },
     }),
     prisma.shopItem.create({
       data: {
         name: "Akar Bumi Border",
-        description: "Border profil edisi terbatas bertema akar pohon yang kokoh dan kuat.",
+        description:
+          "Border profil edisi terbatas bertema akar pohon yang kokoh dan kuat.",
         price: 250,
         type: "BORDER",
         content: defaultItemUrl,
         previewUrl: defaultItemUrl,
         isActive: true,
         eventId: events[0].id,
-      }
+      },
     }),
     prisma.shopItem.create({
       data: {
         name: "Green Planet Banner",
-        description: "Banner spektakuler menampilkan planet hijau yang sehat dan lestari.",
+        description:
+          "Banner spektakuler menampilkan planet hijau yang sehat dan lestari.",
         price: 320,
         type: "BANNER",
         content: defaultItemUrl,
         previewUrl: defaultItemUrl,
         isActive: true,
         eventId: events[0].id,
-      }
+      },
     }),
 
     // LIMITED ITEMS - Event 2 (Pekan Peduli Lautan) - 3 items
     prisma.shopItem.create({
       data: {
         name: "Deep Ocean Banner",
-        description: "Banner eksklusif Pekan Peduli Lautan dengan kedalaman laut yang misterius.",
+        description:
+          "Banner eksklusif Pekan Peduli Lautan dengan kedalaman laut yang misterius.",
         price: 350,
         type: "BANNER",
         content: defaultItemUrl,
         previewUrl: defaultItemUrl,
         isActive: true,
         eventId: events[1].id,
-      }
+      },
     }),
     prisma.shopItem.create({
       data: {
         name: "Coral Guardian Border",
-        description: "Border profil edisi terbatas dengan motif terumbu karang yang indah.",
+        description:
+          "Border profil edisi terbatas dengan motif terumbu karang yang indah.",
         price: 280,
         type: "BORDER",
         content: defaultItemUrl,
         previewUrl: defaultItemUrl,
         isActive: true,
         eventId: events[1].id,
-      }
+      },
     }),
     prisma.shopItem.create({
       data: {
         name: "Waves of Hope Banner",
-        description: "Banner bertema gelombang laut dengan pesan harapan dan perubahan.",
+        description:
+          "Banner bertema gelombang laut dengan pesan harapan dan perubahan.",
         price: 340,
         type: "BANNER",
         content: defaultItemUrl,
         previewUrl: defaultItemUrl,
         isActive: true,
         eventId: events[1].id,
-      }
+      },
     }),
 
     // LIMITED ITEMS - Event 3 (Reboisasi) - 3 items
     prisma.shopItem.create({
       data: {
         name: "Forest Champion Banner",
-        description: "Banner kampanye reboisasi dengan semangat penanaman pohon.",
+        description:
+          "Banner kampanye reboisasi dengan semangat penanaman pohon.",
         price: 310,
         type: "BANNER",
         content: defaultItemUrl,
         previewUrl: defaultItemUrl,
         isActive: true,
         eventId: events[2].id,
-      }
+      },
     }),
     prisma.shopItem.create({
       data: {
         name: "Tree Hugger Border",
-        description: "Border profil edisi terbatas untuk pecinta pohon dan alam.",
+        description:
+          "Border profil edisi terbatas untuk pecinta pohon dan alam.",
         price: 260,
         type: "BORDER",
         content: defaultItemUrl,
         previewUrl: defaultItemUrl,
         isActive: true,
         eventId: events[2].id,
-      }
+      },
     }),
     prisma.shopItem.create({
       data: {
         name: "Seedling Dreams Banner",
-        description: "Banner penuh harapan tentang masa depan hijau dari benih kecil.",
+        description:
+          "Banner penuh harapan tentang masa depan hijau dari benih kecil.",
         price: 330,
         type: "BANNER",
         content: defaultItemUrl,
         previewUrl: defaultItemUrl,
         isActive: true,
         eventId: events[2].id,
-      }
-    })
+      },
+    }),
   ]);
   console.log(`Seeded ${shopItems.length} shop items.`);
 

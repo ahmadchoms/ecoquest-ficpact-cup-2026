@@ -3,8 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, Droplets } from "lucide-react";
-import { calculateWaterUsage } from "@/utils/calculations";
-import { calculateProgressReward } from "@/data/missions";
+import { calculateWaterUsage, calculateProgressReward } from "@/utils/calculations";
 import {
   BarChart,
   Bar,

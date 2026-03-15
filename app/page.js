@@ -3,7 +3,6 @@
 import PageWrapper from "@/components/layout/PageWrapper";
 import { useUserStore } from "@/store/useUserStore";
 
-// Sections
 import HeroSection from "@/components/landing/HeroSection";
 import TickerStrip from "@/components/landing/TickerStrip";
 import HowItWorksSection from "@/components/landing/HowItWorksSection";
@@ -13,16 +12,22 @@ import MissionShowcase from "@/components/landing/MissionShowcase";
 import CtaSection from "@/components/landing/CtaSection";
 import Footer from "@/components/landing/Footer";
 
+import {
+  partners,
+  howItWorksSteps,
+  features,
+} from "@/data/landing";
+
 export default function LandingPage() {
   const { firstVisit } = useUserStore();
 
   return (
     <PageWrapper>
       <HeroSection firstVisit={firstVisit} />
-      <TickerStrip />
-      <HowItWorksSection />
+      <TickerStrip partners={partners} />
+      <HowItWorksSection steps={howItWorksSteps} />
       <StatsSection />
-      <FeaturesSection />
+      <FeaturesSection features={features} />
       <MissionShowcase />
       <CtaSection />
       <Footer />

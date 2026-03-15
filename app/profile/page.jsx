@@ -4,7 +4,7 @@ import PageWrapper from "@/components/layout/PageWrapper";
 import { useUserStore } from "@/store/useUserStore";
 import LevelBadge from "@/components/ui/LevelBadge";
 import BadgeCard from "@/components/ui/BadgeCard";
-import { badgeList } from "@/data/badges";
+import { useBadges } from "@/hooks/useBadges";
 import { Calendar, Award, TrendingUp, Settings } from "lucide-react";
 import { formatDate } from "@/utils/formatters";
 import AnimatedButton from "@/components/ui/AnimatedButton";
@@ -22,6 +22,9 @@ export default function ProfilePage() {
     completedMissions,
     lastActive,
   } = useUserStore();
+
+  const { data: badgesResponse, isLoading: badgesLoading } = useBadges({ limit: 100 });
+  const allBadges = badgesResponse?.data || [];
 
   const history = [
     {
@@ -103,13 +106,19 @@ export default function ProfilePage() {
                 Koleksi Badge Terbaru
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                {badgeList.slice(0, 4).map((badge) => (
-                  <BadgeCard
-                    key={badge.id}
-                    badge={badge}
-                    earned={earnedBadges.includes(badge.id)}
-                  />
-                ))}
+                {badgesLoading ? (
+                  [...Array(4)].map((_, i) => (
+                    <div key={i} className="h-32 bg-gray-200 animate-pulse rounded-2xl border-3 border-black shadow-hard" />
+                  ))
+                ) : (
+                  allBadges.slice(0, 4).map((badge) => (
+                    <BadgeCard
+                      key={badge.id}
+                      badge={badge}
+                      earned={earnedBadges.includes(badge.id)}
+                    />
+                  ))
+                )}
               </div>
             </section>
 

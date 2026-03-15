@@ -1,7 +1,5 @@
-import { provinces } from "@/data/provinces";
-import { missions } from "@/data/missions";
-
-export const checkProvinceConqueror = (completedMissions) => {
+export const checkProvinceConqueror = (completedMissions, allProvinces) => {
+  if (!allProvinces) return false;
   const provinceCompletions = {};
 
   completedMissions.forEach((key) => {
@@ -12,23 +10,32 @@ export const checkProvinceConqueror = (completedMissions) => {
     provinceCompletions[provinceId]++;
   });
 
-  for (const province of provinces) {
-    const totalMissions = province.missions.length;
+  for (const province of allProvinces) {
+    const totalMissions = province.missions?.length || 0;
     const completed = provinceCompletions[province.id] || 0;
-    if (completed >= totalMissions) {
+    if (totalMissions > 0 && completed >= totalMissions) {
       return true;
     }
   }
   return false;
 };
 
-export const getRecommendedMission = (completedMissions, exploredProvinces) => {
-  for (const province of provinces) {
-    for (const missionId of province.missions) {
+export const getRecommendedMission = (
+  completedMissions,
+  allProvinces,
+  allMissions,
+) => {
+  if (!allProvinces || !allMissions) return null;
+  const missionsMap = Array.isArray(allMissions)
+    ? Object.fromEntries(allMissions.map((m) => [m.id, m]))
+    : allMissions;
+
+  for (const province of allProvinces) {
+    for (const missionId of province.missions || []) {
       const key = `${missionId}:${province.id}`;
       if (!completedMissions.includes(key)) {
         return {
-          mission: missions[missionId],
+          mission: missionsMap[missionId],
           province,
         };
       }

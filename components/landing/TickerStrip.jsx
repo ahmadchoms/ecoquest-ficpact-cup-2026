@@ -1,6 +1,4 @@
-import { partners } from "@/data/landing";
-
-export default function TickerStrip() {
+export default function TickerStrip({ partners = [] }) {
   return (
     <section className="bg-yellow border-y-[2.5px] border-black overflow-hidden py-3.5">
       <div className="overflow-hidden">

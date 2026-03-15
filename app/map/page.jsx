@@ -7,16 +7,21 @@ import { motion } from "framer-motion";
 import PageWrapper from "@/components/layout/PageWrapper";
 import MapLegend from "@/components/map/MapLegend";
 import { useUserStore } from "@/store/useUserStore";
-import { provinces } from "@/data/provinces";
+import { useProvinces } from "@/hooks/useProvinces";
 import { REGIONS } from "@/utils/constants";
 import { ChevronRight, Filter } from "lucide-react";
 import XPBar from "@/components/ui/XPBar";
 import { getRecommendedMission } from "@/utils/achievements";
-
-// Dynamic import for browser-only component
 const InteractiveMap = dynamic(
   () => import("@/components/map/InteractiveMap"),
-  { ssr: false },
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-full flex items-center justify-center bg-gray-100">
+        <p className="font-display animate-pulse">Memuat Peta...</p>
+      </div>
+    ),
+  },
 );
 
 export default function MapPage() {
@@ -32,12 +37,15 @@ export default function MapPage() {
   } = useUserStore();
 
   const xpProgress = getXPProgress();
+  const { data: provincesResponse, isLoading } = useProvinces({ limit: 100 });
+  const allProvinces = provincesResponse?.data || [];
+
   const [activeFilter, setActiveFilter] = useState(null);
   const [showMobileCards, setShowMobileCards] = useState(false);
 
   const filteredProvinces = activeFilter
-    ? provinces.filter((p) => p.region === activeFilter)
-    : provinces;
+    ? allProvinces.filter((p) => p.region === activeFilter)
+    : allProvinces;
 
   const recommended = getRecommendedMission(
     completedMissions,
@@ -51,6 +59,7 @@ export default function MapPage() {
         <div className="flex-1 relative z-10">
           <InteractiveMap
             provinces={filteredProvinces}
+            allProvinces={allProvinces}
             onProvinceClick={(id) => router.push(`/province/${id}`)}
           />
           <MapLegend />
@@ -162,8 +171,11 @@ export default function MapPage() {
               Provinsi
             </h3>
             <div className="space-y-2 max-h-100 overflow-y-auto pr-1">
-              {provinces.map((prov) => {
-                const prog = getProvinceProgress(prov.id, prov.missions.length);
+              {allProvinces.map((prov) => {
+                const prog = getProvinceProgress(
+                  prov.id,
+                  prov.missionsCount || 0,
+                );
 
                 return (
                   <button
@@ -224,7 +236,10 @@ export default function MapPage() {
 
             <div className="p-3 grid grid-cols-2 gap-2">
               {filteredProvinces.map((prov) => {
-                const prog = getProvinceProgress(prov.id, prov.missions.length);
+                const prog = getProvinceProgress(
+                  prov.id,
+                  prov.missionsCount || 0,
+                );
 
                 return (
                   <button

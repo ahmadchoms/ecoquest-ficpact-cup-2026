@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AdminAPI } from "@/lib/api/admin";
+import { UserAPI } from "@/lib/api/user";
 
 export const adminEventKeys = {
   all: ["admin", "events"],
@@ -24,6 +25,17 @@ export const useEvents = (filters) => {
       return response;
     },
     placeholderData: (prev) => prev,
+  });
+};
+
+export const useActiveEvents = () => {
+  return useQuery({
+    queryKey: ["user", "events", "active"],
+    queryFn: async () => {
+      const response = await UserAPI.getActiveEvents();
+      return response.data;
+    },
+    staleTime: 5 * 60 * 1000,
   });
 };
 

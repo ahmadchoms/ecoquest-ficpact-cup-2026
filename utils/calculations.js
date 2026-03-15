@@ -89,3 +89,83 @@ export const calculateWaterUsage = (inputs) => {
     rating: total <= 100 ? "excellent" : total <= 150 ? "good" : total <= 200 ? "average" : "high",
   };
 };
+
+/**
+ * Calculate performance-based XP and Point rewards
+ * @param {number} performancePercent - Performance score from 0-100 (0-1 or 0-100)
+ * @param {number} baseXP - Base XP reward from mission
+ * @param {number} basePoints - Base point reward from mission
+ * @returns {object} { earnedXP, earnedPoints }
+ */
+export const calculatePerformanceReward = (
+  performancePercent,
+  baseXP,
+  basePoints,
+) => {
+  // Normalize performance to 0-1 if it's 0-100
+  const perfScore =
+    performancePercent > 1 ? performancePercent / 100 : performancePercent;
+
+  // Performance tiers:
+  // 0-40%: 30% of reward
+  // 40-60%: 50% of reward
+  // 60-80%: 75% of reward
+  // 80-100%: 100% of reward
+  let multiplier = 0.3; // Default untuk < 40%
+
+  if (perfScore >= 0.8) {
+    multiplier = 1.0; // 80-100% = full reward
+  } else if (perfScore >= 0.6) {
+    multiplier = 0.75; // 60-80% = 75% reward
+  } else if (perfScore >= 0.4) {
+    multiplier = 0.5; // 40-60% = 50% reward
+  }
+
+  return {
+    earnedXP: Math.max(Math.round(baseXP * multiplier), 10), // Minimum 10 XP
+    earnedPoints: Math.max(Math.round(basePoints * multiplier), 5), // Minimum 5 points
+  };
+};
+
+/**
+ * Calculate reward based on percentage correct (for quiz type missions)
+ * @param {number} correctCount - Number of correct answers
+ * @param {number} totalCount - Total questions/items
+ * @param {number} baseXP - Base XP reward
+ * @param {number} basePoints - Base point reward
+ * @returns {object} { earnedXP, earnedPoints, performancePercent }
+ */
+export const calculateQuizReward = (
+  correctCount,
+  totalCount,
+  baseXP,
+  basePoints,
+) => {
+  const performancePercent = Math.round((correctCount / totalCount) * 100);
+  const { earnedXP, earnedPoints } = calculatePerformanceReward(
+    performancePercent,
+    baseXP,
+    basePoints,
+  );
+
+  return {
+    earnedXP,
+    earnedPoints,
+    performancePercent,
+  };
+};
+
+/**
+ * Calculate reward based on percentage completed (for simulation/game type missions)
+ * @param {number} completedPercent - Percentage completed (0-100 or 0-1)
+ * @param {number} baseXP - Base XP reward
+ * @param {number} basePoints - Base point reward
+ * @returns {object} { earnedXP, earnedPoints }
+ */
+export const calculateProgressReward = (
+  completedPercent,
+  baseXP,
+  basePoints,
+) => {
+  return calculatePerformanceReward(completedPercent, baseXP, basePoints);
+};

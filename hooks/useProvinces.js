@@ -28,6 +28,17 @@ export const useProvinces = (filters) => {
   });
 };
 
+export const useProvince = (id) => {
+  return useQuery({
+    queryKey: adminProvinceKeys.detail(id),
+    queryFn: async () => {
+      const response = await AdminAPI.getProvince(id);
+      return response?.data;
+    },
+    enabled: !!id,
+  });
+};
+
 export const useUpdateAdminProvince = () => {
   const queryClient = useQueryClient();
   return useMutation({

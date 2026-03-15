@@ -7,17 +7,25 @@ import XPBar from "@/components/ui/XPBar";
 import LevelBadge from "@/components/ui/LevelBadge";
 import { signOut } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Leaf, User, Map, LogOut, Award, Menu, X, ShoppingBag } from "lucide-react";
+import {
+  Leaf,
+  User,
+  Map,
+  LogOut,
+  Award,
+  Menu,
+  X,
+  ShoppingBag,
+} from "lucide-react";
 import { useState, useEffect, useTransition } from "react";
 
 export default function Navbar() {
-  const { totalXP, level, explorerName, coins, resetProgress } = useUserStore();
+  const { totalXP, level, explorerName, coins } = useUserStore();
   const pathname = usePathname();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [, startTransition] = useTransition();
 
-  // Close mobile menu on route change
   useEffect(() => {
     startTransition(() => {
       setMobileOpen(false);
@@ -25,21 +33,33 @@ export default function Navbar() {
     });
   }, [pathname]);
 
-  // Hide navbar on landing page, auth pages, and admin pages
   if (
     pathname === "/" ||
     pathname === "/auth/login" ||
     pathname === "/auth/register" ||
     pathname === "/auth/error" ||
     pathname.startsWith("/admin")
-  )
+  ) {
     return null;
+  }
 
   const navLinks = [
-    { href: "/map", icon: <Map size={18} />, label: "Peta" },
-    { href: "/dashboard", icon: <User size={18} />, label: "Dashboard" },
-    { href: "/leaderboard", icon: <Award size={18} />, label: "Peringkat" },
-    { href: "/shop", icon: <ShoppingBag size={18} />, label: "Shop" },
+    { href: "/map", icon: <Map size={18} strokeWidth={2.5} />, label: "Peta" },
+    {
+      href: "/dashboard",
+      icon: <User size={18} strokeWidth={2.5} />,
+      label: "Dashboard",
+    },
+    {
+      href: "/leaderboard",
+      icon: <Award size={18} strokeWidth={2.5} />,
+      label: "Peringkat",
+    },
+    {
+      href: "/shop",
+      icon: <ShoppingBag size={18} strokeWidth={2.5} />,
+      label: "Shop",
+    },
   ];
 
   const NavLink = ({ href, icon, label }) => {
@@ -47,14 +67,14 @@ export default function Navbar() {
     return (
       <Link
         href={href}
-        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all font-medium text-sm ${
+        className={`flex items-center gap-2 px-4 py-2 rounded-2xl font-display font-bold text-sm transition-all duration-200 border-3 ${
           isActive
-            ? "bg-emerald-50 text-emerald-600"
-            : "text-slate-600 hover:bg-slate-50 hover:text-emerald-500"
+            ? "bg-mint border-black shadow-hard -translate-x-0.5 -translate-y-0.5 text-black"
+            : "bg-transparent border-transparent text-black hover:bg-yellow hover:border-black hover:shadow-hard hover:-translate-x-0.5 hover:-translate-y-0.5"
         }`}
       >
         {icon}
-        <span>{label}</span>
+        <span className="mt-0.5">{label}</span>
       </Link>
     );
   };
@@ -71,57 +91,52 @@ export default function Navbar() {
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ type: "spring", stiffness: 120, damping: 20 }}
-        className="fixed top-0 left-0 right-0 h-16 md:h-20 bg-white/80 backdrop-blur-xl border-b border-slate-200/50 z-50 px-4 md:px-8"
+        className="fixed top-0 left-0 right-0 h-16 md:h-20 bg-white border-b-[2.5px] border-black z-50 px-4 md:px-8"
       >
         <div className="h-full flex items-center justify-between max-w-7xl mx-auto">
-          {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group shrink-0">
-            <div className="w-9 h-9 md:w-10 md:h-10 bg-linear-to-br from-emerald-400 to-teal-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-transform">
-              <Leaf size={18} />
+            <div className="w-9 h-9 md:w-10 md:h-10 bg-green border-3 border-black rounded-2xl flex items-center justify-center text-black shadow-hard transition-all duration-200 group-hover:translate-x-0.5 group-hover:translate-y-0.5 group-hover:shadow-none">
+              <Leaf size={20} strokeWidth={2.5} />
             </div>
-            <span className="font-display font-bold text-lg md:text-xl text-slate-800 hidden sm:block">
+            <span className="font-display font-bold text-lg md:text-xl text-black hidden sm:block mt-0.5">
               EcoQuest
             </span>
           </Link>
 
-          {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-1">
+          <div className="hidden md:flex items-center gap-2">
             {navLinks.map((link) => (
               <NavLink key={link.href} {...link} />
             ))}
           </div>
 
-          {/* Right section */}
-          <div className="flex items-center gap-3">
-            {/* Coins Display */}
-            <div className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50/80">
+          <div className="flex items-center gap-4">
+            <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-yellow border-3 border-black shadow-hard transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none cursor-default">
               <span className="text-lg">💰</span>
-              <div>
-                <p className="text-xs font-bold text-slate-600">Poin</p>
-                <p className="font-bold text-sm text-emerald-700">{coins}</p>
+              <div className="leading-tight">
+                <p className="text-[10px] font-bold text-black uppercase tracking-wide">
+                  Poin
+                </p>
+                <p className="font-display font-bold text-sm text-black">
+                  {coins}
+                </p>
               </div>
             </div>
 
-            {/* XP Bar (desktop only) */}
-            <div className="hidden lg:block">
+            <div className="hidden lg:block w-32">
               <XPBar currentXP={totalXP} />
             </div>
 
-            {/* Profile dropdown */}
             <div className="relative hidden md:block">
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="flex items-center gap-2 hover:bg-slate-50 p-2 rounded-xl transition-colors outline-none focus:ring-2 focus:ring-emerald-500/20"
+                className="flex items-center gap-2 bg-white hover:bg-pink p-1.5 pr-3 rounded-2xl transition-all border-3 border-transparent hover:border-black hover:shadow-hard outline-none"
               >
-                <div className="text-right hidden lg:block">
-                  <p className="text-sm font-bold text-slate-700 leading-none">
+                <LevelBadge level={level} size="sm" />
+                <div className="text-left hidden lg:block">
+                  <p className="text-sm font-display font-bold text-black leading-none mt-0.5">
                     {explorerName || "Explorer"}
                   </p>
-                  <p className="text-xs text-slate-500 font-medium mt-0.5">
-                    Level {level}
-                  </p>
                 </div>
-                <LevelBadge level={level} size="sm" />
               </button>
 
               <AnimatePresence>
@@ -136,40 +151,38 @@ export default function Navbar() {
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.95, y: 5 }}
                       transition={{ duration: 0.15 }}
-                      className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 p-1.5 z-50"
+                      className="absolute right-0 top-full mt-4 w-56 bg-white rounded-3xl shadow-hard border-3 border-black p-2 z-50 overflow-hidden"
                     >
                       <Link
                         href="/profile"
                         onClick={() => setDropdownOpen(false)}
-                        className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-50 text-slate-600 hover:text-emerald-600 transition-colors text-sm font-medium"
+                        className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-mint text-black font-display font-bold text-sm border-2 border-transparent hover:border-black transition-all"
                       >
-                        <User size={16} /> Profil Saya
+                        <User size={18} strokeWidth={2.5} /> Profil Saya
                       </Link>
                       <Link
                         href="/leaderboard"
                         onClick={() => setDropdownOpen(false)}
-                        className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-50 text-slate-600 hover:text-emerald-600 transition-colors text-sm font-medium"
+                        className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-yellow text-black font-display font-bold text-sm border-2 border-transparent hover:border-black transition-all"
                       >
-                        <Award size={16} /> Papan Peringkat
+                        <Award size={18} strokeWidth={2.5} /> Papan Peringkat
                       </Link>
-                      <div className="h-px bg-slate-100 my-1" />
-                      <Link
-                        href = ""
+                      <div className="h-[2.5px] bg-black my-2 rounded-full" />
+                      <button
                         onClick={() => handleLogout()}
-                        className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-50 text-slate-600 hover:text-red-600 transition-colors text-sm font-medium"
+                        className="flex items-center gap-3 px-4 py-3 w-full rounded-xl hover:bg-orange text-black font-display font-bold text-sm border-2 border-transparent hover:border-black transition-all"
                       >
-                        <LogOut size={16} /> Keluar
-                      </Link>
+                        <LogOut size={18} strokeWidth={2.5} /> Keluar
+                      </button>
                     </motion.div>
                   </>
                 )}
               </AnimatePresence>
             </div>
 
-            {/* Hamburger button (mobile) */}
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="md:hidden p-2 rounded-xl hover:bg-slate-50 transition-colors text-slate-600"
+              className="md:hidden p-2 rounded-xl bg-white border-3 border-black shadow-hard hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all text-black outline-none"
               aria-label="Toggle menu"
             >
               <AnimatePresence mode="wait">
@@ -181,7 +194,7 @@ export default function Navbar() {
                     exit={{ rotate: 90, opacity: 0 }}
                     transition={{ duration: 0.15 }}
                   >
-                    <X size={24} />
+                    <X size={20} strokeWidth={3} />
                   </motion.div>
                 ) : (
                   <motion.div
@@ -191,7 +204,7 @@ export default function Navbar() {
                     exit={{ rotate: -90, opacity: 0 }}
                     transition={{ duration: 0.15 }}
                   >
-                    <Menu size={24} />
+                    <Menu size={20} strokeWidth={3} />
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -200,7 +213,6 @@ export default function Navbar() {
         </div>
       </motion.nav>
 
-      {/* Mobile menu overlay */}
       <AnimatePresence>
         {mobileOpen && (
           <>
@@ -208,7 +220,7 @@ export default function Navbar() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 md:hidden"
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 md:hidden"
               onClick={() => setMobileOpen(false)}
             />
             <motion.div
@@ -216,47 +228,48 @@ export default function Navbar() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: "100%" }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="fixed top-16 right-0 bottom-0 w-72 bg-white z-50 md:hidden shadow-2xl border-l border-slate-100"
+              className="fixed top-16 right-0 bottom-0 w-72 bg-white z-50 md:hidden border-l-[2.5px] border-black"
             >
-              <div className="p-6 flex flex-col h-full">
-                {/* User info */}
-                <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl mb-6">
+              <div className="p-6 flex flex-col h-full bg-grid-pattern">
+                <div className="flex items-center gap-3 p-4 bg-yellow border-3 border-black shadow-hard rounded-2xl mb-8">
                   <LevelBadge level={level} size="sm" />
                   <div>
-                    <p className="font-bold text-slate-800 text-sm">
+                    <p className="font-display font-bold text-black text-sm">
                       {explorerName || "Explorer"}
                     </p>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-[11px] font-bold text-black/70 uppercase">
                       Level {level} • {totalXP} XP
                     </p>
                   </div>
                 </div>
 
-                {/* Navigation Links */}
-                <div className="space-y-1 flex-1">
-                  {navLinks.map((link, i) => (
-                    <motion.div
-                      key={link.href}
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.05 }}
-                    >
-                      <Link
-                        href={link.href}
-                        onClick={() => setMobileOpen(false)}
-                        className={`flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all font-medium ${
-                          pathname === link.href
-                            ? "bg-emerald-50 text-emerald-600"
-                            : "text-slate-600 hover:bg-slate-50"
-                        }`}
+                <div className="space-y-3 flex-1">
+                  {navLinks.map((link, i) => {
+                    const isActive = pathname === link.href;
+                    return (
+                      <motion.div
+                        key={link.href}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.05 }}
                       >
-                        {link.icon}
-                        {link.label}
-                      </Link>
-                    </motion.div>
-                  ))}
+                        <Link
+                          href={link.href}
+                          onClick={() => setMobileOpen(false)}
+                          className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all font-display font-bold border-3 ${
+                            isActive
+                              ? "bg-mint border-black shadow-hard text-black -translate-x-0.5 -translate-y-0.5"
+                              : "bg-white border-black text-black hover:bg-yellow hover:shadow-hard hover:-translate-x-0.5 hover:-translate-y-0.5"
+                          }`}
+                        >
+                          {link.icon}
+                          <span className="mt-0.5">{link.label}</span>
+                        </Link>
+                      </motion.div>
+                    );
+                  })}
 
-                  <div className="h-px bg-slate-100 my-3" />
+                  <div className="h-[2.5px] bg-black my-6 rounded-full" />
 
                   <motion.div
                     initial={{ opacity: 0, x: 20 }}
@@ -266,21 +279,19 @@ export default function Navbar() {
                     <Link
                       href="/profile"
                       onClick={() => setMobileOpen(false)}
-                      className="flex items-center gap-3 px-4 py-3.5 rounded-xl text-slate-600 hover:bg-slate-50 font-medium"
+                      className="flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-white border-3 border-black text-black hover:bg-pink hover:shadow-hard transition-all font-display font-bold hover:-translate-x-0.5 hover:-translate-y-0.5"
                     >
-                      <User size={18} /> Profil Saya
+                      <User size={18} strokeWidth={2.5} /> Profil Saya
                     </Link>
                   </motion.div>
                 </div>
 
-                {/* Logout */}
-                <Link
-                href=""
+                <button
                   onClick={() => handleLogout()}
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-red-500 hover:bg-red-50 font-medium mt-auto"
+                  className="flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-orange border-3 border-black text-black font-display font-bold mt-auto shadow-hard hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all active:scale-95"
                 >
-                  <LogOut size={18} /> Keluar
-                </Link>
+                  <LogOut size={18} strokeWidth={2.5} /> Keluar
+                </button>
               </div>
             </motion.div>
           </>

@@ -15,6 +15,7 @@ import {
   fetchProvinceSpecies,
   enrichSpeciesWithIndonesianNames,
 } from "@/services/ai";
+import { calculateQuizReward } from "@/utils/calculations";
 import AnimatedButton from "@/components/ui/AnimatedButton";
 
 // Fallback questions if AI fails or key missing
@@ -92,7 +93,7 @@ export default function SpeciesQuiz({ province, mission, onComplete, onBack }) {
     const fetchQuestions = async () => {
       if (isRequesting) return;
       isRequesting = true;
-      
+
       setLoading(true);
       setError(null);
 
@@ -191,12 +192,13 @@ export default function SpeciesQuiz({ province, mission, onComplete, onBack }) {
       } else {
         setIsFinished(true);
         const score = newCorrect * 20;
-        const { earnedXP, earnedPoints, performancePercent } = calculateQuizReward(
-          newCorrect,
-          questions.length,
-          mission.xpReward,
-          mission.pointReward
-        );
+        const { earnedXP, earnedPoints, performancePercent } =
+          calculateQuizReward(
+            newCorrect,
+            questions.length,
+            mission.xpReward,
+            mission.pointReward,
+          );
         onComplete({
           score,
           earnedXP: earnedXP,
@@ -273,7 +275,7 @@ export default function SpeciesQuiz({ province, mission, onComplete, onBack }) {
           exit={{ opacity: 0, x: -20 }}
           className="space-y-4"
         >
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 min-h-[120px] flex flex-col justify-center">
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 min-h-30 flex flex-col justify-center">
             <p className="text-xs text-purple-500 font-bold mb-2 uppercase tracking-wide">
               {q.species}
             </p>

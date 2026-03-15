@@ -46,12 +46,15 @@ export async function GET(request) {
       return validationErrorResponse(parsedParams.error);
 
     const { page, limit, search } = parsedParams.data;
+    const { sortBy, order } = query;
     const result = await listUsers({
       page,
       limit,
       search,
       role: query.role,
       status: query.status,
+      sortBy,
+      order,
     });
 
     logger.apiSuccess("GET", "/api/admin/users", { total: result.meta.total });

@@ -3,7 +3,7 @@
 import { useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Check, X } from "lucide-react";
-import { calculateQuizReward } from "@/data/missions";
+import { calculateQuizReward } from "@/utils/calculations";
 
 const allWasteItems = [
   {

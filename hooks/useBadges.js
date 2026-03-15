@@ -28,6 +28,17 @@ export const useBadges = (filters) => {
   });
 };
 
+export const useBadge = (id) => {
+  return useQuery({
+    queryKey: adminBadgeKeys.detail(id),
+    queryFn: async () => {
+      const response = await AdminAPI.getBadge(id);
+      return response?.data;
+    },
+    enabled: !!id,
+  });
+};
+
 export const useCreateAdminBadge = () => {
   const queryClient = useQueryClient();
   return useMutation({

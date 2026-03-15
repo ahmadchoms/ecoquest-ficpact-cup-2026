@@ -16,7 +16,6 @@ import {
   listProvinces,
   createProvince,
 } from "@/lib/server/services/province.service";
-} from "@/lib/server/services/province.service";
 
 export async function GET(request) {
   const clientId = getClientIdentifier(request);

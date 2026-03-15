@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, Calculator } from "lucide-react";
-import { calculateCarbonFootprint } from "@/utils/calculations";
-import { calculateProgressReward } from "@/data/missions";
+import {
+  calculateCarbonFootprint,
+  calculateProgressReward,
+} from "@/utils/calculations";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 
 const COLORS = ["#f97316", "#0ea5e9", "#22c55e"];
@@ -27,6 +29,7 @@ export default function CarbonCalculator({
   });
   const [result, setResult] = useState(null);
   const [step, setStep] = useState(0);
+  console.log(mission);
 
   const steps = [
     {
@@ -130,20 +133,20 @@ export default function CarbonCalculator({
     const maxCarbonForFullScore = 5;
     const minCarbonForMinScore = 15;
     let performancePercent = 100;
-    
+
     if (result.total > maxCarbonForFullScore) {
       const carbonOverMax = result.total - maxCarbonForFullScore;
       const carbonRange = minCarbonForMinScore - maxCarbonForFullScore;
       performancePercent = Math.max(
         30,
-        100 - (carbonOverMax / carbonRange) * 70
+        100 - (carbonOverMax / carbonRange) * 70,
       );
     }
 
     const { earnedXP, earnedPoints } = calculateProgressReward(
       performancePercent,
       mission.xpReward,
-      mission.pointReward
+      mission.pointReward,
     );
 
     onComplete({
@@ -246,7 +249,7 @@ export default function CarbonCalculator({
 
         <button
           onClick={handleSubmit}
-          className="w-full py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
+          className="w-full py-3 bg-linear-to-r from-orange-500 to-orange-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
         >
           Selesai & Klaim XP ⚡
         </button>
@@ -272,7 +275,7 @@ export default function CarbonCalculator({
 
       <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
         <div
-          className="h-full bg-gradient-to-r from-orange-400 to-orange-600 rounded-full transition-all"
+          className="h-full bg-linear-to-r from-orange-400 to-orange-600 rounded-full transition-all"
           style={{ width: `${((step + 1) / steps.length) * 100}%` }}
         />
       </div>
@@ -293,7 +296,7 @@ export default function CarbonCalculator({
                 <label className="text-sm font-medium text-gray-700">
                   {field.emoji} {field.label}
                 </label>
-                <span className="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-sm font-bold min-w-[50px] text-center">
+                <span className="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-sm font-bold min-w-12.5 text-center">
                   {inputs[field.key]}
                 </span>
               </div>
@@ -320,7 +323,7 @@ export default function CarbonCalculator({
         {step < steps.length - 1 ? (
           <button
             onClick={() => setStep(step + 1)}
-            className="flex-1 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
+            className="flex-1 py-3 bg-linear-to-r from-orange-500 to-orange-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
           >
             Lanjut →
           </button>

@@ -8,6 +8,8 @@ import { Trophy, Crown, Sparkles, Medal } from "lucide-react";
 import { useUserStore } from "@/store/useUserStore";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 
+import { useUsers } from "@/hooks/useUsers";
+
 // Next.js dynamic import
 const TrophyScene = dynamic(() => import("@/components/3d/TrophyScene"), {
   ssr: false,
@@ -16,31 +18,27 @@ const TrophyScene = dynamic(() => import("@/components/3d/TrophyScene"), {
   ),
 });
 
-const mockLeaderboard = [
-  { id: 1, name: "Siti Nurbaya", xp: 12500, level: 25, badges: 12 },
-  { id: 2, name: "Budi Santoso", xp: 11200, level: 22, badges: 10 },
-  { id: 3, name: "Dewi Lestari", xp: 9800, level: 19, badges: 9 },
-  { id: 4, name: "Andi Wijaya", xp: 8500, level: 17, badges: 8 },
-  { id: 5, name: "Rina Kartika", xp: 7200, level: 14, badges: 6 },
-  { id: 6, name: "Eco Explorer (You)", xp: 0, level: 1, badges: 0 },
-];
-
 export default function LeaderboardPage() {
+  const { data: users = [], isLoading } = useUsers({
+    limit: 10,
+    sortBy: "xp",
+    order: "desc",
+    role: "USER"
+  });
+
   const { explorerName, totalXP, level, earnedBadges } = useUserStore();
 
-  const leaderboardData = mockLeaderboard
-    .map((u) =>
-      u.id === 6
-        ? {
-          ...u,
-          name: explorerName || "Eco Explorer (You)",
-          xp: totalXP,
-          level,
-          badges: earnedBadges.length,
-        }
-        : u,
-    )
-    .sort((a, b) => b.xp - a.xp);
+  const leaderboardData = users.length > 0
+    ? users
+    : [
+      {
+        id: "me",
+        name: explorerName || "Eco Explorer (Anda)",
+        xp: totalXP,
+        level,
+        badges: earnedBadges.length
+      }
+    ];
 
   return (
     <PageWrapper className="min-h-screen bg-white bg-grid-pattern pt-24 pb-20">

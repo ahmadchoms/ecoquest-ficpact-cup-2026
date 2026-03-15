@@ -3,7 +3,7 @@
 import { useState, useMemo, useCallback } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, TreePine } from "lucide-react";
-import { calculateProgressReward } from "@/data/missions";
+import { calculateProgressReward } from "@/utils/calculations";
 
 const ROWS = 6;
 const COLS = 8;

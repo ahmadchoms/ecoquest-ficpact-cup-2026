@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, RefreshCw } from "lucide-react";
-import { calculateProgressReward } from "@/data/missions";
+import { calculateProgressReward } from "@/utils/calculations";
 
 const TRASH_TYPES = {
   // Organik (Organic)

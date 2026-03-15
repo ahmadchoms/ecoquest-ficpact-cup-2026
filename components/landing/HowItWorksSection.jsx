@@ -4,15 +4,13 @@ import NumBadge from "./NumBadge";
 import IlluMap from "./illustrations/IlluMap";
 import IlluTarget from "./illustrations/IlluTarget";
 import IlluTrophy from "./illustrations/IlluTrophy";
-import { howItWorksSteps } from "@/data/landing";
-
 const illustrations = {
   IlluMap: <IlluMap className="w-full h-full block" />,
   IlluTarget: <IlluTarget className="w-[200px] h-[200px] animate-float" />,
   IlluTrophy: <IlluTrophy className="w-[180px] h-[180px] animate-float" />,
 };
 
-export default function HowItWorksSection() {
+export default function HowItWorksSection({ steps = [] }) {
   return (
     <section className="bg-white py-[100px] font-body">
       <div className="max-w-[1100px] mx-auto px-6">

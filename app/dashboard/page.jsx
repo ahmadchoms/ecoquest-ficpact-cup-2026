@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useUserStore } from "@/store/useUserStore";
-import { badgeList } from "@/data/badges";
+import { useBadges } from "@/hooks/useBadges";
 import { IMPACT_LABELS } from "@/utils/constants";
 import XPBar from "@/components/ui/XPBar";
 import LevelBadge from "@/components/ui/LevelBadge";
@@ -40,6 +40,8 @@ export default function DashboardPage() {
     resetProgress,
   } = useUserStore();
 
+  const { data: badgesResponse, isLoading: badgesLoading } = useBadges({ limit: 100 });
+  const allBadges = badgesResponse?.data || [];
   const xpProgress = getXPProgress();
   const impact = getTotalImpactSummary();
 
@@ -59,10 +61,8 @@ export default function DashboardPage() {
         animate="visible"
         className="max-w-4xl mx-auto px-4 py-6 space-y-14"
       >
-        {/* HEADER DASHBOARD - NEO BRUTALISM */}
         <motion.div variants={fadeIn("down", 0.1)}>
           <div className="bg-mint border-3 border-black shadow-hard-lg rounded-4xl overflow-hidden relative">
-            {/* Dekorasi Latar Belakang */}
             <div className="absolute -bottom-20 -right-10 w-64 h-64 bg-yellow rounded-full border-3 border-black opacity-80 pointer-events-none" />
             <div className="absolute top-0 right-10 p-6 opacity-20 text-black pointer-events-none mix-blend-overlay">
               <TreePine size={180} />
@@ -95,7 +95,6 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* Progress Bar Container */}
               <div className="mt-8 bg-white border-3 border-black rounded-2xl p-5 shadow-hard relative overflow-hidden">
                 <div className="flex justify-between text-xs text-black font-black uppercase tracking-widest mb-3">
                   <span>Progress Level {level}</span>
@@ -104,7 +103,6 @@ export default function DashboardPage() {
                     XP
                   </span>
                 </div>
-                {/* Asumsi XPBar sudah punya styling yang tebal, jika belum, bisa dibungkus dengan border */}
                 <div className="rounded-full border-2 border-black overflow-hidden bg-gray-100">
                   <XPBar
                     current={xpProgress.xpInCurrentLevel}
@@ -116,7 +114,6 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Statistik Bottom Bar */}
             <div className="grid grid-cols-3 divide-x-3 divide-black bg-white relative z-10">
               <div className="p-6 text-center group hover:bg-yellow transition-colors cursor-default">
                 <p className="font-display text-4xl font-black text-black group-hover:scale-110 transition-transform">
@@ -149,7 +146,6 @@ export default function DashboardPage() {
           </div>
         </motion.div>
 
-        {/* SECTION: DAMPAK LINGKUNGANMU */}
         <motion.div variants={fadeIn("up", 0.2)}>
           <h2 className="text-2xl font-display font-black text-black mb-6 flex items-center gap-3 uppercase tracking-wide">
             <div className="p-2 bg-green border-3 border-black rounded-xl shadow-hard">
@@ -181,7 +177,6 @@ export default function DashboardPage() {
           </div>
         </motion.div>
 
-        {/* SECTION: CHART & BADGES */}
         <div className="grid lg:grid-cols-2 gap-10">
           {impactChartData.length > 0 && (
             <motion.div variants={fadeIn("up", 0.3)}>
@@ -259,7 +254,6 @@ export default function DashboardPage() {
             variants={fadeIn("up", 0.4)}
             className="flex flex-col gap-10"
           >
-            {/* KOLEKSI BADGE */}
             <div>
               <h2 className="text-xl font-display font-black text-black mb-6 flex items-center gap-3 uppercase tracking-wide">
                 <div className="p-1.5 bg-yellow border-2 border-black rounded-lg shadow-[3px_3px_0_#0f0f0f]">
@@ -273,27 +267,34 @@ export default function DashboardPage() {
               </h2>
 
               <div className="bg-white border-3 border-black shadow-hard rounded-4xl p-5 grid grid-cols-3 sm:grid-cols-4 gap-4">
-                {badgeList.slice(0, 8).map((badge) => (
-                  <BadgeCard
-                    key={badge.id}
-                    badge={badge}
-                    earned={earnedBadges.includes(badge.id)}
-                  />
-                ))}
-                {badgeList.length > 8 && (
-                  <div className="flex flex-col items-center justify-center bg-gray-100 border-3 border-dashed border-black rounded-3xl h-full min-h-25">
-                    <span className="text-xl font-black text-black/50">
-                      +{badgeList.length - 8}
-                    </span>
-                    <span className="text-[10px] font-bold uppercase text-black/50">
-                      Lagi
-                    </span>
-                  </div>
+                {badgesLoading ? (
+                  [...Array(4)].map((_, i) => (
+                    <div key={i} className="h-20 bg-gray-100 animate-pulse rounded-2xl border-2 border-black" />
+                  ))
+                ) : (
+                  <>
+                    {allBadges.slice(0, 8).map((badge) => (
+                      <BadgeCard
+                        key={badge.id}
+                        badge={badge}
+                        earned={earnedBadges.includes(badge.id)}
+                      />
+                    ))}
+                    {allBadges.length > 8 && (
+                      <div className="flex flex-col items-center justify-center bg-gray-100 border-3 border-dashed border-black rounded-3xl h-full min-h-25">
+                        <span className="text-xl font-black text-black/50">
+                          +{allBadges.length - 8}
+                        </span>
+                        <span className="text-[10px] font-bold uppercase text-black/50">
+                          Lagi
+                        </span>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </div>
 
-            {/* SHARE DAMPAKMU */}
             <div>
               <h2 className="text-xl font-display font-black text-black mb-6 flex items-center gap-3 uppercase tracking-wide">
                 <div className="p-1.5 bg-orange border-2 border-black rounded-lg shadow-[3px_3px_0_#0f0f0f]">
@@ -310,7 +311,6 @@ export default function DashboardPage() {
           </motion.div>
         </div>
 
-        {/* SECTION: TOMBOL AKSI BAWAH */}
         <motion.div
           variants={fadeIn("up", 0.5)}
           className="flex flex-col sm:flex-row gap-5 pt-8"

@@ -16,12 +16,11 @@ import {
 
 import PageWrapper from "@/components/layout/PageWrapper";
 import { useUserStore } from "@/store/useUserStore";
-import { provinces } from "@/data/provinces";
-import { missions } from "@/data/missions";
 import { threatLevelLabel, difficultyLabel } from "@/utils/formatters";
 import { getMissionUnlockStatus } from "@/utils/achievements";
 import ProgressRing from "@/components/ui/ProgressRing";
 import { fadeIn, staggerContainer } from "@/utils/motion-variants";
+import { useProvince } from "@/hooks/useProvinces";
 
 export default function ProvincePage() {
   const { provinceId } = useParams();
@@ -29,44 +28,53 @@ export default function ProvincePage() {
   const { completedMissions, getProvinceProgress, getProvinceMissionsDone } =
     useUserStore();
 
-  const province = provinces.find((p) => p.id === provinceId);
-  if (!province) {
+  const { data: province, isLoading, isError } = useProvince(provinceId);
+
+  if (isLoading) {
     return (
-      <PageWrapper className="min-h-screen flex items-center justify-center pt-16 md:pt-20">
-        <div className="text-center">
-          <p className="text-8xl mb-4 grayscale opacity-50">🏝️</p>
-          <h2 className="font-heading text-3xl font-bold text-gray-800 mb-2">
+      <PageWrapper className="min-h-screen bg-white bg-grid-pattern flex items-center justify-center pt-16 md:pt-20">
+        <div className="text-center animate-wiggle bg-yellow border-3 border-black shadow-hard p-10 rounded-4xl">
+          <p className="text-8xl mb-6">🏝️</p>
+          <h2 className="font-display text-2xl font-bold text-black">
+            Memuat Data Provinsi...
+          </h2>
+        </div>
+      </PageWrapper>
+    );
+  }
+
+  if (isError || !province) {
+    return (
+      <PageWrapper className="min-h-screen bg-white bg-grid-pattern flex items-center justify-center pt-16 md:pt-20">
+        <div className="text-center bg-pink border-3 border-black shadow-hard p-10 rounded-4xl">
+          <p className="text-8xl mb-6 grayscale opacity-80">🏝️</p>
+          <h2 className="font-display text-3xl font-bold text-black mb-6">
             Provinsi Tidak Ditemukan
           </h2>
           <Link
-            to="/map"
-            className="text-primary-600 hover:underline font-medium"
+            href="/map"
+            className="inline-flex items-center gap-2 bg-white border-3 border-black text-black font-display font-bold px-6 py-3 rounded-2xl shadow-hard hover:-translate-x-1 hover:-translate-y-1 transition-all active:translate-x-0 active:translate-y-0 active:shadow-none"
           >
-            ← Kembali ke Peta
+            <ArrowLeft size={20} strokeWidth={3} /> Kembali ke Peta
           </Link>
         </div>
       </PageWrapper>
     );
   }
 
-  const progress = getProvinceProgress(provinceId, province.missions.length);
+  const missionsList = province.missions || [];
+  const progress = getProvinceProgress(provinceId, missionsList.length);
   const doneMissions = getProvinceMissionsDone(provinceId);
   const threat = threatLevelLabel(province.threatLevel);
   const unlockStatuses = getMissionUnlockStatus(
-    province.missions,
+    missionsList.map((m) => m.id),
     completedMissions,
     provinceId,
   );
 
   return (
-    <PageWrapper className="min-h-screen bg-slate-50 pt-16 md:pt-20 pb-24 md:pb-12">
-      {/* Dynamic Header */}
-      <div className="relative overflow-hidden bg-slate-900 text-white pb-24 -mt-20 pt-32 rounded-b-[3rem] shadow-2xl z-0">
-        <div
-          className={`absolute inset-0 bg-linear-to-br from-emerald-900 to-teal-900 opacity-90`}
-        />
-
-        {/* Abstract Pattern Overlay */}
+    <PageWrapper className="min-h-screen bg-white bg-grid-pattern pt-16 md:pt-20 pb-24 md:pb-12 text-black">
+      <div className="relative overflow-hidden bg-mint border-b-[3px] border-black pb-24 -mt-20 pt-32 rounded-b-4xl shadow-hard z-0">
         <svg
           className="absolute inset-0 w-full h-full opacity-10 pointer-events-none"
           xmlns="http://www.w3.org/2000/svg"
@@ -81,7 +89,7 @@ export default function ProvincePage() {
           >
             <path
               d="M0 40L40 0H20L0 20M40 40V20L20 40"
-              stroke="white"
+              stroke="black"
               strokeWidth="2"
               fill="none"
             />
@@ -89,25 +97,20 @@ export default function ProvincePage() {
           <rect width="100%" height="100%" fill="url(#hero-pattern)" />
         </svg>
 
-        <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-teal-500/20 rounded-full blur-3xl translate-y-1/3 -translate-x-1/4 pointer-events-none" />
-
         <div className="relative z-10 max-w-5xl mx-auto px-4">
           <button
             onClick={() => router.push("/map")}
-            className="flex items-center gap-2 text-white/70 hover:text-white mb-8 transition-colors group"
+            className="flex items-center gap-2 bg-white border-3 border-black text-black font-display font-bold px-4 py-2 rounded-2xl shadow-hard hover:-translate-x-1 hover:-translate-y-1 transition-all active:translate-x-0 active:translate-y-0 active:shadow-none mb-8 w-max"
           >
-            <div className="bg-white/10 p-2 rounded-full group-hover:bg-white/20 transition-colors">
-              <ArrowLeft size={18} />
-            </div>
-            <span className="font-medium">Kembali ke Peta</span>
+            <ArrowLeft size={18} strokeWidth={3} />
+            <span className="mt-0.5">Kembali ke Peta</span>
           </button>
 
           <div className="flex flex-col md:flex-row items-start md:items-center gap-8">
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="text-8xl md:text-9xl filter drop-shadow-2xl"
+              className="text-8xl md:text-9xl bg-white border-3 border-black shadow-hard-xl rounded-4xl p-6 animate-float"
             >
               {province.illustration}
             </motion.div>
@@ -117,15 +120,15 @@ export default function ProvincePage() {
                 <motion.div
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
-                  className="flex items-center gap-2 text-emerald-300 font-bold tracking-wider text-sm uppercase mb-2"
+                  className="inline-flex items-center gap-2 bg-yellow border-3 border-black shadow-hard px-4 py-1.5 rounded-2xl font-display font-bold text-sm text-black mb-4"
                 >
-                  <MapPin size={16} /> {province.region}
+                  <MapPin size={18} strokeWidth={2.5} /> {province.region}
                 </motion.div>
                 <motion.h1
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.1 }}
-                  className="font-heading text-4xl md:text-6xl font-black text-white leading-tight"
+                  className="font-display text-4xl md:text-7xl font-black text-black leading-tight uppercase tracking-tight"
                 >
                   {province.name}
                 </motion.h1>
@@ -135,12 +138,12 @@ export default function ProvincePage() {
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.2 }}
-                className="flex flex-wrap gap-2"
+                className="flex flex-wrap gap-3 pt-2"
               >
                 {province.ecosystems.map((eco, i) => (
                   <span
                     key={i}
-                    className="bg-white/10 hover:bg-white/20 border border-white/10 text-white text-sm px-4 py-1.5 rounded-full backdrop-blur-sm transition-colors cursor-default"
+                    className="bg-white border-3 border-black text-black font-display font-bold text-sm px-5 py-2 rounded-2xl shadow-hard hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform cursor-default"
                   >
                     {eco}
                   </span>
@@ -152,22 +155,22 @@ export default function ProvincePage() {
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.3 }}
-              className="bg-white/10 border border-white/20 backdrop-blur-md p-6 rounded-3xl text-center min-w-35"
+              className="bg-yellow border-3 border-black shadow-hard p-6 rounded-4xl text-center min-w-40 transform hover:rotate-3 transition-transform"
             >
               <ProgressRing
                 progress={progress}
-                size={80}
-                color="#34d399"
-                strokeWidth={6}
-                trackColor="rgba(255,255,255,0.1)"
+                size={90}
+                color="#0f0f0f"
+                strokeWidth={8}
+                trackColor="#0f0f0f20"
               >
                 <div className="flex flex-col items-center">
-                  <span className="text-2xl font-black text-white">
+                  <span className="text-3xl font-display font-black text-black">
                     {Math.round(progress)}%
                   </span>
                 </div>
               </ProgressRing>
-              <p className="text-emerald-200 text-xs font-bold uppercase mt-2">
+              <p className="text-black text-sm font-display font-bold uppercase mt-3 tracking-widest">
                 Explored
               </p>
             </motion.div>
@@ -175,8 +178,7 @@ export default function ProvincePage() {
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 -mt-16 relative z-10 space-y-8">
-        {/* Info Cards */}
+      <div className="max-w-5xl mx-auto px-4 -mt-10 relative z-10 space-y-8">
         <motion.div
           variants={staggerContainer()}
           initial="hidden"
@@ -185,40 +187,43 @@ export default function ProvincePage() {
         >
           <motion.div
             variants={fadeIn("up", 0.1)}
-            className="md:col-span-2 bg-white rounded-3xl p-8 shadow-xl shadow-slate-200/50 border border-slate-100 flex flex-col justify-center"
+            className="md:col-span-2 bg-white rounded-4xl p-8 border-3 border-black shadow-hard flex flex-col justify-center"
           >
-            <h3 className="font-heading text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
-              <Info size={20} className="text-emerald-500" /> Tentang Provinsi
+            <h3 className="font-display text-2xl font-bold text-black mb-4 flex items-center gap-3">
+              <span className="bg-green border-3 border-black p-2 rounded-xl shadow-hard">
+                <Info size={24} strokeWidth={3} />
+              </span>
+              Tentang Provinsi
             </h3>
-            <p className="text-slate-600 leading-relaxed text-lg">
+            <p className="text-black font-medium leading-relaxed text-lg border-l-4 border-black pl-4 ml-2">
               {province.description}
             </p>
           </motion.div>
 
           <motion.div
             variants={fadeIn("up", 0.2)}
-            className="bg-white rounded-3xl p-8 shadow-xl shadow-slate-200/50 border border-slate-100 space-y-6"
+            className="bg-purple rounded-4xl p-8 border-3 border-black shadow-hard space-y-8"
           >
             <div>
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+              <h3 className="font-display text-sm font-bold text-black/70 uppercase tracking-widest mb-3">
                 Status Konservasi
               </h3>
               <div
-                className={`inline-flex items-center gap-2 ${threat.bg} ${threat.color} text-sm font-bold px-4 py-2 rounded-xl w-full justify-center`}
+                className={`inline-flex items-center gap-2 ${threat.bg} ${threat.color} font-display font-bold px-4 py-3 rounded-2xl w-full justify-center border-3 border-black shadow-hard`}
               >
-                <Shield size={16} />
+                <Shield size={20} strokeWidth={2.5} />
                 {threat.text}
               </div>
             </div>
             <div>
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+              <h3 className="font-display text-sm font-bold text-black/70 uppercase tracking-widest mb-3">
                 Fauna Ikonik
               </h3>
               <div className="flex flex-wrap gap-2">
                 {province.species.map((sp, i) => (
                   <span
                     key={i}
-                    className="bg-slate-100 text-slate-600 text-xs font-bold px-2.5 py-1 rounded-lg"
+                    className="bg-white border-[2.5px] border-black text-black font-display font-bold text-xs px-3 py-1.5 rounded-xl shadow-[2px_2px_0px_#0f0f0f]"
                   >
                     {sp}
                   </span>
@@ -228,49 +233,52 @@ export default function ProvincePage() {
           </motion.div>
         </motion.div>
 
-        {/* Fun Fact Ribbon */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="bg-linear-to-r from-amber-100 via-yellow-50 to-amber-100 border border-amber-200/50 rounded-2xl p-6 flex flex-col md:flex-row items-center gap-4 shadow-sm"
+          className="bg-pink border-3 border-black rounded-4xl p-6 flex flex-col md:flex-row items-center gap-6 shadow-hard"
         >
-          <div className="bg-amber-400 text-white p-3 rounded-xl shrink-0 shadow-lg shadow-amber-400/40">
-            <Star size={24} fill="currentColor" />
+          <div className="bg-yellow border-3 border-black text-black p-4 rounded-2xl shrink-0 shadow-hard animate-wiggle">
+            <Star size={32} strokeWidth={2.5} fill="currentColor" />
           </div>
-          <p className="text-amber-900 font-medium text-base md:text-lg">
-            <strong>Tahukah kamu?</strong> {province.funFact}
+          <p className="text-black font-medium text-lg leading-relaxed">
+            <strong className="font-display font-black text-xl block mb-1 uppercase tracking-wide">
+              Tahukah kamu?
+            </strong>
+            {province.funFact}
           </p>
         </motion.div>
 
-        {/* Mission Path */}
-        <div className="pt-8 pb-12">
-          <div className="flex items-center justify-between mb-12">
-            <h3 className="font-heading text-3xl font-bold text-slate-800 flex items-center gap-3">
-              <span className="bg-emerald-100 text-emerald-600 p-3 rounded-2xl">
-                <MapPin size={28} />
+        <div className="pt-12 pb-12">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-12 gap-4">
+            <h3 className="font-display text-4xl font-black text-black flex items-center gap-4 uppercase tracking-tight">
+              <span className="bg-green border-3 border-black p-3.5 rounded-2xl shadow-hard">
+                <MapPin size={32} strokeWidth={3} />
               </span>
               Jalur Misi
             </h3>
-            <span className="bg-slate-900 text-white font-bold px-6 py-2 rounded-full text-sm shadow-xl shadow-slate-900/20">
+            <span className="bg-yellow border-3 border-black text-black font-display font-bold px-8 py-3 rounded-2xl shadow-hard text-lg">
               {doneMissions} / {province.missions.length} Selesai
             </span>
           </div>
 
-          <div className="relative pl-0 md:pl-0 space-y-12 md:space-y-0">
-            <div className="grid gap-8">
-              {province.missions.map((missionId, i) => {
-                const mission = missions[missionId];
+          <div className="relative pl-0 space-y-10">
+            <div className="grid gap-10">
+              {missionsList.map((mission, i) => {
+                const missionId = mission.id;
                 const status = unlockStatuses[i];
                 const diff = difficultyLabel(mission.difficulty);
 
-                // Determine border and shadow classes based on status
-                const cardClasses =
-                  status === "completed"
-                    ? "border-emerald-200 shadow-xl shadow-emerald-500/10 ring-4 ring-emerald-50"
-                    : status === "unlocked"
-                      ? "border-blue-200 shadow-xl shadow-blue-500/10 hover:ring-4 hover:ring-blue-50 cursor-pointer"
-                      : "border-slate-100 opacity-60 grayscale cursor-not-allowed bg-slate-50";
+                const isCompleted = status === "completed";
+                const isUnlocked = status === "unlocked";
+                const isLocked = status === "locked";
+
+                const cardClasses = isCompleted
+                  ? "bg-mint border-black shadow-hard hover:-translate-x-1 hover:-translate-y-1"
+                  : isUnlocked
+                    ? "bg-white border-black shadow-hard hover:-translate-x-1 hover:-translate-y-1 hover:bg-yellow cursor-pointer"
+                    : "bg-gray-100 border-black opacity-80 grayscale cursor-not-allowed shadow-none translate-x-1 translate-y-1";
 
                 return (
                   <motion.div
@@ -281,68 +289,73 @@ export default function ProvincePage() {
                     transition={{ delay: i * 0.15 }}
                     className="relative"
                   >
-                    {/* Connector Line (Vertical) */}
                     {i < province.missions.length - 1 && (
-                      <div className="absolute left-8 top-24 -bottom-8 w-0.5 bg-slate-200 z-0 hidden md:block ml-0.5 border-l-2 border-dashed border-slate-300" />
+                      <div className="absolute left-10 top-28 -bottom-12 w-0.75 bg-black z-0 hidden md:block ml-0.5 border-dashed" />
                     )}
 
                     <div
-                      className={`relative bg-white rounded-4xl p-6 md:p-8 border-2 transition-all duration-300 transform ${cardClasses}`}
+                      className={`relative rounded-4xl p-6 md:p-8 border-3 transition-all duration-300 transform ${cardClasses}`}
                     >
-                      {status !== "locked" ? (
+                      {!isLocked ? (
                         <Link
                           href={`/mission/${provinceId}/${missionId}`}
                           className="flex flex-col md:flex-row items-center gap-8 group"
                         >
-                          <div className="relative z-10">
+                          <div className="relative z-10 shrink-0">
                             <div
-                              className={`w-20 h-20 rounded-3xl bg-linear-to-br ${mission.color} flex items-center justify-center text-4xl shadow-lg ring-4 ring-white group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300`}
+                              className={`w-24 h-24 rounded-3xl bg-white border-3 border-black flex items-center justify-center text-5xl shadow-hard-lg group-hover:scale-110 group-hover:rotate-6 group-hover:bg-pink transition-all duration-300`}
                             >
                               {mission.icon}
                             </div>
-                            {status === "completed" && (
-                              <div className="absolute -bottom-2 -right-2 bg-emerald-500 text-white p-1.5 rounded-full border-2 border-white shadow-md">
-                                <CheckCircle2 size={16} />
+                            {isCompleted && (
+                              <div className="absolute -bottom-3 -right-3 bg-green text-black p-2.5 rounded-full border-3 border-black shadow-hard">
+                                <CheckCircle2 size={24} strokeWidth={3} />
                               </div>
                             )}
                           </div>
 
-                          <div className="flex-1 text-center md:text-left space-y-3">
+                          <div className="flex-1 text-center md:text-left space-y-4">
                             <div className="flex items-center justify-center md:justify-start gap-3 flex-wrap">
-                              <h4 className="font-heading text-2xl font-bold text-slate-800">
+                              <h4 className="font-display text-3xl font-black text-black uppercase tracking-tight">
                                 {mission.title}
                               </h4>
                               <span
-                                className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${diff.bg} ${diff.color}`}
+                                className={`px-4 py-1.5 rounded-xl border-3 border-black shadow-[3px_3px_0px_#0f0f0f] text-sm font-display font-bold uppercase ${diff.bg} ${diff.color}`}
                               >
                                 {diff.text}
                               </span>
                             </div>
-                            <p className="text-slate-500 font-medium text-lg leading-relaxed">
+                            <p className="text-black/80 font-medium text-lg leading-relaxed max-w-2xl">
                               {mission.description}
                             </p>
 
-                            <div className="flex items-center justify-center md:justify-start gap-6 text-sm text-slate-400 pt-2 font-medium">
-                              <span className="flex items-center gap-1.5 text-amber-500 bg-amber-50 px-3 py-1 rounded-lg">
-                                <Star size={16} fill="currentColor" /> +
-                                {mission.xpReward} XP
+                            <div className="flex items-center justify-center md:justify-start gap-4 text-sm pt-2">
+                              <span className="flex items-center gap-2 bg-yellow border-[2.5px] border-black shadow-[3px_3px_0px_#0f0f0f] text-black font-display font-bold px-4 py-2 rounded-xl">
+                                <Star
+                                  size={18}
+                                  strokeWidth={2.5}
+                                  fill="currentColor"
+                                />{" "}
+                                +{mission.xpReward} XP
                               </span>
-                              <span className="flex items-center gap-1.5 bg-slate-100 px-3 py-1 rounded-lg text-slate-500">
-                                <Info size={16} /> {mission.timeEstimate}
+                              <span className="flex items-center gap-2 bg-white border-[2.5px] border-black shadow-[3px_3px_0px_#0f0f0f] text-black font-display font-bold px-4 py-2 rounded-xl">
+                                <Info size={18} strokeWidth={2.5} />{" "}
+                                {mission.timeEstimate}
                               </span>
                             </div>
                           </div>
 
-                          <div className="shrink-0">
+                          <div className="shrink-0 mt-6 md:mt-0">
                             <div
-                              className={`w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300
-                                    ${status === "completed" ? "bg-emerald-100 text-emerald-600" : "bg-slate-900 text-white shadow-xl shadow-slate-900/30 group-hover:scale-110"}`}
+                              className={`w-16 h-16 rounded-2xl flex items-center justify-center border-3 border-black shadow-hard transition-all duration-300
+                                    ${isCompleted ? "bg-green text-black" : "bg-orange text-black group-hover:scale-110"}`}
                             >
-                              {status === "completed" ? (
-                                <CheckCircle2 size={28} />
+                              {isCompleted ? (
+                                <CheckCircle2 size={32} strokeWidth={3} />
                               ) : (
                                 <Play
-                                  size={24}
+                                  size={30}
+                                  strokeWidth={2.5}
                                   fill="currentColor"
                                   className="ml-1"
                                 />
@@ -351,15 +364,15 @@ export default function ProvincePage() {
                           </div>
                         </Link>
                       ) : (
-                        <div className="flex flex-col md:flex-row items-center gap-8 opacity-60">
-                          <div className="w-20 h-20 rounded-3xl bg-slate-200 flex items-center justify-center text-slate-400 ring-4 ring-white">
-                            <Lock size={32} />
+                        <div className="flex flex-col md:flex-row items-center gap-8 opacity-70">
+                          <div className="w-24 h-24 rounded-3xl bg-gray-200 border-3 border-black flex items-center justify-center text-black shadow-none shrink-0">
+                            <Lock size={36} strokeWidth={2.5} />
                           </div>
                           <div className="flex-1 text-center md:text-left">
-                            <h4 className="font-heading text-2xl font-bold text-slate-400 mb-2">
+                            <h4 className="font-display text-3xl font-black text-black mb-3 uppercase tracking-tight">
                               {mission.title}
                             </h4>
-                            <p className="text-slate-400 font-medium bg-slate-100 px-4 py-2 rounded-xl inline-block">
+                            <p className="text-black font-display font-bold bg-white border-3 border-black shadow-hard px-5 py-2.5 rounded-2xl inline-block">
                               🔒 Selesaikan misi sebelumnya untuk membuka
                             </p>
                           </div>

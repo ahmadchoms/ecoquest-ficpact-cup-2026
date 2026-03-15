@@ -28,6 +28,17 @@ export const useMissions = (filters) => {
   });
 };
 
+export const useMission = (id) => {
+  return useQuery({
+    queryKey: adminMissionKeys.detail(id),
+    queryFn: async () => {
+      const response = await AdminAPI.getMission(id);
+      return response?.data;
+    },
+    enabled: !!id,
+  });
+};
+
 export const useProvinceOptions = () => {
   return useQuery({
     queryKey: ["admin", "provinces", "options"],

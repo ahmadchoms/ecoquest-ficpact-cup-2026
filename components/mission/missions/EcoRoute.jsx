@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, RefreshCw, Zap } from "lucide-react";
-import { calculateProgressReward } from "@/data/missions";
+import { calculateProgressReward } from "@/utils/calculations";
 
 const VEHICLES = {
   walk: { name: "Jalan Kaki", emoji: "🚶", emissionPerTile: 0, color: "bg-green-400" },
