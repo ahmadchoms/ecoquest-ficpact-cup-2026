@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { AdminAPI } from "@/lib/api/admin";
+import { API } from "@/lib/api/api";
 
 export const adminQueryKeys = {
   stats: ["admin", "stats"],
@@ -10,7 +10,7 @@ export const useAdmin = () => {
   const statsQuery = useQuery({
     queryKey: adminQueryKeys.stats,
     queryFn: async () => {
-      const { data } = await AdminAPI.getStats();
+      const { data } = await API.getStats();
       return data;
     },
     staleTime: 1000 * 60 * 5, // 5 minutes fresh
@@ -19,7 +19,7 @@ export const useAdmin = () => {
   const activitiesQuery = useQuery({
     queryKey: adminQueryKeys.activities,
     queryFn: async () => {
-      const { data } = await AdminAPI.getActivities();
+      const { data } = await API.getActivities();
       return data;
     },
     staleTime: 1000 * 60, // 1 minute

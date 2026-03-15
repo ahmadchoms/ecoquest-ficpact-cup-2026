@@ -67,7 +67,7 @@ export default function ShopPage() {
 
         <motion.div
           variants={fadeIn("up", 0.2)}
-          className="h-[4px] w-full bg-black rounded-full"
+          className="h-1 w-full bg-black rounded-full"
         />
 
         <motion.div variants={fadeIn("up", 0.25)}>
@@ -76,7 +76,7 @@ export default function ShopPage() {
 
         <motion.div
           variants={fadeIn("up", 0.3)}
-          className="h-[4px] w-full bg-black rounded-full"
+          className="h-1 w-full bg-black rounded-full"
         />
 
         <motion.div variants={fadeIn("up", 0.35)}>

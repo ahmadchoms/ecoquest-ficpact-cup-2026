@@ -79,7 +79,7 @@ export default function HeroSection({ firstVisit }) {
               variants={fadeIn("up", 0.6)}
               className="flex flex-wrap gap-3 mt-7"
             >
-              {["🌿 Gratis Selamanya", "🏆 5000+ Pemain", "🗺️ 34 Provinsi"].map(
+              {["🌿 Gratis Selamanya", "🏆 5000+ Pemain", "🗺️ 38 Provinsi"].map(
                 (t) => (
                   <EcoBadge key={t} variant="mint">
                     {t}

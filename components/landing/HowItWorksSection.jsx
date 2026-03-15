@@ -4,6 +4,7 @@ import NumBadge from "./NumBadge";
 import IlluMap from "./illustrations/IlluMap";
 import IlluTarget from "./illustrations/IlluTarget";
 import IlluTrophy from "./illustrations/IlluTrophy";
+import { howItWorksSteps } from "@/data/landing";
 const illustrations = {
   IlluMap: <IlluMap className="w-full h-full block" />,
   IlluTarget: <IlluTarget className="w-[200px] h-[200px] animate-float" />,

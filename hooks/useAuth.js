@@ -1,5 +1,5 @@
 import { useQueryClient, useMutation } from "@tanstack/react-query";
-import { authAPI } from "@/lib/api/auth";
+import { API } from "@/lib/api/auth";
 
 export const authKeys = {
   all: ["auth"],
@@ -11,7 +11,7 @@ export const authKeys = {
 export const useRegister = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload) => authAPI.register(payload),
+    mutationFn: (payload) => API.register(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: authKeys.all });
     },
@@ -21,13 +21,13 @@ export const useRegister = () => {
 export const useForgotPassword = (payload) => {
   return useMutation({
     mutationKey: authKeys.forgotPassword(),
-    mutationFn: () => authAPI.forgot_password(payload),
+    mutationFn: () => API.forgot_password(payload),
   });
 };
 
 export const useResetPassword = (payload) => {
   return useMutation({
     mutationKey: authKeys.resetPassword(),
-    mutationFn: () => authAPI.reset_password(payload),
+    mutationFn: () => API.reset_password(payload),
   });
 };

@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { AdminAPI } from "@/lib/api/admin";
+import { API } from "@/lib/api/api";
 
 export const adminBadgeKeys = {
   all: ["admin", "badges"],
@@ -21,7 +21,7 @@ export const useBadges = (filters) => {
   return useQuery({
     queryKey: adminBadgeKeys.list(filters),
     queryFn: async () => {
-      const response = await AdminAPI.getBadges(filters);
+      const response = await API.getBadges(filters);
       return response;
     },
     placeholderData: (prev) => prev,
@@ -32,7 +32,7 @@ export const useBadge = (id) => {
   return useQuery({
     queryKey: adminBadgeKeys.detail(id),
     queryFn: async () => {
-      const response = await AdminAPI.getBadge(id);
+      const response = await API.getBadge(id);
       return response?.data;
     },
     enabled: !!id,
@@ -42,7 +42,7 @@ export const useBadge = (id) => {
 export const useCreateAdminBadge = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data) => AdminAPI.createBadge(data),
+    mutationFn: (data) => API.createBadge(data),
     onSuccess: () => invalidateBadgeQueries(queryClient),
   });
 };
@@ -50,15 +50,16 @@ export const useCreateAdminBadge = () => {
 export const useUpdateAdminBadge = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }) => AdminAPI.updateBadge(id, data),
-    onSuccess: (_, variables) => invalidateBadgeQueries(queryClient, variables.id),
+    mutationFn: ({ id, data }) => API.updateBadge(id, data),
+    onSuccess: (_, variables) =>
+      invalidateBadgeQueries(queryClient, variables.id),
   });
 };
 
 export const useDeleteAdminBadge = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id) => AdminAPI.deleteBadge(id),
+    mutationFn: (id) => API.deleteBadge(id),
     onSuccess: () => invalidateBadgeQueries(queryClient),
   });
 };

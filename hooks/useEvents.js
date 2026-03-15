@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { AdminAPI } from "@/lib/api/admin";
-import { UserAPI } from "@/lib/api/user";
+import { API } from "@/lib/api/api";
 
 export const adminEventKeys = {
   all: ["admin", "events"],
@@ -21,7 +20,7 @@ export const useEvents = (filters) => {
   return useQuery({
     queryKey: adminEventKeys.list(filters),
     queryFn: async () => {
-      const response = await AdminAPI.getEvents(filters);
+      const response = await API.getEvents(filters);
       return response;
     },
     placeholderData: (prev) => prev,
@@ -32,7 +31,7 @@ export const useActiveEvents = () => {
   return useQuery({
     queryKey: ["user", "events", "active"],
     queryFn: async () => {
-      const response = await UserAPI.getActiveEvents();
+      const response = await API.getActiveEvents();
       return response.data;
     },
     staleTime: 5 * 60 * 1000,
@@ -42,7 +41,7 @@ export const useActiveEvents = () => {
 export const useCreateAdminEvent = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data) => AdminAPI.createEvent(data),
+    mutationFn: (data) => API.createEvent(data),
     onSuccess: () => invalidateEventQueries(queryClient),
   });
 };
@@ -50,7 +49,7 @@ export const useCreateAdminEvent = () => {
 export const useUpdateAdminEvent = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }) => AdminAPI.updateEvent(id, data),
+    mutationFn: ({ id, data }) => API.updateEvent(id, data),
     onSuccess: (_, variables) =>
       invalidateEventQueries(queryClient, variables.id),
   });
@@ -59,7 +58,7 @@ export const useUpdateAdminEvent = () => {
 export const useDeleteAdminEvent = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id) => AdminAPI.deleteEvent(id),
+    mutationFn: (id) => API.deleteEvent(id),
     onSuccess: () => invalidateEventQueries(queryClient),
   });
 };

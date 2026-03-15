@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { AdminAPI } from "@/lib/api/admin";
+import { API } from "@/lib/api/api";
 
 // Query Keys
 export const adminUserKeys = {
@@ -24,7 +24,7 @@ const invalidateUserQueries = (queryClient, userId = null) => {
 export const useUsers = (filters) => {
   return useQuery({
     queryKey: adminUserKeys.list(filters),
-    queryFn: () => AdminAPI.getUsers(filters),
+    queryFn: () => API.getUsers(filters),
     // placeholderData menggantikan keepPreviousData (deprecated di v5)
     placeholderData: (prev) => prev,
   });
@@ -34,7 +34,7 @@ export const useUsers = (filters) => {
 export const useCreateAdminUser = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data) => AdminAPI.createUser(data),
+    mutationFn: (data) => API.createUser(data),
     onSuccess: () => invalidateUserQueries(queryClient),
   });
 };
@@ -43,7 +43,7 @@ export const useCreateAdminUser = () => {
 export const useUpdateAdminUser = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }) => AdminAPI.updateUser(id, data),
+    mutationFn: ({ id, data }) => API.updateUser(id, data),
     onSuccess: (_, { id }) => invalidateUserQueries(queryClient, id),
   });
 };
@@ -52,7 +52,7 @@ export const useUpdateAdminUser = () => {
 export const useDeleteAdminUser = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id) => AdminAPI.deleteUser(id),
+    mutationFn: (id) => API.deleteUser(id),
     onSuccess: () => invalidateUserQueries(queryClient),
   });
 };

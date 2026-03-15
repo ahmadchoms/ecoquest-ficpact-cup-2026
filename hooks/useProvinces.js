@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { AdminAPI } from "@/lib/api/admin";
+import { API } from "@/lib/api/api";
 
 export const adminProvinceKeys = {
   all: ["admin", "provinces"],
@@ -21,7 +21,7 @@ export const useProvinces = (filters) => {
   return useQuery({
     queryKey: adminProvinceKeys.list(filters),
     queryFn: async () => {
-      const response = await AdminAPI.getProvinces(filters);
+      const response = await API.getProvinces(filters);
       return response;
     },
     placeholderData: (prev) => prev,
@@ -32,7 +32,7 @@ export const useProvince = (id) => {
   return useQuery({
     queryKey: adminProvinceKeys.detail(id),
     queryFn: async () => {
-      const response = await AdminAPI.getProvince(id);
+      const response = await API.getProvince(id);
       return response?.data;
     },
     enabled: !!id,
@@ -42,7 +42,7 @@ export const useProvince = (id) => {
 export const useUpdateAdminProvince = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }) => AdminAPI.updateProvince(id, data),
+    mutationFn: ({ id, data }) => API.updateProvince(id, data),
     onSuccess: (_, variables) =>
       invalidateProvinceQueries(queryClient, variables.id),
   });
@@ -51,7 +51,7 @@ export const useUpdateAdminProvince = () => {
 export const useDeleteAdminProvince = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id) => AdminAPI.deleteProvince(id),
+    mutationFn: (id) => API.deleteProvince(id),
     onSuccess: () => invalidateProvinceQueries(queryClient),
   });
 };
