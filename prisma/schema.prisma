@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,6 +6,168 @@ datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id                 String              @id @default(cuid())
+  email              String              @unique
+  password           String
+  username           String              @unique
+  xp                 Int                 @default(0)
+  level              Int                 @default(1)
+  profileImage       String?
+  bio                String?
+  activeBannerId     String?
+  activeBorderId     String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  name               String
+  points             Int                 @default(0)
+  role               Role                @default(USER)
+  status             UserStatus          @default(ACTIVE)
+  accounts           Account[]
+  missionCompletions MissionCompletion[]
+  sessions           Session[]
+  userItems          UserItem[]
+  badges             Badge[]             @relation("UserBadges")
+}
+
+model Province {
+  id          String      @id @default(cuid())
+  name        String      @unique
+  ecosystems  String[]
+  description String?
+  funFact     String?
+  species     String[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  region      Region
+  threatLevel Difficulty?
+  missions    Mission[]
+}
+
+model Mission {
+  id            String              @id @default(cuid())
+  title         String
+  subtitle      String?
+  description   String
+  xpReward      Int
+  timeEstimate  String?
+  icon          String?
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  provinceId    String
+  badgeRewardId String?
+  pointsReward  Int
+  status        MissionStatus       @default(ACTIVE)
+  type          MissionType
+  difficulty    Difficulty
+  category      MissionCategory
+  badgeReward   Badge?              @relation(fields: [badgeRewardId], references: [id])
+  province      Province            @relation(fields: [provinceId], references: [id], onDelete: Cascade)
+  completions   MissionCompletion[]
+}
+
+model Badge {
+  id          String           @id @default(cuid())
+  name        String           @unique
+  description String
+  icon        String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  rarity      Rarity
+  category    MissionCategory?
+  missions    Mission[]
+  users       User[]           @relation("UserBadges")
+}
+
+model MissionCompletion {
+  id           String   @id @default(cuid())
+  xpEarned     Int
+  completedAt  DateTime @default(now())
+  createdAt    DateTime @default(now())
+  userId       String
+  missionId    String
+  pointsEarned Int      @default(0)
+  mission      Mission  @relation(fields: [missionId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, missionId])
+}
+
+model Event {
+  id          String     @id @default(cuid())
+  name        String
+  description String?
+  bannerUrl   String?
+  startDate   DateTime
+  endDate     DateTime
+  isActive    Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  items       ShopItem[]
+}
+
+model ShopItem {
+  id          String       @id @default(cuid())
+  name        String
+  description String?
+  price       Int
+  type        ShopItemType
+  content     String
+  previewUrl  String?
+  isActive    Boolean      @default(true)
+  eventId     String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  rarity      String       @default("common")
+  event       Event?       @relation(fields: [eventId], references: [id])
+  purchases   UserItem[]
+}
+
+model UserItem {
+  id         String   @id @default(cuid())
+  userId     String
+  itemId     String
+  acquiredAt DateTime @default(now())
+  item       ShopItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, itemId])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
 }
 
 enum Role {
@@ -77,177 +233,4 @@ enum Region {
 enum ShopItemType {
   BANNER
   BORDER
-}
-
-model User {
-  id           String     @id @default(cuid())
-  email        String     @unique
-  password     String
-  name         String
-  username     String     @unique
-  xp           Int        @default(0)
-  points       Int        @default(0)
-  level        Int        @default(1)
-  profileImage String?
-  bio          String?
-  role         Role       @default(USER)
-  status       UserStatus @default(ACTIVE)
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-
-  accounts           Account[]
-  sessions           Session[]
-  badges             Badge[]             @relation("UserBadges")
-  missionCompletions MissionCompletion[]
-  userItems          UserItem[]
-}
-
-model Province {
-  id          String      @id @default(cuid())
-  name        String      @unique
-  region      Region
-  ecosystems  String[]
-  threatLevel Difficulty?
-  description String?
-  funFact     String?
-  species     String[]
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-
-  missions Mission[]
-}
-
-model Mission {
-  id           String          @id @default(cuid())
-  title        String
-  subtitle     String?
-  description  String
-  type         MissionType
-  difficulty   Difficulty
-  status       MissionStatus   @default(ACTIVE)
-  pointsReward Int
-  xpReward     Int
-  timeEstimate String?
-  category     MissionCategory
-  icon         String?
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime        @updatedAt
-
-  provinceId String
-  province   Province @relation(fields: [provinceId], references: [id], onDelete: Cascade)
-
-  badgeRewardId String?
-  badgeReward   Badge?  @relation(fields: [badgeRewardId], references: [id], onDelete: SetNull)
-
-  completions MissionCompletion[]
-}
-
-model Badge {
-  id          String           @id @default(cuid())
-  name        String           @unique
-  description String
-  icon        String?
-  rarity      Rarity
-  category    MissionCategory?
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-
-  users    User[]    @relation("UserBadges")
-  missions Mission[]
-}
-
-model MissionCompletion {
-  id          String   @id @default(cuid())
-  xpEarned    Int
-  completedAt DateTime @default(now())
-  createdAt   DateTime @default(now())
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  missionId String
-  mission   Mission @relation(fields: [missionId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, missionId])
-}
-
-model Event {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  bannerUrl   String?
-  startDate   DateTime
-  endDate     DateTime
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  items ShopItem[]
-}
-
-model ShopItem {
-  id          String       @id @default(cuid())
-  name        String
-  description String?
-  price       Int
-  type        ShopItemType
-  content     String
-  previewUrl  String?
-  rarity      String       @default("common")
-  isActive    Boolean      @default(true)
-
-  eventId String?
-  event   Event?  @relation(fields: [eventId], references: [id], onDelete: SetNull)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  purchases UserItem[]
-}
-
-model UserItem {
-  id         String   @id @default(cuid())
-  userId     String
-  itemId     String
-  acquiredAt DateTime @default(now())
-
-  user User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  item ShopItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, itemId])
-}
-
-model Account {
-  id                String  @id @default(cuid())
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String? @db.Text
-  session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([provider, providerAccountId])
-}
-
-model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model VerificationToken {
-  identifier String
-  token      String   @unique
-  expires    DateTime
-
-  @@unique([identifier, token])
 }
