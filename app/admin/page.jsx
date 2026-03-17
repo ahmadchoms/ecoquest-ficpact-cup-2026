@@ -29,6 +29,7 @@ import {
   ResponsiveContainer,
   Cell,
 } from "recharts";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -37,11 +38,28 @@ export default function AdminDashboard() {
   // Modals & Action States
   const [isActivityModalOpen, setIsActivityModalOpen] = useState(false);
   const [expandedActivities, setExpandedActivities] = useState([]);
+  const [analyticsPeriod, setAnalyticsPeriod] = useState("Minggu Ini");
+  
+  // Map period label to API range parameter
+  const periodToRange = {
+    "Minggu Ini": "7d",
+    "Bulan Ini": "30d",
+    "Tahun Ini": "365d",
+  };
+  
+  const range = periodToRange[analyticsPeriod] || "7d";
+  const { data: analyticsData, isLoading: isAnalyticsLoading } = useAnalytics(range);
 
   const handleOpenActivities = () => {
     setIsActivityModalOpen(true);
     setExpandedActivities(activities || []);
   };
+
+  // Transform analytics trend data for chart
+  const xpDistribution = analyticsData?.trend || [];
+  
+  // Chart colors
+  const COLORS = ["#f5e642", "#b5f0c0", "#c9b8ff", "#ffcc80", "#ffa07a"];
 
   const uiStats = stats
     ? [
@@ -73,16 +91,6 @@ export default function AdminDashboard() {
     : [];
 
   const activityFeeds = activities || [];
-
-  const xpDistribution = [
-    { name: "Sen", value: 4000 },
-    { name: "Sel", value: 3000 },
-    { name: "Rab", value: 2000 },
-    { name: "Kam", value: 2780 },
-    { name: "Jum", value: 1890 },
-    { name: "Sab", value: 2390 },
-    { name: "Min", value: 3490 },
-  ];
 
   const handleGoToAnalytics = () => {
     router.push("/admin/analytics");
@@ -120,7 +128,6 @@ export default function AdminDashboard() {
     );
   }
 
-  const COLORS = ["#f5e642", "#b5f0c0", "#c9b8ff", "#ffcc80"];
 
   return (
     <div className="space-y-10">
@@ -176,9 +183,10 @@ export default function AdminDashboard() {
             <div className="w-40">
               <EcoSelect
                 icon={Calendar}
-                value="Bulan Ini"
-                onChange={() => {}}
+                value={analyticsPeriod}
+                onChange={(e) => setAnalyticsPeriod(e.target.value)}
                 options={[
+                  { label: "Minggu Ini", value: "Minggu Ini" },
                   { label: "Bulan Ini", value: "Bulan Ini" },
                   { label: "Tahun Ini", value: "Tahun Ini" },
                 ]}
@@ -187,51 +195,61 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div className="flex-1 w-full min-h-[300px] relative z-10">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={xpDistribution}>
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  vertical={false}
-                  stroke="#e2e8f0"
-                />
-                <XAxis
-                  dataKey="name"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fontSize: 10, fontWeight: 900, fill: "#64748b" }}
-                  dy={10}
-                />
-                <YAxis
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fontSize: 10, fontWeight: 900, fill: "#64748b" }}
-                />
-                <Tooltip
-                  cursor={{ fill: "rgba(0,0,0,0.05)" }}
-                  contentStyle={{
-                    borderRadius: "16px",
-                    border: "3px solid black",
-                    boxShadow: "4px 4px 0 black",
-                    fontFamily: "var(--font-body)",
-                    fontWeight: 900,
-                    textTransform: "uppercase",
-                    fontSize: "10px",
-                  }}
-                />
-                <Bar dataKey="value" radius={[8, 8, 0, 0]} barSize={40}>
-                  {xpDistribution.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={COLORS[index % COLORS.length]}
-                      stroke="black"
-                      strokeWidth={2}
-                    />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+          {isAnalyticsLoading ? (
+            <div className="flex-1 w-full min-h-[300px] flex items-center justify-center">
+              <Loader2 className="animate-spin text-slate-400" size={32} />
+            </div>
+          ) : xpDistribution && xpDistribution.length > 0 ? (
+            <div className="flex-1 w-full min-h-[300px] relative z-10">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={xpDistribution}>
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    vertical={false}
+                    stroke="#e2e8f0"
+                  />
+                  <XAxis
+                    dataKey="name"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 10, fontWeight: 900, fill: "#64748b" }}
+                    dy={10}
+                  />
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 10, fontWeight: 900, fill: "#64748b" }}
+                  />
+                  <Tooltip
+                    cursor={{ fill: "rgba(0,0,0,0.05)" }}
+                    contentStyle={{
+                      borderRadius: "16px",
+                      border: "3px solid black",
+                      boxShadow: "4px 4px 0 black",
+                      fontFamily: "var(--font-body)",
+                      fontWeight: 900,
+                      textTransform: "uppercase",
+                      fontSize: "10px",
+                    }}
+                  />
+                  <Bar dataKey="partisipasi" radius={[8, 8, 0, 0]} barSize={40}>
+                    {xpDistribution.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[index % COLORS.length]}
+                        stroke="black"
+                        strokeWidth={2}
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          ) : (
+            <div className="flex-1 w-full min-h-[300px] flex items-center justify-center">
+              <p className="text-slate-400 font-bold">Tidak ada data tersedia</p>
+            </div>
+          )}
         </motion.div>
 
         {/* Recent Activity Timeline */}

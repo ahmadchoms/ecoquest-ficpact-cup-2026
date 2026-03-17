@@ -91,16 +91,6 @@ export async function POST(request) {
 
     const newUser = await createUser(userData);
 
-    if (body.password) {
-      userData.password = body.password;
-    }
-
-    if (body.profileImage && typeof body.profileImage === "string") {
-      userData.profileImage = body.profileImage;
-    }
-
-    const newUser = await createUser(userData);
-
     logger.apiSuccess("POST", "/api/admin/users", { id: newUser.id });
     return createdResponse(newUser);
   } catch (error) {

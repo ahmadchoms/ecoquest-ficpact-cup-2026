@@ -16,7 +16,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import DataTable from "@/components/admin/DataTable";
 import FormModal from "@/components/admin/FormModal";
 import EcoInput from "@/components/ui/EcoInput";
-import EcoInput from "@/components/ui/EcoInput";
 import EcoSelect from "@/components/ui/EcoSelect";
 import EcoTextarea from "@/components/ui/EcoTextarea";
 import ConfirmModal from "@/components/admin/ConfirmModal";
@@ -43,7 +42,6 @@ export default function ProvincesAdminPage() {
   const [selectedProvince, setSelectedProvince] = useState(null);
   const [provinceToDelete, setProvinceToDelete] = useState(null);
 
-  const { data: response, isLoading, isError, error } = useProvinces(filters);
   const { data: response, isLoading, isError, error } = useProvinces(filters);
   const provinces = response?.data || [];
   const meta = response?.meta || { total: 0, page: 1, totalPages: 1 };
@@ -167,23 +165,12 @@ export default function ProvincesAdminPage() {
           <p className="font-body font-bold text-slate-700">
             {error?.message || "Terjadi kesalahan saat menghubungi server."}
           </p>
-          <h2 className="text-xl font-display font-black text-red-600 mb-2">
-            Gagal Memuat Data
-          </h2>
-          <p className="font-body font-bold text-slate-700">
-            {error?.message || "Terjadi kesalahan saat menghubungi server."}
-          </p>
         </div>
       ) : (
         <DataTable
           columns={columns}
           data={provinces}
           isLoading={isLoading}
-          onEdit={handleOpenModal}
-          paginationMeta={meta}
-          onPageChange={(page) => setFilters((prev) => ({ ...prev, page }))}
-          onSearch={(search) => updateFilter("search", search)}
-          filterConfigs={PROVINCE_TABLE_FILTER_CONFIGS}
           onEdit={handleOpenModal}
           paginationMeta={meta}
           onPageChange={(page) => setFilters((prev) => ({ ...prev, page }))}
@@ -212,16 +199,6 @@ export default function ProvincesAdminPage() {
             <div className="space-y-2">
               <label className="font-display font-bold text-sm text-black ml-1">
                 Wilayah
-            <EcoInput
-              icon={Map}
-              label="Nama Provinsi"
-              {...register("name")}
-              error={errors.name?.message}
-              placeholder="Contoh: Jawa Timur"
-            />
-            <div className="space-y-2">
-              <label className="font-display font-bold text-sm text-black ml-1">
-                Wilayah
               </label>
               <EcoSelect
                 value={watch("region")}
@@ -229,16 +206,7 @@ export default function ProvincesAdminPage() {
                 options={REGION_SELECT_OPTIONS}
                 error={errors.region?.message}
               />
-              <EcoSelect
-                value={watch("region")}
-                onChange={handleSelectChange("region")}
-                options={REGION_SELECT_OPTIONS}
-                error={errors.region?.message}
-              />
             </div>
-
-            <div className="space-y-2">
-              <label className="font-display font-bold text-sm text-black ml-1">
 
             <div className="space-y-2">
               <label className="font-display font-bold text-sm text-black ml-1">
@@ -250,36 +218,8 @@ export default function ProvincesAdminPage() {
                 onChange={handleSelectChange("threatLevel")}
                 options={DIFFICULTY_SELECT_OPTIONS}
                 error={errors.threatLevel?.message}
-                value={watch("threatLevel")}
-                onChange={handleSelectChange("threatLevel")}
-                options={DIFFICULTY_SELECT_OPTIONS}
-                error={errors.threatLevel?.message}
               />
             </div>
-
-            <EcoInput
-              icon={Lightbulb}
-              label="Fun Fact"
-              {...register("funFact")}
-              error={errors.funFact?.message}
-              placeholder="Fakta unik tentang provinsi ini..."
-            />
-
-            <EcoInput
-              icon={Leaf}
-              label="Ekosistem (pisahkan dengan koma)"
-              {...register("ecosystems")}
-              error={errors.ecosystems?.message}
-              placeholder="Hutan Hujan, Sabana, Mangrove"
-            />
-
-            <EcoInput
-              icon={Cat}
-              label="Spesies (pisahkan dengan koma)"
-              {...register("species")}
-              error={errors.species?.message}
-              placeholder="Harimau Sumatera, Orangutan"
-            />
 
             <EcoInput
               icon={Lightbulb}
@@ -309,18 +249,7 @@ export default function ProvincesAdminPage() {
           <div className="relative">
             <div className="absolute left-4 top-9.5 text-slate-400 z-10">
               <Layers size={18} />
-          <div className="relative">
-            <div className="absolute left-4 top-9.5 text-slate-400 z-10">
-              <Layers size={18} />
             </div>
-            <EcoTextarea
-              label="Status Ekosistem & Deskripsi"
-              rows={3}
-              {...register("description")}
-              error={errors.description?.message}
-              placeholder="Deskripsi singkat kondisi lingkungan di wilayah ini..."
-              className="pl-12"
-            />
             <EcoTextarea
               label="Status Ekosistem & Deskripsi"
               rows={3}
@@ -350,18 +279,6 @@ export default function ProvincesAdminPage() {
           </div>
         </div>
       </FormModal>
-
-      <ConfirmModal
-        isOpen={Boolean(provinceToDelete)}
-        onClose={() => setProvinceToDelete(null)}
-        onConfirm={handleDelete}
-        title="Hapus Provinsi?"
-        message={`Apakah kamu yakin ingin menghapus data provinsi "${provinceToDelete?.name}"? Tindakan ini tidak dapat dibatalkan.`}
-        confirmText="Ya, Hapus"
-        cancelText="Batal"
-        isLoading={deleteMutation.isPending}
-        isDestructive={true}
-      />
 
       <ConfirmModal
         isOpen={Boolean(provinceToDelete)}
