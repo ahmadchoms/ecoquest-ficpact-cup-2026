@@ -14,6 +14,8 @@ export const userShopKeys = {
   userItems: () => [...userShopKeys.all, "userItems"],
 };
 
+import { navbarKeys } from "./useNavbarData";
+
 const invalidateMissionQueries = (queryClient) => {
   queryClient.invalidateQueries({ queryKey: userMissionKeys.lists() });
 };
@@ -21,6 +23,8 @@ const invalidateMissionQueries = (queryClient) => {
 const invalidateShopQueries = (queryClient) => {
   queryClient.invalidateQueries({ queryKey: userShopKeys.shopItems() });
   queryClient.invalidateQueries({ queryKey: userShopKeys.userItems() });
+  // Invalidate navbar to fetch fresh points from database
+  queryClient.invalidateQueries({ queryKey: navbarKeys.stats() });
 };
 
 // === MISSIONS HOOKS ===
@@ -68,7 +72,8 @@ export const useAvailableShopItems = () => {
       const response = await UserAPI.getShopItems();
       return response.data || [];
     },
-    staleTime: 10 * 60 * 1000,
+    staleTime: 0, // Set ke 0 agar tidak cache terlalu lama, refetch lebih sering
+    gcTime: 1000 * 60 * 10, // Keep cache for 10 minutes
   });
 };
 

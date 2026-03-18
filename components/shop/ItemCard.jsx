@@ -1,24 +1,40 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useUserStore } from "@/store/useUserStore";
 import { usePurchaseShopItem } from "@/hooks/useUserMissions";
+import { useNavbarData } from "@/hooks/useNavbarData";
 import EcoCard from "@/components/design-system/EcoCard";
 import EcoButton from "@/components/design-system/EcoButton";
 import PurchaseConfirmation from "./PurchaseConfirmation";
 import Toast from "@/components/ui/Toast";
 
-export default function ItemCard({ item, delay = 0, onBuyClick = null }) {
+export default function ItemCard({ item, delay = 0, onBuyClick = null, isOwned = false }) {
   // Safety check
   if (!item) return null;
   
   const { points: userPoints, deductCoins } = useUserStore();
+  const { data: navbarData } = useNavbarData(); // Fetch fresh points from database
   const purchaseMutation = usePurchaseShopItem();
   
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+  const [realTimePoints, setRealTimePoints] = useState(userPoints); // State untuk database points
+  const [localIsOwned, setLocalIsOwned] = useState(isOwned); // Track ownership state
+
+  // Update realTimePoints ketika navbarData berubah
+  useEffect(() => {
+    if (navbarData?.points !== undefined) {
+      setRealTimePoints(navbarData.points);
+    }
+  }, [navbarData?.points]);
+  
+  // Update localIsOwned ketika isOwned prop berubah
+  useEffect(() => {
+    setLocalIsOwned(isOwned);
+  }, [isOwned]);
   
   const rarityColors = {
     common: "from-slate-300 to-slate-400",
@@ -48,8 +64,12 @@ export default function ItemCard({ item, delay = 0, onBuyClick = null }) {
   };
 
   const handlePurchaseClick = () => {
-    if (userPoints < item.price) {
-      setToastMessage(`Poin tidak cukup! Kamu membutuhkan ${item.price - userPoints} poin lagi.`);
+    if (localIsOwned) {
+      return; // Don't do anything if already owned
+    }
+    
+    if (realTimePoints < item.price) {
+      setToastMessage(`Poin tidak cukup! Kamu membutuhkan ${item.price - realTimePoints} poin lagi.`);
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
       return;
@@ -64,6 +84,11 @@ export default function ItemCard({ item, delay = 0, onBuyClick = null }) {
   const handleConfirmPurchase = async () => {
     try {
       await purchaseMutation.mutateAsync(item.id);
+      // Update localIsOwned to true since purchase succeeded
+      setLocalIsOwned(true);
+      // Update realTimePoints dengan hasil dari response
+      const newPoints = realTimePoints - item.price;
+      setRealTimePoints(newPoints);
       deductCoins(item.price);
       setShowConfirmation(false);
       setToastMessage(`${item.name} berhasil dibeli!`);
@@ -146,25 +171,36 @@ export default function ItemCard({ item, delay = 0, onBuyClick = null }) {
 
           {/* Price and Button */}
           <div className="mt-4 space-y-2">
-            <div className="flex items-baseline gap-1">
-              <span className="text-lg sm:text-xl font-display font-extrabold">
-                {item.price}
-              </span>
-              <span className="text-xs font-bold text-slate-500">Poin</span>
-            </div>
+            {!localIsOwned && (
+              <div className="flex items-baseline gap-1">
+                <span className="text-lg sm:text-xl font-display font-extrabold">
+                  {item.price}
+                </span>
+                <span className="text-xs font-bold text-slate-500">Poin</span>
+              </div>
+            )}
 
             <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              whileHover={localIsOwned ? {} : { scale: 1.02 }}
+              whileTap={localIsOwned ? {} : { scale: 0.98 }}
               onClick={handlePurchaseClick}
-              disabled={purchaseMutation.isPending || userPoints < item.price}
+              disabled={purchaseMutation.isPending || localIsOwned || realTimePoints < item.price}
               className={`w-full px-4 py-2.5 font-bold text-sm rounded-xl shadow-md transition-all ${
-                userPoints >= item.price && !purchaseMutation.isPending
+                localIsOwned
+                  ? "bg-slate-200 text-slate-500 cursor-not-allowed border-2 border-slate-300"
+                  : realTimePoints >= item.price && !purchaseMutation.isPending
                   ? "bg-emerald-500 text-white hover:shadow-lg hover:bg-emerald-600"
                   : "bg-slate-300 text-slate-500 cursor-not-allowed"
               }`}
             >
-              {purchaseMutation.isPending ? "Membeli..." : userPoints >= item.price ? "Beli Sekarang" : "Poin Kurang"}
+              {localIsOwned 
+                ? "✓ Sudah Dimiliki" 
+                : purchaseMutation.isPending 
+                ? "Membeli..." 
+                : realTimePoints >= item.price 
+                ? "Beli Sekarang" 
+                : "Poin Kurang"
+              }
             </motion.button>
           </div>
         </div>

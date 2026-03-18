@@ -1,4 +1,5 @@
 import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
 import { successResponse, errorResponse, notFoundResponse, serverErrorResponse } from "@/lib/server/utils/response";
 import { logger } from "@/lib/server/utils/logger";
 import prisma from "@/lib/prisma";
@@ -10,7 +11,7 @@ import prisma from "@/lib/prisma";
  */
 export async function POST(request, { params }) {
   try {
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions);
     if (!session) {
       return errorResponse("Tidak terautentikasi", 401);
     }

@@ -2,14 +2,18 @@
 
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import ItemCard from "./ItemCard";
+import { userShopKeys } from "@/hooks/useUserMissions";
 
-export default function DailyRefresh({ items = [] }) {
+export default function DailyRefresh({ items = [], ownedItemIds = new Set() }) {
+  const queryClient = useQueryClient();
   const [timeLeft, setTimeLeft] = useState({
     hours: 0,
     minutes: 0,
     seconds: 0,
   });
+  const [hasRefreshed, setHasRefreshed] = useState(false);
 
   useEffect(() => {
     const updateCountdown = () => {
@@ -24,12 +28,22 @@ export default function DailyRefresh({ items = [] }) {
       const seconds = Math.floor((diff / 1000) % 60);
 
       setTimeLeft({ hours, minutes, seconds });
+
+      // Trigger invalidation ketika timer mencapai 0 (ganti hari)
+      if (diff <= 0 && !hasRefreshed) {
+        // Invalidate shop items query agar refetch data baru
+        queryClient.invalidateQueries({ queryKey: userShopKeys.shopItems() });
+        setHasRefreshed(true);
+      } else if (diff > 1000 && hasRefreshed) {
+        // Reset flag ketika masuk hari baru (untuk hari esok harinya)
+        setHasRefreshed(false);
+      }
     };
 
     updateCountdown();
     const interval = setInterval(updateCountdown, 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [queryClient, hasRefreshed]);
 
   const staggerContainer = {
     hidden: { opacity: 0 },
@@ -76,7 +90,12 @@ export default function DailyRefresh({ items = [] }) {
         className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"
       >
         {items.map((item, index) => (
-          <ItemCard key={item.id} item={item} delay={index * 0.05} />
+          <ItemCard 
+            key={item.id} 
+            item={item} 
+            delay={index * 0.05}
+            isOwned={ownedItemIds.has(item.id)}
+          />
         ))}
       </motion.div>
     </div>
