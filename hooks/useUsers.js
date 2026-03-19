@@ -10,6 +10,10 @@ export const adminUserKeys = {
   detail: (id) => [...adminUserKeys.details(), id],
 };
 
+export const leaderboardKeys = {
+  all: ["user", "leaderboard"],
+};
+
 // Helper
 const invalidateUserQueries = (queryClient, userId = null) => {
   queryClient.invalidateQueries({ queryKey: adminUserKeys.lists() });
@@ -54,5 +58,12 @@ export const useDeleteAdminUser = () => {
   return useMutation({
     mutationFn: (id) => API.deleteUser(id),
     onSuccess: () => invalidateUserQueries(queryClient),
+  });
+};
+
+export const useUserRanks = () => {
+  return useQuery({
+    queryKey: leaderboardKeys.all,
+    queryFn: () => API.getLeaderboard(),
   });
 };

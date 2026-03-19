@@ -4,10 +4,10 @@ import dynamic from "next/dynamic";
 import { Suspense } from "react";
 import { motion } from "framer-motion";
 import PageWrapper from "@/components/layout/PageWrapper";
-import { Trophy, Crown, Sparkles, Medal } from "lucide-react";
+import { Trophy, Crown, Sparkles, Medal, Coins } from "lucide-react";
 import { useUserStore } from "@/store/useUserStore";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
-import { useUsers } from "@/hooks/useUsers";
+import { useUserRanks } from "@/hooks/useUsers";
 
 const TrophyScene = dynamic(() => import("@/components/3d/TrophyScene"), {
   ssr: false,
@@ -37,6 +37,19 @@ function getRankConfig(index) {
   return { bg: "bg-pink", icon: `#${index + 1}` };
 }
 
+function LeaderboardSkeleton() {
+  return (
+    <>
+      {[1, 2, 3, 4, 5].map((i) => (
+        <div
+          key={i}
+          className="bg-gray-50 border-3 border-gray-200 rounded-3xl p-4 h-24 animate-pulse mb-4"
+        />
+      ))}
+    </>
+  );
+}
+
 function LeaderboardCard({ user, index, isCurrentUser }) {
   const { bg, icon } = getRankConfig(index);
   const cardBg = isCurrentUser ? "bg-green" : "bg-white";
@@ -63,10 +76,11 @@ function LeaderboardCard({ user, index, isCurrentUser }) {
           </h3>
           <div className="flex items-center gap-2 mt-1">
             <span className="bg-white border-2 border-black px-2 py-0.5 rounded-md text-[10px] font-bold text-black uppercase">
-              Level {user.level}
+              Level {user.level || 1}
             </span>
-            <span className="bg-white border-2 border-black px-2 py-0.5 rounded-md text-[10px] font-bold text-black uppercase">
-              {user.badges} Badges
+            <span className="bg-white border-2 border-black px-2 py-0.5 rounded-md text-[10px] font-bold text-black uppercase flex items-center gap-1">
+              <Coins size={10} />
+              {user.points || 0} Pts
             </span>
           </div>
         </div>
@@ -74,7 +88,7 @@ function LeaderboardCard({ user, index, isCurrentUser }) {
 
       <div className="bg-white border-3 border-black px-4 py-2 rounded-2xl shadow-[3px_3px_0_#0f0f0f] flex items-baseline justify-center sm:justify-end gap-1.5 shrink-0 transform group-hover:rotate-2 transition-transform">
         <span className="font-display font-black text-2xl text-black">
-          {user.xp.toLocaleString()}
+          {(user.xp || 0).toLocaleString()}
         </span>
         <span className="text-xs font-black text-black uppercase tracking-widest">
           XP
@@ -85,29 +99,31 @@ function LeaderboardCard({ user, index, isCurrentUser }) {
 }
 
 export default function LeaderboardPage() {
-  const { data: responseData = [], isLoading } = useUsers({
-    limit: 10,
-    sortBy: "xp",
-    order: "desc",
-    role: "USER",
-  });
+  const { data: responseData, isLoading, isError } = useUserRanks();
+
+  const {
+    email: currentUserEmail,
+    explorerName,
+    totalXP,
+    level,
+    coins,
+  } = useUserStore();
 
   const users = responseData?.data || [];
+  const shouldShowFallback = !isLoading && (isError || users.length === 0);
 
-  const { explorerName, totalXP, level, earnedBadges } = useUserStore();
-
-  const leaderboardData =
-    users.length > 0
-      ? users
-      : [
-          {
-            id: "me",
-            name: explorerName || "Eco Explorer (Anda)",
-            xp: totalXP,
-            level,
-            badges: earnedBadges.length,
-          },
-        ];
+  const leaderboardData = shouldShowFallback
+    ? [
+        {
+          id: "me",
+          email: currentUserEmail,
+          name: explorerName || "Eco Explorer (Anda)",
+          xp: totalXP,
+          level: level,
+          points: coins,
+        },
+      ]
+    : users;
 
   return (
     <PageWrapper className="min-h-screen bg-white bg-grid-pattern pt-24 pb-20">
@@ -146,16 +162,18 @@ export default function LeaderboardPage() {
         </div>
 
         <div className="space-y-4 relative z-10">
-          {leaderboardData.slice(0, 10).map((user, index) => (
-            <LeaderboardCard
-              key={user.id}
-              user={user}
-              index={index}
-              isCurrentUser={
-                user.name === (explorerName || "Eco Explorer (You)")
-              }
-            />
-          ))}
+          {isLoading ? (
+            <LeaderboardSkeleton />
+          ) : (
+            leaderboardData.map((user, index) => (
+              <LeaderboardCard
+                key={user.id}
+                user={user}
+                index={index}
+                isCurrentUser={user.email === currentUserEmail}
+              />
+            ))
+          )}
         </div>
       </div>
     </PageWrapper>
