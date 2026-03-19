@@ -429,58 +429,91 @@ export default function EditProfileModal({ isOpen, explorerName, explorerBio, ex
                         Memuat Banner...
                       </span>
                     </div>
-                  ) : banners.length === 0 ? (
-                    <div className="text-center py-8 border-3 border-dashed border-slate-300 rounded-2xl">
-                      <p className="font-bold text-slate-500">
-                        Kamu belum memiliki banner apapun
-                      </p>
-                      <p className="text-sm text-slate-400 mt-2">
-                        Mainkan misi atau beli dari shop untuk koleksi banner!
-                      </p>
-                    </div>
                   ) : (
-                    <div
-                      className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-133 overflow-y-auto p-1 pr-2"
-                      style={{ scrollbarGutter: "stable" }}
-                    >
-                      {banners.map((banner) => (
-                        <motion.button
-                          key={banner.id}
-                          onClick={() => setSelectedBannerId(banner.id)}
-                          whileHover={{ scale: 1.01 }}
-                          whileTap={{ scale: 0.98 }}
-                          className={`p-4 rounded-2xl border-3 transition-all text-left ${
-                            selectedBannerId === banner.id
-                              ? "border-black bg-orange/80 shadow-hard"
-                              : "border-black bg-white hover:bg-slate-50 shadow-hard"
-                          }`}
-                        >
-                          {banner.content && (
-                            <img
-                              src={banner.content}
-                              alt={banner.name}
-                              className="w-full h-24 object-cover rounded-lg mb-3 border-2 border-black"
-                            />
-                          )}
-                          <h3 className="font-bold text-black uppercase">
-                            {banner.name}
-                          </h3>
-                          <p className="text-xs text-slate-600 mt-1">
-                            {banner.description}
-                          </p>
-                          <div className="mt-3 flex items-center justify-between">
-                            <span className="text-xs font-bold bg-slate-200 px-2 py-1 rounded-lg">
-                              {banner.rarity}
-                            </span>
-                            {selectedBannerId === banner.id && (
-                              <span className="text-xs font-bold bg-orange-300 text-black px-2 py-1 rounded-lg">
-                                ✓ Dipilih
-                              </span>
-                            )}
+                    <>
+                      {/* Default Banner Option */}
+                      <motion.button
+                        onClick={() => setSelectedBannerId(null)}
+                        whileHover={{ scale: 1.01 }}
+                        whileTap={{ scale: 0.98 }}
+                        className={`w-full p-4 rounded-2xl border-3 transition-all text-left ${
+                          selectedBannerId === null
+                            ? "border-black bg-orange/80 shadow-hard"
+                            : "border-black bg-white hover:bg-slate-50 shadow-hard"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h3 className="font-bold text-black uppercase">
+                              📸 Default Banner
+                            </h3>
+                            <p className="text-xs text-slate-600 mt-1">
+                              Tampilan banner standar
+                            </p>
                           </div>
-                        </motion.button>
-                      ))}
-                    </div>
+                          {selectedBannerId === null && (
+                            <span className="text-xs font-bold bg-orange-300 text-black px-3 py-1 rounded-lg whitespace-nowrap ml-2">
+                              ✓ Dipilih
+                            </span>
+                          )}
+                        </div>
+                      </motion.button>
+
+                      {/* Custom Banners */}
+                      {banners.length === 0 ? (
+                        <div className="text-center py-8 border-3 border-dashed border-slate-300 rounded-2xl">
+                          <p className="font-bold text-slate-500">
+                            Kamu belum memiliki banner custom
+                          </p>
+                          <p className="text-sm text-slate-400 mt-2">
+                            Mainkan misi atau beli dari shop untuk koleksi banner!
+                          </p>
+                        </div>
+                      ) : (
+                        <div
+                          className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-107 overflow-y-auto p-1 pr-2"
+                          style={{ scrollbarGutter: "stable" }}
+                        >
+                          {banners.map((banner) => (
+                            <motion.button
+                              key={banner.id}
+                              onClick={() => setSelectedBannerId(banner.id)}
+                              whileHover={{ scale: 1.01 }}
+                              whileTap={{ scale: 0.98 }}
+                              className={`p-4 rounded-2xl border-3 transition-all text-left ${
+                                selectedBannerId === banner.id
+                                  ? "border-black bg-orange/80 shadow-hard"
+                                  : "border-black bg-white hover:bg-slate-50 shadow-hard"
+                              }`}
+                            >
+                              {banner.content && (
+                                <img
+                                  src={banner.content}
+                                  alt={banner.name}
+                                  className="w-full h-24 object-cover rounded-lg mb-3 border-2 border-black"
+                                />
+                              )}
+                              <h3 className="font-bold text-black uppercase">
+                                {banner.name}
+                              </h3>
+                              <p className="text-xs text-slate-600 mt-1">
+                                {banner.description}
+                              </p>
+                              <div className="mt-3 flex items-center justify-between">
+                                <span className="text-xs font-bold bg-slate-200 px-2 py-1 rounded-lg">
+                                  {banner.rarity}
+                                </span>
+                                {selectedBannerId === banner.id && (
+                                  <span className="text-xs font-bold bg-orange-300 text-black px-2 py-1 rounded-lg">
+                                    ✓ Dipilih
+                                  </span>
+                                )}
+                              </div>
+                            </motion.button>
+                          ))}
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               )}
@@ -495,58 +528,91 @@ export default function EditProfileModal({ isOpen, explorerName, explorerBio, ex
                         Memuat Border...
                       </span>
                     </div>
-                  ) : borders.length === 0 ? (
-                    <div className="text-center py-8 border-3 border-dashed border-slate-300 rounded-2xl">
-                      <p className="font-bold text-slate-500">
-                        Kamu belum memiliki border apapun
-                      </p>
-                      <p className="text-sm text-slate-400 mt-2">
-                        Mainkan misi atau beli dari shop untuk koleksi border!
-                      </p>
-                    </div>
                   ) : (
-                    <div
-                      className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-133 overflow-y-auto p-1 pr-2"
-                      style={{ scrollbarGutter: "stable" }}
-                    >
-                      {borders.map((border) => (
-                        <motion.button
-                          key={border.id}
-                          onClick={() => setSelectedBorderId(border.id)}
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          className={`p-4 rounded-2xl border-3 transition-all text-left ${
-                            selectedBorderId === border.id
-                              ? "border-black bg-pink/80 shadow-hard"
-                              : "border-black bg-white hover:bg-slate-50 shadow-hard"
-                          }`}
-                        >
-                          {border.content && (
-                            <img
-                              src={border.content}
-                              alt={border.name}
-                              className="w-24 h-24 object-cover rounded-lg mb-3 mx-auto border-2 border-black"
-                            />
-                          )}
-                          <h3 className="font-bold text-black uppercase">
-                            {border.name}
-                          </h3>
-                          <p className="text-xs text-slate-600 mt-1">
-                            {border.description}
-                          </p>
-                          <div className="mt-3 flex items-center justify-between">
-                            <span className="text-xs font-bold bg-slate-200 px-2 py-1 rounded-lg">
-                              {border.rarity}
-                            </span>
-                            {selectedBorderId === border.id && (
-                              <span className="text-xs font-bold bg-pink-300 text-black px-2 py-1 rounded-lg">
-                                ✓ Dipilih
-                              </span>
-                            )}
+                    <>
+                      {/* Default Border Option */}
+                      <motion.button
+                        onClick={() => setSelectedBorderId(null)}
+                        whileHover={{ scale: 1.01 }}
+                        whileTap={{ scale: 0.98 }}
+                        className={`w-full p-4 rounded-2xl border-3 transition-all text-left ${
+                          selectedBorderId === null
+                            ? "border-black bg-pink/80 shadow-hard"
+                            : "border-black bg-white hover:bg-slate-50 shadow-hard"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h3 className="font-bold text-black uppercase">
+                              ⭐ Default Border
+                            </h3>
+                            <p className="text-xs text-slate-600 mt-1">
+                              Tampilan border standar (garis hitam)
+                            </p>
                           </div>
-                        </motion.button>
-                      ))}
-                    </div>
+                          {selectedBorderId === null && (
+                            <span className="text-xs font-bold bg-pink-300 text-black px-3 py-1 rounded-lg whitespace-nowrap ml-2">
+                              ✓ Dipilih
+                            </span>
+                          )}
+                        </div>
+                      </motion.button>
+
+                      {/* Custom Borders */}
+                      {borders.length === 0 ? (
+                        <div className="text-center py-8 border-3 border-dashed border-slate-300 rounded-2xl">
+                          <p className="font-bold text-slate-500">
+                            Kamu belum memiliki border custom
+                          </p>
+                          <p className="text-sm text-slate-400 mt-2">
+                            Mainkan misi atau beli dari shop untuk koleksi border!
+                          </p>
+                        </div>
+                      ) : (
+                        <div
+                          className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-107 overflow-y-auto p-1 pr-2"
+                          style={{ scrollbarGutter: "stable" }}
+                        >
+                          {borders.map((border) => (
+                            <motion.button
+                              key={border.id}
+                              onClick={() => setSelectedBorderId(border.id)}
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              className={`p-4 rounded-2xl border-3 transition-all text-left ${
+                                selectedBorderId === border.id
+                                  ? "border-black bg-pink/80 shadow-hard"
+                                  : "border-black bg-white hover:bg-slate-50 shadow-hard"
+                              }`}
+                            >
+                              {border.content && (
+                                <img
+                                  src={border.content}
+                                  alt={border.name}
+                                  className="w-24 h-24 object-cover rounded-lg mb-3 mx-auto border-2 border-black"
+                                />
+                              )}
+                              <h3 className="font-bold text-black uppercase">
+                                {border.name}
+                              </h3>
+                              <p className="text-xs text-slate-600 mt-1">
+                                {border.description}
+                              </p>
+                              <div className="mt-3 flex items-center justify-between">
+                                <span className="text-xs font-bold bg-slate-200 px-2 py-1 rounded-lg">
+                                  {border.rarity}
+                                </span>
+                                {selectedBorderId === border.id && (
+                                  <span className="text-xs font-bold bg-pink-300 text-black px-2 py-1 rounded-lg">
+                                    ✓ Dipilih
+                                  </span>
+                                )}
+                              </div>
+                            </motion.button>
+                          ))}
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               )}
