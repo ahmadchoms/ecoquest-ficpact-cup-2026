@@ -2,13 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import {
-  ArrowLeft,
-  Clock,
-  Zap,
-  Play,
-  ArrowRight,
-} from "lucide-react";
+import { ArrowLeft, Clock, Zap, Play, ArrowRight } from "lucide-react";
 import NeoButton from "@/components/ui/NeoButton";
 import { getMissionStyle } from "@/utils/constants";
 import { fadeIn, zoomIn } from "@/utils/motion-variants";
@@ -84,10 +78,7 @@ export default function BriefingPhase({
           animate="visible"
         >
           <div className="mb-4 sm:mb-6">
-            <span className="inline-block px-3 sm:px-4 py-1.5 sm:py-2 bg-black text-white text-xs font-display font-bold uppercase tracking-widest rounded-xl mb-3 sm:mb-4 shadow-[3px_3px_0px_#f5e642]">
-              Misi #{province.name}
-            </span>
-            <h1 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-black mb-2 sm:mb-4 leading-tight uppercase tracking-tight">
+            <h1 className="font-display text-2xl text-center md:text-left md:text-3xl font-black text-black mb-2 sm:mb-4 leading-tight uppercase tracking-tight">
               {mission.title}
             </h1>
             <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-black/70 font-display font-bold uppercase tracking-wide">
@@ -106,7 +97,14 @@ export default function BriefingPhase({
 
           <div className="flex flex-wrap gap-2 sm:gap-3 mb-6 sm:mb-8 md:mb-10">
             <RewardBadge
-              icon={<Zap size={18} strokeWidth={2.5} fill="currentColor" className="shrink-0" />}
+              icon={
+                <Zap
+                  size={18}
+                  strokeWidth={2.5}
+                  fill="currentColor"
+                  className="shrink-0"
+                />
+              }
               label="XP"
               value={`+${mission.xpReward} XP`}
               bgClass="bg-yellow"
@@ -137,7 +135,12 @@ export default function BriefingPhase({
             onClick={onStart}
             className="w-full py-4 sm:py-5 bg-green hover:bg-yellow text-black border-3 border-black rounded-2xl sm:rounded-3xl font-display font-black text-lg sm:text-xl md:text-2xl uppercase tracking-wider shadow-hard-lg hover:shadow-hard-xl hover:-translate-x-1 hover:-translate-y-1 active:translate-x-0 active:translate-y-0 active:shadow-none transition-all flex items-center justify-center gap-3 group"
           >
-            <Play size={22} strokeWidth={3} fill="currentColor" className="shrink-0" />
+            <Play
+              size={22}
+              strokeWidth={3}
+              fill="currentColor"
+              className="shrink-0"
+            />
             <span className="mt-0.5">
               {alreadyDone ? "Mainkan Ulang" : "Mulai Misi"}
             </span>

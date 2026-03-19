@@ -32,7 +32,7 @@ export default function ImpactCard({ icon, value, unit, label, delay = 0 }) {
         </div>
 
         <div>
-          <div className="flex items-baseline gap-1">
+          <div className="flex flex-wrap items-baseline gap-1">
             <motion.span className="text-2xl font-display font-black text-black">
               {rounded}
             </motion.span>
