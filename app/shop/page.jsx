@@ -31,8 +31,14 @@ const seededShuffle = (array, seed) => {
 };
 
 export default function ShopPage() {
-  const { data: shopItems = [], isLoading } = useAvailableShopItems();
+  const { data: shopItems = [], isLoading: shopLoading } = useAvailableShopItems();
+  const { data: userItems = [] } = useUserShopItems();
   const { data: activeEvents = [], isLoading: eventsLoading } = useActiveEvents();
+
+    // Create set of owned item IDs for O(1) lookup
+  const ownedItemIds = useMemo(() => {
+    return new Set(userItems.map((item) => item.itemId));
+  }, [userItems]);
 
   // Daily Refresh: Items dengan eventId (limited items)
   const dailyItems = useMemo(() => {

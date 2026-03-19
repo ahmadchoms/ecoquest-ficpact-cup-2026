@@ -32,7 +32,6 @@ export default function Navbar() {
 
   const { data: dbUser, isLoading } = useNavbarData();
   const store = useUserStore();
-  console.log("data Peserta untuk Navbar:", dbUser);
 
   const displayPoints = dbUser?.points ?? store.coins;
   const displayXP = dbUser?.xp ?? store.totalXP;

@@ -81,7 +81,7 @@ export const useUserShopItems = () => {
   return useQuery({
     queryKey: userShopKeys.userItems(),
     queryFn: async () => {
-      const response = await API.getUserItems();
+      const response = await API.getPurchasedShopItems();
       return response.data || [];
     },
     staleTime: 5 * 60 * 1000,

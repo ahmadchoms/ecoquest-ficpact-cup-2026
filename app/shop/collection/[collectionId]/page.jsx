@@ -3,10 +3,10 @@
 import { motion } from "framer-motion";
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect, useMemo } from "react";
+import { toast } from "@/lib/toast";
 import PageWrapper from "@/components/layout/PageWrapper";
 import ItemCard from "@/components/shop/ItemCard";
 import PurchaseConfirmation from "@/components/shop/PurchaseConfirmation";
-import Toast from "@/components/ui/Toast";
 import { useUserStore } from "@/store/useUserStore";
 import { usePurchaseShopItem, useUserShopItems } from "@/hooks/useUserMissions";
 import { useNavbarData } from "@/hooks/useNavbarData";
@@ -26,8 +26,6 @@ export default function CollectionDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [realTimePoints, setRealTimePoints] = useState(userPoints); // State untuk database points
   const [itemsToConfirm, setItemsToConfirm] = useState(null); // Batch purchase items
@@ -102,9 +100,7 @@ export default function CollectionDetailPage() {
 
   const handleBuyItem = (item) => {
     if (realTimePoints < item.price) {
-      setToastMessage(`Poin tidak cukup! Kamu membutuhkan ${item.price - realTimePoints} poin lagi.`);
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 3000);
+      toast.error("Poin Tidak Cukup!", `Kamu membutuhkan ${item.price - realTimePoints} poin lagi.`);
       return;
     }
     setSelectedItem(item);
@@ -122,13 +118,9 @@ export default function CollectionDetailPage() {
       setRealTimePoints(newPoints);
       deductCoins(selectedItem.price);
       setShowConfirmation(false);
-      setToastMessage(`${selectedItem.name} berhasil dibeli!`);
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 2000);
+      toast.success("Berhasil!", `${selectedItem.name} berhasil dibeli!`);
     } catch (error) {
-      setToastMessage(error.response?.data?.message || "Gagal membeli item. Silakan coba lagi.");
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 3000);
+      toast.error("Gagal Membeli!", error.response?.data?.message || "Gagal membeli item. Silakan coba lagi.");
     } finally {
       setIsProcessing(false);
     }
@@ -158,15 +150,12 @@ export default function CollectionDetailPage() {
       setShowBatchConfirmation(false);
       setItemsToConfirm(null);
       setOwnedItemsPreview([]);
-      setToastMessage(
+      toast.success(
+        "Berhasil!",
         `${itemsToConfirm.length} item berhasil dibeli! Selamat berbelanja!`
       );
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 2000);
     } catch (error) {
-      setToastMessage("Gagal membeli beberapa item. Silakan coba lagi.");
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 3000);
+      toast.error("Gagal Membeli!", "Gagal membeli beberapa item. Silakan coba lagi.");
     } finally {
       setIsProcessing(false);
     }
@@ -185,8 +174,7 @@ export default function CollectionDetailPage() {
 
     // If all items are owned
     if (unownedItems.length === 0) {
-      setToastMessage("Semua item di koleksi ini sudah Anda miliki!");
-      setShowToast(true);
+      toast.info("Informasi", "Semua item di koleksi ini sudah Anda miliki!");
       return;
     }
 
@@ -195,10 +183,10 @@ export default function CollectionDetailPage() {
 
     // Validate points
     if (realTimePoints < totalCost) {
-      setToastMessage(
-        `Poin tidak cukup! Total kebutuhan ${totalCost} poin, kamu kekurangan ${totalCost - realTimePoints} poin.`
+      toast.error(
+        "Poin Tidak Cukup!",
+        `Total kebutuhan ${totalCost} poin, kamu kekurangan ${totalCost - realTimePoints} poin.`
       );
-      setShowToast(true);
       return;
     }
 
@@ -370,15 +358,7 @@ export default function CollectionDetailPage() {
         />
       )}
 
-      {/* Toast Notification */}
-      {showToast && (
-        <Toast
-          isOpen={showToast}
-          message={toastMessage}
-          type={toastMessage?.includes("kurang") ? "error" : "success"}
-          onClose={() => setShowToast(false)}
-        />
-      )}
+
     </PageWrapper>
   );
 }
