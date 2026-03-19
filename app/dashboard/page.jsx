@@ -1,9 +1,11 @@
 "use client";
 
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useDashboard } from "@/hooks/useDashboard";
 import { useUserBadges } from "@/hooks/useUserBadges";
+import { useUserStore } from "@/store/useUserStore";
 import { IMPACT_LABELS } from "@/utils/constants";
 import XPBar from "@/components/ui/XPBar";
 import LevelBadge from "@/components/ui/LevelBadge";
@@ -31,6 +33,28 @@ import StatusCard from "@/components/ui/StatusCard";
 export default function DashboardPage() {
   const { data, isLoading, error } = useDashboard();
   const { data: allBadges, isLoading: badgesLoading } = useUserBadges();
+
+  // Sync dashboard data to Zustand store
+  const setDashboardData = useUserStore((state) => state.setDashboardData);
+  useEffect(() => {
+    if (data) {
+      setDashboardData({
+        explorerName: data.name || "",
+        level: data.level || 1,
+        totalXP: data.xp || 0,
+        coins: data.points || 0,
+        exploredProvinces: data.exploredProvinces || [],
+        impactData: data.impactData || {
+          carbonSaved: 0,
+          waterSaved: 0,
+          wasteClassified: 0,
+          speciesLearned: 0,
+          mangroveRestored: 0,
+        },
+        earnedBadges: data.badges || [],
+      });
+    }
+  }, [data, setDashboardData]);
 
   // Map hook data to component variables
   const explorerName = data?.name || "Eco Explorer";
@@ -360,20 +384,7 @@ export default function DashboardPage() {
             <button className="w-full py-4 px-6 bg-yellow border-3 border-black rounded-2xl shadow-hard hover:bg-orange hover:-translate-y-1 hover:shadow-hard-lg active:translate-x-1 active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-3 font-display font-black text-black uppercase tracking-widest text-lg">
               <Map size={24} strokeWidth={2.5} /> Jelajahi Peta
             </button>
-          </Link>
-
-          <button
-            disabled
-            title="Reset progress feature coming soon"
-            className="px-6 py-4 rounded-2xl bg-gray-300 border-3 border-black shadow-hard flex items-center justify-center gap-2 font-display font-black text-gray-600 uppercase tracking-widest group cursor-not-allowed opacity-60"
-          >
-            <RotateCcw
-              size={20}
-              strokeWidth={3}
-              className="group-hover:-rotate-180 transition-transform duration-500"
-            />
-            Reset Progress
-          </button>
+          </Link> 
         </motion.div>
       </motion.div>
     </PageWrapper>

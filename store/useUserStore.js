@@ -26,6 +26,30 @@ export const useUserStore = create(
 
       setExplorerName: (name) => set({ explorerName: name }),
 
+      /**
+       * Sync dashboard data from database to local store
+       * Called when dashboard query updates - keeps Zustand in sync with server
+       * Note: completedMissions is not synced (API returns count, store expects array of keys)
+       * exploredProvinces is synced from database
+       */
+      setDashboardData: (data) => {
+        set({
+          explorerName: data.explorerName || "",
+          level: data.level || 1,
+          totalXP: data.totalXP || 0,
+          coins: data.coins || 0,
+          exploredProvinces: data.exploredProvinces || [],
+          impactData: data.impactData || {
+            carbonSaved: 0,
+            waterSaved: 0,
+            wasteClassified: 0,
+            speciesLearned: 0,
+            mangroveRestored: 0,
+          },
+          earnedBadges: data.earnedBadges || [],
+        });
+      },
+
       completeOnboarding: () => set({ firstVisit: false }),
 
       addXP: (xp) => {
@@ -54,9 +78,10 @@ export const useUserStore = create(
       completeMission: (missionId, provinceId, xpEarned, pointsEarned = 0, impactValues = {}) => {
         const key = `${missionId}:${provinceId}`;
         const prev = get();
-        if (prev.completedMissions.includes(key)) return;
+        const prevMissions = Array.isArray(prev.completedMissions) ? prev.completedMissions : [];
+        if (prevMissions.includes(key)) return;
 
-        const newCompleted = [...prev.completedMissions, key];
+        const newCompleted = [...prevMissions, key];
         const newExplored = prev.exploredProvinces.includes(provinceId)
           ? prev.exploredProvinces
           : [...prev.exploredProvinces, provinceId];
@@ -81,18 +106,23 @@ export const useUserStore = create(
       },
 
       isMissionDone: (missionId, provinceId) => {
-        return get().completedMissions.includes(`${missionId}:${provinceId}`);
+        const missions = get().completedMissions;
+        return Array.isArray(missions) && missions.includes(`${missionId}:${provinceId}`);
       },
 
       getProvinceProgress: (provinceId, totalMissions) => {
-        const done = get().completedMissions.filter((m) =>
+        const missions = get().completedMissions;
+        if (!Array.isArray(missions)) return 0;
+        const done = missions.filter((m) =>
           m.endsWith(`:${provinceId}`)
         ).length;
         return totalMissions > 0 ? Math.round((done / totalMissions) * 100) : 0;
       },
 
       getProvinceMissionsDone: (provinceId) => {
-        return get().completedMissions.filter((m) =>
+        const missions = get().completedMissions;
+        if (!Array.isArray(missions)) return 0;
+        return missions.filter((m) =>
           m.endsWith(`:${provinceId}`)
         ).length;
       },
@@ -108,9 +138,10 @@ export const useUserStore = create(
 
       checkAchievements: (completedMissions, exploredProvinces) => {
         const self = get();
+        const missions = Array.isArray(completedMissions) ? completedMissions : [];
         if (exploredProvinces.length >= 5) self.unlockBadge("eco-explorer");
         if (exploredProvinces.length >= 10) self.unlockBadge("indonesian-hero");
-        if (completedMissions.length >= 10) self.unlockBadge("eco-warrior");
+        if (missions.length >= 10) self.unlockBadge("eco-warrior");
       },
 
       getXPProgress: () => {
@@ -122,9 +153,10 @@ export const useUserStore = create(
 
       getTotalImpactSummary: () => {
         const { impactData, completedMissions, exploredProvinces } = get();
+        const missions = Array.isArray(completedMissions) ? completedMissions : [];
         return {
           ...impactData,
-          missionsCompleted: completedMissions.length,
+          missionsCompleted: missions.length,
           provincesExplored: exploredProvinces.length,
           treesEquivalent: Math.floor(impactData.carbonSaved / 4),
         };
@@ -132,19 +164,40 @@ export const useUserStore = create(
 
       resetProgress: () => {
         set({
-          totalXP: 0, level: 1, earnedBadges: [],
-          completedMissions: [], exploredProvinces: [],
+          totalXP: 0,
+          level: 1,
+          earnedBadges: [],
+          completedMissions: [],
+          exploredProvinces: [],
           missionScores: {},
           impactData: {
-            carbonSaved: 0, waterSaved: 0, wasteClassified: 0,
-            speciesLearned: 0, mangroveRestored: 0,
+            carbonSaved: 0,
+            waterSaved: 0,
+            wasteClassified: 0,
+            speciesLearned: 0,
+            mangroveRestored: 0,
           },
-          firstVisit: true, lastActive: null,
+          firstVisit: true,
+          lastActive: null,
         });
       },
     }),
     {
       name: "ecoquest-v1",
+      onRehydrateStorage: () => (state) => {
+        // Ensure completedMissions is always an array after hydration
+        if (state && !Array.isArray(state.completedMissions)) {
+          state.completedMissions = [];
+        }
+        // Ensure exploredProvinces is always an array
+        if (state && !Array.isArray(state.exploredProvinces)) {
+          state.exploredProvinces = [];
+        }
+        // Ensure earnedBadges is always an array
+        if (state && !Array.isArray(state.earnedBadges)) {
+          state.earnedBadges = [];
+        }
+      },
     }
   )
 );

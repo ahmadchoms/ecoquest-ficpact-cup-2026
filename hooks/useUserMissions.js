@@ -15,9 +15,12 @@ export const userShopKeys = {
 };
 
 import { navbarKeys } from "./useNavbarData";
+import { userDashboardKeys } from "./useDashboard";
 
 const invalidateMissionQueries = (queryClient) => {
   queryClient.invalidateQueries({ queryKey: userMissionKeys.lists() });
+  // Invalidate dashboard so Zustand syncs with fresh data
+  queryClient.invalidateQueries({ queryKey: userDashboardKeys.dashboard() });
 };
 
 const invalidateShopQueries = (queryClient) => {
@@ -25,6 +28,8 @@ const invalidateShopQueries = (queryClient) => {
   queryClient.invalidateQueries({ queryKey: userShopKeys.userItems() });
   // Invalidate navbar to fetch fresh points from database
   queryClient.invalidateQueries({ queryKey: navbarKeys.stats() });
+  // Invalidate dashboard so Zustand syncs with fresh data after purchase
+  queryClient.invalidateQueries({ queryKey: userDashboardKeys.dashboard() });
 };
 
 // === MISSIONS HOOKS ===

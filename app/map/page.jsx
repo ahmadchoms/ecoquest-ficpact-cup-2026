@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react"; // Tambah useEffect
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
-import { motion, AnimatePresence } from "framer-motion"; // Tambah AnimatePresence untuk exit animasi
+import { motion, AnimatePresence } from "framer-motion";
 import PageWrapper from "@/components/layout/PageWrapper";
 import MapLegend from "@/components/map/MapLegend";
 import { useUserStore } from "@/store/useUserStore";
 import { useProvinces } from "@/hooks/useProvinces";
+import { useDashboard } from "@/hooks/useDashboard";
 import { REGIONS } from "@/utils/constants";
 import { ChevronRight, Filter } from "lucide-react";
 import XPBar from "@/components/ui/XPBar";
@@ -26,8 +27,13 @@ const InteractiveMap = dynamic(
 
 export default function MapPage() {
   const router = useRouter();
-  const [mounted, setMounted] = useState(false); // State untuk handle hydration
+  const [mounted, setMounted] = useState(false);
 
+  // Fetch dashboard data from database (source of truth)
+  const { data: dashboardData } = useDashboard();
+
+  // Get Zustand store state and actions
+  const setDashboardData = useUserStore((state) => state.setDashboardData);
   const {
     totalXP,
     level,
@@ -47,6 +53,27 @@ export default function MapPage() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Sync dashboard data to Zustand store (keeps local state in sync with database)
+  useEffect(() => {
+    if (dashboardData && mounted) {
+      setDashboardData({
+        explorerName: dashboardData.name || "",
+        level: dashboardData.level || 1,
+        totalXP: dashboardData.xp || 0,
+        coins: dashboardData.points || 0,
+        exploredProvinces: dashboardData.exploredProvinces || [],
+        impactData: dashboardData.impactData || {
+          carbonSaved: 0,
+          waterSaved: 0,
+          wasteClassified: 0,
+          speciesLearned: 0,
+          mangroveRestored: 0,
+        },
+        earnedBadges: dashboardData.badges || [],
+      });
+    }
+  }, [dashboardData, mounted, setDashboardData]);
 
   const xpProgress = getXPProgress();
 

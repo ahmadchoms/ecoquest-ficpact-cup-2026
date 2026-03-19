@@ -20,89 +20,269 @@ export default function ShareCard({
   },
 }) {
   const cardRef = useRef(null);
+  
+  // Safely get count from earnedBadges
+  const badgeCount = Array.isArray(earnedBadges) ? earnedBadges.length : (typeof earnedBadges === 'number' ? earnedBadges : 0);
+  // Safely get count from completedMissions
+  const missionCount = Array.isArray(completedMissions) ? completedMissions.length : (typeof completedMissions === 'number' ? completedMissions : 0);
+  // Safely get count from exploredProvinces
+  const provinceCount = Array.isArray(exploredProvinces) ? exploredProvinces.length : 0;
 
   const handleShare = useCallback(async () => {
     if (!cardRef.current) return;
     try {
-      const html2canvas = (await import("html2canvas")).default;
-      const canvas = await html2canvas(cardRef.current, {
-        scale: 2,
-        backgroundColor: "#f5e642", // Yellow bg
+      // Gunakan canvas API langsung untuk menghindari masalah CSS
+      const canvas = document.createElement("canvas");
+      const CARD_WIDTH = 400;
+      const CARD_HEIGHT = 400;
+      const scale = 2;
+      
+      canvas.width = CARD_WIDTH * scale;
+      canvas.height = CARD_HEIGHT * scale;
+      
+      const ctx = canvas.getContext("2d");
+      ctx.scale(scale, scale);
+      
+      // Background
+      ctx.fillStyle = "#f5e642";
+      ctx.fillRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
+      
+      // Border
+      ctx.strokeStyle = "#000000";
+      ctx.lineWidth = 3;
+      ctx.strokeRect(1.5, 1.5, CARD_WIDTH - 3, CARD_HEIGHT - 3);
+      
+      // Shadow glow (top right)
+      ctx.fillStyle = "rgba(255,255,255,0.2)";
+      ctx.beginPath();
+      ctx.arc(CARD_WIDTH + 30, -30, 70, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Title Section
+      ctx.font = "bold 32px Georgia";
+      ctx.fillStyle = "#000000";
+      ctx.textAlign = "center";
+      ctx.fillText("🌿", CARD_WIDTH / 2, 50);
+      ctx.font = "bold 18px Georgia";
+      ctx.fillText(explorerName, CARD_WIDTH / 2, 80);
+      ctx.font = "bold 11px Arial";
+      ctx.fillStyle = "rgba(0,0,0,0.6)";
+      ctx.fillText("ECOQUEST INDONESIA", CARD_WIDTH / 2, 100);
+      
+      // Stats divider line
+      ctx.strokeStyle = "rgba(0,0,0,0.1)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(50, 120);
+      ctx.lineTo(CARD_WIDTH - 50, 120);
+      ctx.stroke();
+      
+      // Stats section
+      const statsX = [70, 200, 330];
+      const statsLabels = ["Level", "Misi", "Badge"];
+      const statsValues = [level, missionCount, badgeCount];
+      
+      ctx.font = "bold 24px Georgia";
+      ctx.fillStyle = "#000000";
+      ctx.textAlign = "center";
+      
+      statsValues.forEach((val, idx) => {
+        ctx.fillText(val.toString(), statsX[idx], 155);
+        ctx.font = "bold 10px Arial";
+        ctx.fillStyle = "rgba(0,0,0,0.6)";
+        ctx.fillText(statsLabels[idx], statsX[idx], 175);
+        ctx.font = "bold 24px Georgia";
+        ctx.fillStyle = "#000000";
       });
-      const link = document.createElement("a");
-      link.download = "ecoquest-impact.png";
-      link.href = canvas.toDataURL();
-      link.click();
+      
+      // Impact data grid
+      ctx.font = "bold 14px Arial";
+      const impactKeys = Object.entries(IMPACT_LABELS);
+      const itemWidth = (CARD_WIDTH - 20) / 2;
+      const itemHeight = 60;
+      
+      impactKeys.forEach(([key, { icon, label, unit }], idx) => {
+        const row = Math.floor(idx / 2);
+        const col = idx % 2;
+        const x = 10 + col * itemWidth;
+        const y = 200 + row * itemHeight;
+        
+        // Cell background
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(x, y, itemWidth - 5, itemHeight - 5);
+        
+        // Cell border
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x, y, itemWidth - 5, itemHeight - 5);
+        
+        // Icon
+        ctx.font = "bold 18px Arial";
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#000000";
+        ctx.fillText(icon, x + itemWidth / 2 - 2.5, y + 20);
+        
+        // Value
+        ctx.font = "bold 14px Arial";
+        ctx.fillStyle = "#000000";
+        ctx.fillText((impactData[key] || 0).toString(), x + itemWidth / 2 - 2.5, y + 40);
+        
+        // Unit
+        ctx.font = "bold 9px Arial";
+        ctx.fillStyle = "#6b7280";
+        ctx.fillText(unit, x + itemWidth / 2 - 2.5, y + 53);
+      });
+      
+      // Footer
+      ctx.font = "bold 9px Arial";
+      ctx.fillStyle = "rgba(0,0,0,0.25)";
+      ctx.textAlign = "center";
+      ctx.fillText("ECOQUEST.ID", CARD_WIDTH / 2, CARD_HEIGHT - 10);
+      
+      // Download
+      canvas.toBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.download = `ecoquest-impact-${Date.now()}.png`;
+        link.href = url;
+        link.click();
+        URL.revokeObjectURL(url);
+      }, "image/png");
+      
     } catch (err) {
       console.error("Failed to generate image:", err);
     }
-  }, []);
+  }, [level, missionCount, badgeCount, explorerName, impactData]);
 
   return (
     <div>
       <div
+        style={{
+          backgroundColor: "#f5e642",
+          borderRadius: "1.5rem",
+          padding: "1.5rem",
+          border: "3px solid black",
+          boxShadow: "4px 4px 0px rgba(0,0,0,0.2)",
+          position: "relative",
+          overflow: "hidden",
+          fontFamily: "system-ui, -apple-system, sans-serif",
+        }}
         ref={cardRef}
-        className="bg-yellow rounded-3xl p-6 border-3 border-black shadow-hard relative overflow-hidden font-body"
       >
-        <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/20 rounded-full blur-2xl pointer-events-none" />
+        <div
+          style={{
+            position: "absolute",
+            top: "-40px",
+            right: "-40px",
+            width: "128px",
+            height: "128px",
+            backgroundColor: "rgba(255,255,255,0.2)",
+            borderRadius: "50%",
+            filter: "blur(40px)",
+            pointerEvents: "none",
+          }}
+        />
 
-        <div className="text-center mb-5 relative z-10">
-          <div className="text-3xl mb-1">🌿</div>
-          <h3 className="font-display font-extrabold text-lg text-black">
-            EcoQuest Indonesia
+        <div style={{ textAlign: "center", marginBottom: "1.25rem", position: "relative", zIndex: "10" }}>
+          <div style={{ fontSize: "1.875rem", marginBottom: "0.25rem" }}>🌿</div>
+          <h3
+            style={{
+              fontFamily: "Georgia, serif",
+              fontWeight: "900",
+              fontSize: "1.125rem",
+              color: "black",
+            }}
+          >
+            {explorerName}
           </h3>
-          <p className="text-xs font-bold text-black/60 uppercase tracking-widest">
-            Dampak Lingkunganku
+          <p
+            style={{
+              fontSize: "0.75rem",
+              fontWeight: "700",
+              color: "rgba(0,0,0,0.6)",
+              textTransform: "uppercase",
+              letterSpacing: "0.1em",
+            }}
+          >
+            EcoQuest Indonesia
           </p>
         </div>
 
-        <div className="flex items-center justify-center gap-4 mb-6 relative z-10">
-          <div className="text-center">
-            <p className="text-2xl font-display font-extrabold text-black">
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "1rem", marginBottom: "1.5rem", position: "relative", zIndex: "10" }}>
+          <div style={{ textAlign: "center" }}>
+            <p
+              style={{
+                fontSize: "1.5rem",
+                fontFamily: "Georgia, serif",
+                fontWeight: "900",
+                color: "black",
+              }}
+            >
               {level}
             </p>
-            <p className="text-[10px] font-bold text-black/60 uppercase">
+            <p style={{ fontSize: "0.625rem", fontWeight: "700", color: "rgba(0,0,0,0.6)", textTransform: "uppercase" }}>
               Level
             </p>
           </div>
-          <div className="w-0.5 h-8 bg-black/10" />
-          <div className="text-center">
-            <p className="text-2xl font-display font-extrabold text-black">
-              {totalXP}
+          <div style={{ width: "2px", height: "2rem", backgroundColor: "rgba(0,0,0,0.1)" }} />
+          <div style={{ textAlign: "center" }}>
+            <p
+              style={{
+                fontSize: "1.5rem",
+                fontFamily: "Georgia, serif",
+                fontWeight: "900",
+                color: "black",
+              }}
+            >
+              {missionCount}
             </p>
-            <p className="text-[10px] font-bold text-black/60 uppercase">
-              Total XP
+            <p style={{ fontSize: "0.625rem", fontWeight: "700", color: "rgba(0,0,0,0.6)", textTransform: "uppercase" }}>
+              Misi
             </p>
           </div>
-          <div className="w-0.5 h-8 bg-black/10" />
-          <div className="text-center">
-            <p className="text-2xl font-display font-extrabold text-black">
-              {exploredProvinces.length}
+          <div style={{ width: "2px", height: "2rem", backgroundColor: "rgba(0,0,0,0.1)" }} />
+          <div style={{ textAlign: "center" }}>
+            <p
+              style={{
+                fontSize: "1.5rem",
+                fontFamily: "Georgia, serif",
+                fontWeight: "900",
+                color: "black",
+              }}
+            >
+              {badgeCount}
             </p>
-            <p className="text-[10px] font-bold text-black/60 uppercase">
-              Provinsi
+            <p style={{ fontSize: "0.625rem", fontWeight: "700", color: "rgba(0,0,0,0.6)", textTransform: "uppercase" }}>
+              Badge
             </p>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 relative z-10">
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "0.5rem", position: "relative", zIndex: "10" }}>
           {Object.entries(IMPACT_LABELS).map(([key, { icon, label, unit }]) => (
             <div
               key={key}
-              className="bg-white border-2 border-black rounded-xl p-2 text-center shadow-[2px_2px_0_rgba(0,0,0,0.1)]"
+              style={{
+                backgroundColor: "white",
+                border: "2px solid black",
+                borderRadius: "0.75rem",
+                padding: "0.5rem",
+                textAlign: "center",
+                boxShadow: "2px 2px 0 rgba(0,0,0,0.1)",
+              }}
             >
-              <span className="text-lg block mb-1">{icon}</span>
-              <p className="text-sm font-extrabold text-black">
+              <span style={{ fontSize: "1.125rem", display: "block", marginBottom: "0.25rem" }}>{icon}</span>
+              <p style={{ fontSize: "0.875rem", fontWeight: "900", color: "black" }}>
                 {impactData[key] || 0}
               </p>
-              <p className="text-[9px] font-bold text-gray-500 uppercase">
+              <p style={{ fontSize: "0.5625rem", fontWeight: "700", color: "#6b7280", textTransform: "uppercase" }}>
                 {unit}
               </p>
             </div>
           ))}
         </div>
 
-        <p className="text-center text-[10px] font-bold text-black/40 mt-4 uppercase tracking-widest">
+        <p style={{ textAlign: "center", fontSize: "0.625rem", fontWeight: "700", color: "rgba(0,0,0,0.25)", marginTop: "1rem", textTransform: "uppercase", letterSpacing: "0.1em" }}>
           ecoquest.id
         </p>
       </div>
