@@ -37,7 +37,6 @@ export default function MapPage() {
     getXPProgress,
   } = useUserStore();
 
-  const xpProgress = getXPProgress();
   const { data: provincesResponse, isLoading } = useProvinces({ limit: 100 });
   const allProvinces = provincesResponse?.data || [];
 

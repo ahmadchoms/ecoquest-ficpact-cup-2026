@@ -1,31 +1,49 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { successResponse, errorResponse } from "@/lib/server/utils/response";
+import {
+  successResponse,
+  errorResponse,
+  unauthorizedResponse,
+  notFoundResponse,
+  serverErrorResponse,
+} from "@/lib/server/utils/response";
+import { logger } from "@/lib/server/utils/logger";
+import {
+  checkRateLimit,
+  getClientIdentifier,
+} from "@/lib/server/utils/rate-limit";
+import { getNavbarUserData } from "@/lib/server/services/user.service";
 
-export async function GET(req) {
+/**
+ * GET /api/user/navbar
+ * Fetch navbar user data (name, xp, points, level, profileImage)
+ */
+export async function GET(request) {
+  const clientId = getClientIdentifier(request);
+  const { limited } = checkRateLimit(`navbar:${clientId}`, {
+    maxRequests: 60,
+  });
+  if (limited)
+    return errorResponse("Terlalu banyak permintaan. Coba lagi nanti.", 429);
+
   try {
-    const session = await getServerSession(authOptions);
+    logger.apiRequest("GET", "/api/user/navbar");
 
-    if (!session?.user?.email) {
-      return errorResponse("Unauthorized", 401);
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user?.email) {
+      logger.apiError("GET", "/api/user/navbar", "Unauthorized");
+      return unauthorizedResponse("Silakan login terlebih dahulu");
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      select: {
-        id: true,
-        name: true,
-        xp: true, // Mengambil field xp
-        points: true, // Mengambil field points
-        level: true,
-        profileImage: true,
-      },
-    });
+    const user = await getNavbarUserData(session.user.email);
+    if (!user) {
+      return notFoundResponse("Pengguna");
+    }
 
-    if (!user) return errorResponse("User not found", 404);
-
+    logger.apiSuccess("GET", "/api/user/navbar", "Navbar data fetched");
     return successResponse(user);
   } catch (error) {
-    return errorResponse("Failed to fetch navbar data", 500);
+    logger.apiError("GET", "/api/user/navbar", error.message);
+    return serverErrorResponse("Gagal mengambil data navbar");
   }
 }

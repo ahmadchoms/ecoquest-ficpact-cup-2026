@@ -7,6 +7,10 @@ import PageWrapper from "@/components/layout/PageWrapper";
 import StatusCard from "@/components/ui/StatusCard";
 import CelebrationOverlay from "@/components/ui/CelebrationOverlay";
 import { fadeIn, zoomIn } from "@/utils/motion-variants";
+import { useUserStore } from "@/store/useUserStore";
+import { useUserMission } from "@/hooks/useUserMissions";
+import { useProvince } from "@/hooks/useProvinces";
+import { useCompleteMission } from "@/hooks/useUserMissions";
 
 import missionComponents from "@/constants/missionRegistry";
 import BriefingPhase from "@/components/mission/phases/BriefingPhase";

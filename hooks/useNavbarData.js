@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { UserAPI } from "@/lib/api/user"; // Sesuaikan path ini dengan letak API helper kamu
+import { API } from "@/lib/api/api"; // Sesuaikan path ini dengan letak API helper kamu
 
 export const navbarKeys = {
   all: ["navbar"],
@@ -10,7 +10,7 @@ export const useNavbarData = () => {
   return useQuery({
     queryKey: navbarKeys.stats(),
     queryFn: async () => {
-      const response = await UserAPI.getNavbarData();
+      const response = await API.getNavbarData();
       // Mengikuti pola contoh 1 & 3: mengambil response.data
       // Jika interceptor kamu sudah unwrap ke data, biarkan saja return response;
       return response.data || response; 

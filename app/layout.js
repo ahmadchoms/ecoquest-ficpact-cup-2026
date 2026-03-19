@@ -1,5 +1,6 @@
 import Navbar from "@/components/layout/Navbar";
 import "./globals.css";
+import "react-easy-crop/react-easy-crop.css";
 import { Syne, DM_Sans } from "next/font/google";
 import BottomNav from "@/components/layout/BottomNav";
 import Providers from "@/components/providers";

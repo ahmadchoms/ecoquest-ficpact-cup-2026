@@ -1,29 +1,43 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect, useTransition } from "react";
-import { useUserStore } from "@/store/useUserStore";
-import { X, ChevronDown, Loader } from "lucide-react";
+import { useState, useEffect, useTransition, useRef } from "react";
+import { X, ChevronDown, Loader, Upload, Trash2 } from "lucide-react";
 import { useUserItems, useUpdateUserItems } from "@/hooks/useUserItems";
+import { useUpdateUserProfile } from "@/hooks/useUpdateUserProfile";
+import { toast } from "@/lib/toast";
+import ImageCropper from "./ImageCropper";
+import { set } from "zod";
 
-export default function EditProfileModal({ isOpen, onClose }) {
+export default function EditProfileModal({ isOpen, explorerName, explorerBio, explorerImage, onClose }) {
   // Mengambil state dari zustand store kamu
-  const { explorerName } = useUserStore();
   const [name, setName] = useState("");
+  const [bio, setBio] = useState("");
+  const [profileImageFile, setProfileImageFile] = useState(null);
+  const [profileImagePreview, setProfileImagePreview] = useState(null);
+  const [cropMode, setCropMode] = useState(false);
+  const [tempImageSrc, setTempImageSrc] = useState(null);
+  const [originalImageSrc, setOriginalImageSrc] = useState(null); // Store original full image
+  const [cropPending, setCropPending] = useState(false); // Track if crop is in progress
+  const [croppedBlob, setCroppedBlob] = useState(null); // Store cropped blob for re-editing
+  const fileInputRef = useRef(null);
   const [, startTransition] = useTransition();
   const [activeTab, setActiveTab] = useState("profile"); // "profile" | "banner" | "border"
   const [selectedBannerId, setSelectedBannerId] = useState(null);
   const [selectedBorderId, setSelectedBorderId] = useState(null);
-  const [showSuccess, setShowSuccess] = useState(false);
 
   // Fetch user items
   const { data: items, isLoading: itemsLoading } = useUserItems();
-  const updateMutation = useUpdateUserItems();
+  const updateProfileMutation = useUpdateUserProfile();
+  const updateItemsMutation = useUpdateUserItems();
 
   // Sync nama saat modal dibuka
   useEffect(() => {
     if (isOpen) {
       startTransition(() => setName(explorerName || ""));
+      setBio(explorerBio || "");
+      setProfileImagePreview(explorerImage || null);
       setActiveTab("profile");
-      setShowSuccess(false);
+      setCroppedBlob(null);
+      setOriginalImageSrc(null);
     }
   }, [isOpen, explorerName]);
 
@@ -37,23 +51,143 @@ export default function EditProfileModal({ isOpen, onClose }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Update nama di zustand store
-    // useUserStore.setState({ explorerName: name });
-    onClose();
+    
+    // Guard against submitting while in crop mode
+    if (cropMode || cropPending) {
+      return;
+    }
+    
+    if (!name.trim()) {
+      toast.error("Error", "Nama tidak boleh kosong!");
+      return;
+    }
+
+    // Only send fields that have content
+    const updateData = {
+      name: name.trim(),
+      bio: bio.trim() || "", // Allow empty bio
+    };
+
+    if (profileImageFile) {
+      updateData.profileImageFile = profileImageFile;
+    }
+
+    updateProfileMutation.mutate(
+      updateData,
+      {
+        onSuccess: (result) => {
+          toast.success(
+            "Berhasil diperbarui!",
+            "Profil berhasil diperbarui!",
+          );
+          setProfileImageFile(null);
+          setProfileImagePreview(null);
+          setCroppedBlob(null);
+          setOriginalImageSrc(null);
+          onClose();
+        },
+        onError: (err) => {
+          toast.error("Gagal diperbarui!", `Terjadi kesalahan: ${err.message}`);
+        },
+      },
+    );
+  };
+
+  const handleProfileFormSubmit = () => {
+    const form = document.getElementById("profile-form");
+    if (form) {
+      form.dispatchEvent(new Event("submit", { bubbles: true }));
+    }
+  };
+
+  const handleFileSelect = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!["image/jpeg", "image/png", "image/webp", "image/gif"].includes(file.type)) {
+      toast.error("Hanya file gambar yang didukung (JPEG, PNG, WebP, GIF)");
+      return;
+    }
+
+    // Validate file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Ukuran file maksimal 5MB");
+      return;
+    }
+
+    // Buat preview untuk cropper
+    setCropPending(true); // Mark crop as pending
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const src = e.target?.result;
+      setOriginalImageSrc(src); // Store original full image
+      setTempImageSrc(src);
+      setCropMode(true);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleCropComplete = (blob) => {
+    // Convert blob ke File
+    const file = new File([blob], "profile-crop.jpg", { type: "image/jpeg" });
+    setProfileImageFile(file);
+
+    // Preview dari blob
+    const url = URL.createObjectURL(blob);
+    setProfileImagePreview(url);
+
+    // Store blob for potential re-editing
+    setCroppedBlob(blob);
+
+    // Keluar dari crop mode
+    setCropMode(false);
+    setCropPending(false);
+    setTempImageSrc(null);
+  };
+
+  const handleCancelCrop = () => {
+    setCropPending(false);
+    setCropMode(false);
+    setTempImageSrc(null);
+    setCroppedBlob(null);
+    setOriginalImageSrc(null);
+    setProfileImageFile(null);
+    setProfileImagePreview(null);
+  };
+
+  const handleEditCrop = () => {
+    // Use original full image for re-editing instead of cropped blob
+    if (originalImageSrc) {
+      setTempImageSrc(originalImageSrc);
+      setCropMode(true);
+    }
   };
 
   const handleSaveItems = () => {
-    updateMutation.mutate(
+    updateItemsMutation.mutate(
       {
         activeBannerId: selectedBannerId,
         activeBorderId: selectedBorderId,
       },
       {
         onSuccess: () => {
-          setShowSuccess(true);
-          setTimeout(() => setShowSuccess(false), 2000);
+          if (activeTab === "banner") {
+            toast.success(
+              "Berhasil diperbarui!",
+              "Banner berhasil diperbarui!",
+            );
+          }
+          if (activeTab === "border") {
+            toast.success(
+              "Berhasil diperbarui!",
+              "Border berhasil diperbarui!",
+            );
+          }
         },
-      }
+        onError: (err) =>
+          toast.error("Gagal diperbarui!", `Terjadi kesalahan: ${err.message}`),
+      },
     );
   };
 
@@ -78,12 +212,12 @@ export default function EditProfileModal({ isOpen, onClose }) {
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="eco-card relative w-full max-w-2xl p-6 sm:p-8 bg-white bg-grid-pattern z-10 overflow-hidden"
+            className="eco-card relative w-full max-w-2xl h-[90vh] flex flex-col bg-white bg-grid-pattern z-10 overflow-hidden"
           >
             {/* Dekorasi Blob */}
             <div className="absolute -top-10 -right-10 w-32 h-32 bg-yellow rounded-full animate-blob opacity-50 pointer-events-none border-3 border-black shadow-hard" />
 
-            <div className="flex justify-between items-center mb-6 relative z-10">
+            <div className="flex justify-between items-center p-6 sm:p-8 pb-0 relative z-10">
               <h2 className="text-2xl font-display font-bold text-black uppercase tracking-wider">
                 Edit Profil
               </h2>
@@ -96,7 +230,7 @@ export default function EditProfileModal({ isOpen, onClose }) {
             </div>
 
             {/* Tabs Navigation */}
-            <div className="flex gap-2 mb-6 relative z-10 border-b-3 border-black">
+            <div className="flex gap-2 px-6 sm:px-8 pb-6 relative z-10 border-b-3 border-black">
               <button
                 onClick={() => setActiveTab("profile")}
                 className={`px-4 py-2 font-bold uppercase text-sm transition-all ${
@@ -111,7 +245,7 @@ export default function EditProfileModal({ isOpen, onClose }) {
                 onClick={() => setActiveTab("banner")}
                 className={`px-4 py-2 font-bold uppercase text-sm transition-all ${
                   activeTab === "banner"
-                    ? "bg-blue border-b-4 border-b-black text-black"
+                    ? "bg-orange border-b-4 border-b-black text-black"
                     : "text-slate-600 hover:text-black"
                 }`}
               >
@@ -129,11 +263,11 @@ export default function EditProfileModal({ isOpen, onClose }) {
               </button>
             </div>
 
-            {/* Tab Content */}
-            <div className="relative z-10">
+            {/* Tab Content - Scrollable */}
+            <div className="relative z-10 flex-1 overflow-y-auto p-6 sm:p-8 pt-0">
               {/* Profile Tab */}
               {activeTab === "profile" && (
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form id="profile-form" onSubmit={handleSubmit} className="space-y-6">
                   <div className="space-y-2">
                     <label className="block font-bold text-black uppercase text-sm">
                       Nama Explorer
@@ -147,20 +281,140 @@ export default function EditProfileModal({ isOpen, onClose }) {
                     />
                   </div>
 
-                  <div className="flex gap-4 pt-4">
-                    <button
-                      type="button"
-                      onClick={onClose}
-                      className="flex-1 py-3 px-4 bg-white border-3 border-black text-black font-bold uppercase rounded-2xl shadow-hard hover:bg-gray-100 active:translate-x-1 active:translate-y-1 active:shadow-none transition-all"
-                    >
-                      Batal
-                    </button>
-                    <button
-                      type="submit"
-                      className="flex-1 py-3 px-4 bg-green border-3 border-black text-black font-bold uppercase rounded-2xl shadow-hard hover:bg-mint active:translate-x-1 active:translate-y-1 active:shadow-none transition-all"
-                    >
-                      Simpan
-                    </button>
+                  <div className="space-y-2">
+                    <label className="block font-bold text-black uppercase text-sm">
+                      Bio / Tentang Kamu
+                    </label>
+                    <textarea
+                      value={bio}
+                      onChange={(e) => setBio(e.target.value)}
+                      maxLength={500}
+                      rows={3}
+                      className="w-full px-4 py-3 bg-white border-3 border-black rounded-2xl font-body text-black placeholder-slate-400 focus:outline-none focus:ring-0 shadow-hard focus:bg-mint transition-colors resize-none"
+                      placeholder="Ceritakan tentang dirimu... (max 500 karakter)"
+                    />
+                    <p className="text-xs text-slate-600 font-medium">
+                      {bio.length} / 500
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="block font-bold text-black uppercase text-sm">
+                      Foto Profil
+                    </label>
+                    
+                    {/* Image Cropper */}
+                    {cropMode && tempImageSrc && (
+                      <div className="mb-4">
+                        <ImageCropper
+                          imageSrc={tempImageSrc}
+                          onCropComplete={handleCropComplete}
+                          onCancel={handleCancelCrop}
+                        />
+                      </div>
+                    )}
+                    
+                    {/* Image Preview - Circular (with Edit/Reset buttons only for cropped images) */}
+                    {profileImagePreview && !cropMode && (
+                      <div className="flex flex-col items-center gap-4 mb-4">
+                        <div className="w-32 h-32 rounded-full border-4 border-black shadow-hard overflow-hidden bg-white">
+                          <img
+                            src={profileImagePreview}
+                            alt="Preview"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        {/* Reset & Edit Buttons - Only show after crop, not for existing profile image */}
+                        {croppedBlob && (
+                          <div className="flex gap-2 w-full">
+                            <button
+                              type="button"
+                              onClick={handleCancelCrop}
+                              className="flex-1 px-3 py-2 bg-white border-3 border-black text-black font-bold uppercase rounded-xl shadow-hard hover:bg-gray-100 transition-all text-sm"
+                            >
+                              Reset
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleEditCrop}
+                              className="flex-1 px-3 py-2 bg-yellow border-3 border-black text-black font-bold uppercase rounded-xl shadow-hard hover:bg-orange transition-all text-sm"
+                            >
+                              Edit
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    
+                    {/* Upload Button */}
+                    {!profileImageFile && !cropMode && (
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="w-full flex items-center justify-center gap-2 px-4 py-4 bg-blue border-3 border-black border-dashed text-black bg-yellow hover:bg-orange backdrop-blur-xl bg font-bold uppercase rounded-2xl shadow-hard hover:bg-cyan transition-all"
+                      >
+                        <Upload size={20} />
+                        Pilih Foto Profil
+                      </button>
+                    )}
+
+                    {/* Hidden File Input */}
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileSelect}
+                      className="hidden"
+                    />
+                    
+                    {/* <p className="text-xs text-slate-600 font-medium">
+                      Format: JPG, PNG, GIF (Max 5MB) • Foto akan dipotong menjadi lingkaran
+                    </p> */}
+
+                    {/* Delete Profile Image Button */}
+                    {explorerImage && !profileImageFile && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          // Delete profile image with name and bio to keep them
+                          const updateData = {
+                            name: name.trim(),
+                            bio: bio.trim() || "",
+                            profileImageFile: null, // Signal to delete
+                          };
+                          
+                          updateProfileMutation.mutate(
+                            updateData,
+                            {
+                              onSuccess: () => {
+                                setProfileImagePreview(null);
+                                toast.success(
+                                  "Berhasil dihapus!",
+                                  "Foto profil kembali ke default!",
+                                );
+                              },
+                              onError: (err) => {
+                                toast.error("Gagal dihapus!", `Terjadi kesalahan: ${err.message}`);
+                              },
+                            },
+                          );
+                        }}
+                        disabled={updateProfileMutation.isPending}
+                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-500 hover:bg-red-600 border-3 border-black text-white font-bold uppercase rounded-2xl shadow-hard disabled:opacity-50 transition-all"
+                      >
+                        {updateProfileMutation.isPending ? (
+                          <>
+                            <Loader className="w-4 h-4 animate-spin" />
+                            Menghapus...
+                          </>
+                        ) : (
+                          <>
+                            <Trash2 size={18} />
+                            Hapus Foto Profil (Kembali ke Default)
+                          </>
+                        )}
+                      </button>
+                    )}
                   </div>
                 </form>
               )}
@@ -185,22 +439,25 @@ export default function EditProfileModal({ isOpen, onClose }) {
                       </p>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-96 overflow-y-auto">
+                    <div
+                      className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-133 overflow-y-auto p-1 pr-2"
+                      style={{ scrollbarGutter: "stable" }}
+                    >
                       {banners.map((banner) => (
                         <motion.button
                           key={banner.id}
                           onClick={() => setSelectedBannerId(banner.id)}
-                          whileHover={{ scale: 1.02 }}
+                          whileHover={{ scale: 1.01 }}
                           whileTap={{ scale: 0.98 }}
                           className={`p-4 rounded-2xl border-3 transition-all text-left ${
                             selectedBannerId === banner.id
-                              ? "border-green bg-green/10 shadow-hard"
+                              ? "border-black bg-orange/80 shadow-hard"
                               : "border-black bg-white hover:bg-slate-50 shadow-hard"
                           }`}
                         >
-                          {banner.previewUrl && (
+                          {banner.content && (
                             <img
-                              src={banner.previewUrl}
+                              src={banner.content}
                               alt={banner.name}
                               className="w-full h-24 object-cover rounded-lg mb-3 border-2 border-black"
                             />
@@ -216,7 +473,7 @@ export default function EditProfileModal({ isOpen, onClose }) {
                               {banner.rarity}
                             </span>
                             {selectedBannerId === banner.id && (
-                              <span className="text-xs font-bold bg-green text-black px-2 py-1 rounded-lg">
+                              <span className="text-xs font-bold bg-orange-300 text-black px-2 py-1 rounded-lg">
                                 ✓ Dipilih
                               </span>
                             )}
@@ -224,39 +481,6 @@ export default function EditProfileModal({ isOpen, onClose }) {
                         </motion.button>
                       ))}
                     </div>
-                  )}
-
-                  <div className="flex gap-4 pt-4">
-                    <button
-                      onClick={() => setActiveTab("profile")}
-                      className="flex-1 py-3 px-4 bg-white border-3 border-black text-black font-bold uppercase rounded-2xl shadow-hard hover:bg-gray-100 active:translate-x-1 active:translate-y-1 active:shadow-none transition-all"
-                    >
-                      Kembali
-                    </button>
-                    <button
-                      onClick={handleSaveItems}
-                      disabled={updateMutation.isPending}
-                      className="flex-1 py-3 px-4 bg-blue border-3 border-black text-black font-bold uppercase rounded-2xl shadow-hard hover:bg-cyan disabled:opacity-50 active:translate-x-1 active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-2"
-                    >
-                      {updateMutation.isPending ? (
-                        <>
-                          <Loader className="w-4 h-4 animate-spin" />
-                          Menyimpan...
-                        </>
-                      ) : (
-                        "Simpan Pilihan"
-                      )}
-                    </button>
-                  </div>
-
-                  {showSuccess && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="bg-green/20 border-3 border-green py-3 px-4 rounded-2xl text-center font-bold text-black"
-                    >
-                      ✓ Banner berhasil diperbarui!
-                    </motion.div>
                   )}
                 </div>
               )}
@@ -281,7 +505,10 @@ export default function EditProfileModal({ isOpen, onClose }) {
                       </p>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-96 overflow-y-auto">
+                    <div
+                      className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-133 overflow-y-auto p-1 pr-2"
+                      style={{ scrollbarGutter: "stable" }}
+                    >
                       {borders.map((border) => (
                         <motion.button
                           key={border.id}
@@ -290,15 +517,15 @@ export default function EditProfileModal({ isOpen, onClose }) {
                           whileTap={{ scale: 0.98 }}
                           className={`p-4 rounded-2xl border-3 transition-all text-left ${
                             selectedBorderId === border.id
-                              ? "border-pink bg-pink/10 shadow-hard"
+                              ? "border-black bg-pink/80 shadow-hard"
                               : "border-black bg-white hover:bg-slate-50 shadow-hard"
                           }`}
                         >
-                          {border.previewUrl && (
+                          {border.content && (
                             <img
-                              src={border.previewUrl}
+                              src={border.content}
                               alt={border.name}
-                              className="w-full h-24 object-cover rounded-lg mb-3 border-2 border-black"
+                              className="w-24 h-24 object-cover rounded-lg mb-3 mx-auto border-2 border-black"
                             />
                           )}
                           <h3 className="font-bold text-black uppercase">
@@ -312,7 +539,7 @@ export default function EditProfileModal({ isOpen, onClose }) {
                               {border.rarity}
                             </span>
                             {selectedBorderId === border.id && (
-                              <span className="text-xs font-bold bg-pink text-black px-2 py-1 rounded-lg">
+                              <span className="text-xs font-bold bg-pink-300 text-black px-2 py-1 rounded-lg">
                                 ✓ Dipilih
                               </span>
                             )}
@@ -321,39 +548,95 @@ export default function EditProfileModal({ isOpen, onClose }) {
                       ))}
                     </div>
                   )}
+                </div>
+              )}
+            </div>
 
-                  <div className="flex gap-4 pt-4">
-                    <button
-                      onClick={() => setActiveTab("profile")}
-                      className="flex-1 py-3 px-4 bg-white border-3 border-black text-black font-bold uppercase rounded-2xl shadow-hard hover:bg-gray-100 active:translate-x-1 active:translate-y-1 active:shadow-none transition-all"
-                    >
-                      Kembali
-                    </button>
-                    <button
-                      onClick={handleSaveItems}
-                      disabled={updateMutation.isPending}
-                      className="flex-1 py-3 px-4 bg-pink border-3 border-black text-black font-bold uppercase rounded-2xl shadow-hard hover:bg-orange disabled:opacity-50 active:translate-x-1 active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-2"
-                    >
-                      {updateMutation.isPending ? (
-                        <>
-                          <Loader className="w-4 h-4 animate-spin" />
-                          Menyimpan...
-                        </>
-                      ) : (
-                        "Simpan Pilihan"
-                      )}
-                    </button>
-                  </div>
+            {/* Buttons - Fixed at Bottom */}
+            <div className="shrink-0 border-t-3 border-black p-6 sm:p-8 relative z-10">
+              {/* Profile Tab Buttons */}
+              {activeTab === "profile" && !cropMode && (
+                <div className="flex gap-4">
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    disabled={updateProfileMutation.isPending || cropPending}
+                    className="flex-1 py-3 px-4 bg-white border-3 border-black text-black font-bold uppercase rounded-2xl shadow-hard hover:bg-gray-100 disabled:opacity-50 active:translate-x-1 active:translate-y-1 active:shadow-none transition-all"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleProfileFormSubmit}
+                    disabled={updateProfileMutation.isPending || cropPending}
+                    className="flex-1 py-3 px-4 bg-green border-3 border-black text-black font-bold uppercase rounded-2xl shadow-hard hover:bg-mint disabled:opacity-50 active:translate-x-1 active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-2"
+                  >
+                    {updateProfileMutation.isPending ? (
+                      <>
+                        <Loader className="w-4 h-4 animate-spin" />
+                        Menyimpan...
+                      </>
+                    ) : cropPending ? (
+                      <>
+                        <Loader className="w-4 h-4 animate-spin" />
+                        Tunggu Crop...
+                      </>
+                    ) : (
+                      "Simpan Profil"
+                    )}
+                  </button>
+                </div>
+              )}
 
-                  {showSuccess && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="bg-pink/20 border-3 border-pink py-3 px-4 rounded-2xl text-center font-bold text-black"
-                    >
-                      ✓ Border berhasil diperbarui!
-                    </motion.div>
-                  )}
+              {/* Banner Tab Buttons */}
+              {activeTab === "banner" && (
+                <div className="flex gap-4">
+                  <button
+                    onClick={() => setActiveTab("profile")}
+                    className="flex-1 py-3 px-4 bg-white border-3 border-black text-black font-bold uppercase rounded-2xl shadow-hard hover:bg-gray-100 active:translate-x-1 active:translate-y-1 active:shadow-none transition-all"
+                  >
+                    Kembali
+                  </button>
+                  <button
+                    onClick={handleSaveItems}
+                    disabled={updateItemsMutation.isPending}
+                    className="flex-1 py-3 px-4 bg-orange border-3 border-black text-black font-bold uppercase rounded-2xl shadow-hard hover:bg-orange-300 disabled:opacity-50 active:translate-x-1 active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-2"
+                  >
+                    {updateItemsMutation.isPending ? (
+                      <>
+                        <Loader className="w-4 h-4 animate-spin" />
+                        Menyimpan...
+                      </>
+                    ) : (
+                      "Simpan Pilihan"
+                    )}
+                  </button>
+                </div>
+              )}
+
+              {/* Border Tab Buttons */}
+              {activeTab === "border" && (
+                <div className="flex gap-4">
+                  <button
+                    onClick={() => setActiveTab("profile")}
+                    className="flex-1 py-3 px-4 bg-white border-3 border-black text-black font-bold uppercase rounded-2xl shadow-hard hover:bg-gray-100 active:translate-x-1 active:translate-y-1 active:shadow-none transition-all"
+                  >
+                    Kembali
+                  </button>
+                  <button
+                    onClick={handleSaveItems}
+                    disabled={updateItemsMutation.isPending}
+                    className="flex-1 py-3 px-4 bg-pink border-3 border-black text-black font-bold uppercase rounded-2xl shadow-hard hover:bg-pink-300 disabled:opacity-50 active:translate-x-1 active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-2"
+                  >
+                    {updateItemsMutation.isPending ? (
+                      <>
+                        <Loader className="w-4 h-4 animate-spin" />
+                        Menyimpan...
+                      </>
+                    ) : (
+                      "Simpan Pilihan"
+                    )}
+                  </button>
                 </div>
               )}
             </div>

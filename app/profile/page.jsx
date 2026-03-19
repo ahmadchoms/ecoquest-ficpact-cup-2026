@@ -9,23 +9,66 @@ import { Calendar, Award, TrendingUp, Settings, Loader } from "lucide-react";
 
 import AnimatedButton from "@/components/ui/AnimatedButton";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import EditProfileModal from "@/components/ui/EditProfileModal";
+import { useUserItems, useUpdateUserItems } from "@/hooks/useUserItems";
 
 export default function ProfilePage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedBannerId, setSelectedBannerId] = useState(null);
+  const [selectedBorderId, setSelectedBorderId] = useState(null);
+
   const { data, isLoading, error } = useDashboard();
   const { data: allBadges, isLoading: badgesLoading } = useUserBadges();
+  const { data: itemsData } = useUserItems();
 
   // Map hook data to component variables
   const explorerName = data?.name || "Explorer";
+  const explorerBio = data?.bio || "";
+  const explorerImage = data?.profileImage || null;
   const totalXP = data?.xp || 0;
   const level = data?.level || 1;
-  const earnedBadges = data?.badges?.map((badge) => badge.id) || [];
-  const completedMissions = Array.from({ length: data?.completedMissions || 0 });
+  const completedMissions = Array.from({
+    length: data?.completedMissions || 0,
+  });
   const joinedDate = data?.createdAt ? new Date(data.createdAt) : null;
   const activityHistory = data?.activityHistory || [];
   console.log("Profile Data:", data);
+
+  // Get active banner for header background
+  const activeBannerId = itemsData?.activeSelection?.bannerId;
+  const activeBanner = itemsData?.banners?.find((b) => b.id === activeBannerId);
+  const bannerBgStyle = activeBanner?.content
+    ? {
+        backgroundImage: `url(${activeBanner.content})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }
+    : activeBanner?.content
+      ? { backgroundColor: activeBanner.content }
+      : {};
+
+  // Get active border for avatar
+  const activeBorderId = itemsData?.activeSelection?.borderId;
+  const activeBorder = itemsData?.borders?.find((b) => b.id === activeBorderId);
+  
+  // Check if border content is image URL or color
+  const isImageBorder = activeBorder?.content && (
+    activeBorder.content.includes("http") || 
+    activeBorder.content.includes(".png") || 
+    activeBorder.content.includes(".jpg") || 
+    activeBorder.content.includes(".webp") ||
+    activeBorder.content.includes(".gif")
+  );
+
+  // Sync selected items with active selection when data loads
+  useEffect(() => {
+    if (itemsData?.activeSelection) {
+      setSelectedBannerId(itemsData.activeSelection.bannerId || null);
+      setSelectedBorderId(itemsData.activeSelection.borderId || null);
+    }
+  }, [itemsData?.activeSelection]);
+
   // Loading state UI
   if (isLoading) {
     return (
@@ -64,21 +107,49 @@ export default function ProfilePage() {
     );
   }
 
-
-
   return (
     <PageWrapper className="min-h-screen bg-slate-50 bg-grid-pattern pt-20 md:pb-12 pb-24">
-      <div className="max-w-4xl mx-auto px-4">
+      <div className="max-w-4xl mx-auto px-4 py-6">
         {/* Header Profile */}
-        <div className="bg-mint border-3 border-black shadow-hard-lg rounded-4xl p-8 flex flex-col md:flex-row items-center gap-8 mb-12 relative overflow-hidden">
+        <div
+          className="border-3 border-black shadow-hard-lg rounded-4xl p-8 flex flex-col md:flex-row items-center gap-8 mb-12 relative overflow-hidden transition-all duration-300"
+          style={{
+            ...bannerBgStyle,
+            backgroundColor: bannerBgStyle.backgroundColor || "#d4fce8", // Default bg-mint
+          }}
+        >
           {/* Dekorasi background bulat */}
           <div className="absolute -top-16 -right-16 w-48 h-48 bg-yellow rounded-full border-3 border-black shadow-hard opacity-80 pointer-events-none" />
 
           {/* Avatar Profile */}
-          <div className="relative z-10">
-            <div className="w-32 h-32 rounded-full bg-white border-3 border-black shadow-hard flex items-center justify-center text-6xl">
-              🧑‍🚀
+          <div className="relative z-10 w-36 h-36">
+            {/* BORDER IMAGE - only if it's an image */}
+            {isImageBorder && (
+              <div
+                className="absolute inset-0 rounded-full pointer-events-none"
+                style={{
+                  backgroundImage: `url(${activeBorder.content})`,
+                  backgroundSize: "130%",
+                  backgroundPosition: "center",
+                  backgroundRepeat: "no-repeat",
+                }}
+              />
+            )}
+
+            {/* AVATAR */}
+            <div className="w-full h-full rounded-full bg-white shadow-hard flex items-center justify-center text-6xl overflow-hidden" style={!isImageBorder && activeBorder?.content ? { borderWidth: "4px", borderStyle: "solid", borderColor: activeBorder.content } : {}}>
+              {data?.profileImage ? (
+                <img 
+                  src={data.profileImage} 
+                  alt={explorerName}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                "🧑‍🚀"
+              )}
             </div>
+
+            {/* LEVEL BADGE */}
             <div className="absolute -bottom-2 -right-2">
               <LevelBadge level={level} size="md" />
             </div>
@@ -89,9 +160,12 @@ export default function ProfilePage() {
             <h1 className="text-4xl font-display font-black text-black uppercase tracking-wide mb-2">
               {explorerName || "Explorer"}
             </h1>
-            <p className="text-sm font-bold text-slate-600 mb-4">@{data?.username || "username"}</p>
+            <p className="text-sm font-bold text-slate-600 mb-4">
+              @{data?.username || "username"}
+            </p>
             <p className="text-black font-medium flex items-center justify-center md:justify-start gap-2 mb-6">
-              <Calendar size={18} strokeWidth={2.5} /> Bergabung sejak {joinedDate ? joinedDate.getFullYear() : "2024"}
+              <Calendar size={18} strokeWidth={2.5} /> Bergabung sejak{" "}
+              {joinedDate ? joinedDate.getFullYear() : "2024"}
             </p>
 
             <div className="flex justify-center md:justify-start gap-4">
@@ -142,13 +216,15 @@ export default function ProfilePage() {
                     <Loader className="w-6 h-6 animate-spin text-black" />
                   </div>
                 ) : (
-                  (allBadges || []).slice(0, 4).map((badge) => (
-                    <BadgeCard
-                      key={badge.id}
-                      badge={badge}
-                      earned={badge.earned}
-                    />
-                  ))
+                  (allBadges || [])
+                    .slice(0, 4)
+                    .map((badge) => (
+                      <BadgeCard
+                        key={badge.id}
+                        badge={badge}
+                        earned={badge.earned}
+                      />
+                    ))
                 )}
               </div>
             </section>
@@ -226,6 +302,9 @@ export default function ProfilePage() {
 
       <EditProfileModal
         isOpen={isEditModalOpen}
+        explorerName={explorerName}
+        explorerBio={explorerBio}
+        explorerImage={explorerImage}
         onClose={() => setIsEditModalOpen(false)}
       />
     </PageWrapper>
