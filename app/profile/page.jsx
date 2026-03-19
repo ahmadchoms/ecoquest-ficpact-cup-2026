@@ -12,6 +12,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import EditProfileModal from "@/components/ui/EditProfileModal";
 import { useUserItems, useUpdateUserItems } from "@/hooks/useUserItems";
+import StatusCard from "@/components/ui/StatusCard";
 
 export default function ProfilePage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -69,41 +70,21 @@ export default function ProfilePage() {
     }
   }, [itemsData?.activeSelection]);
 
-  // Loading state UI
   if (isLoading) {
-    return (
-      <PageWrapper className="min-h-screen bg-slate-50 bg-grid-pattern pt-20 pb-24 flex items-center justify-center">
-        <div className="text-center">
-          <Loader className="w-12 h-12 animate-spin mx-auto mb-4 text-black" />
-          <p className="font-display font-black text-2xl text-black uppercase">
-            Loading Profile...
-          </p>
-        </div>
-      </PageWrapper>
-    );
-  }
-
-  // Error state UI
+        return (
+          <StatusCard emoji="🪪" title="Memuat Profil..." variant="loading" />
+        );
+      }
+    
   if (error) {
     return (
-      <PageWrapper className="min-h-screen bg-slate-50 bg-grid-pattern pt-20 pb-24 flex items-center justify-center">
-        <div className="text-center">
-          <div className="bg-white border-3 border-black rounded-3xl p-8 shadow-hard max-w-md">
-            <p className="font-display font-black text-3xl text-red-600 uppercase mb-3">
-              Oops!
-            </p>
-            <p className="text-black text-sm mb-6">
-              Failed to load profile. Please try refreshing the page.
-            </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="w-full py-3 px-4 bg-yellow border-3 border-black rounded-xl shadow-hard hover:bg-orange transition-all font-display font-black uppercase"
-            >
-              Refresh Page
-            </button>
-          </div>
-        </div>
-      </PageWrapper>
+      <StatusCard
+        emoji="🪪"
+        title="Data Profil Tidak Ditemukan"
+        variant="error"
+        backHref="/dashboard"
+        backLabel="Kembali ke Dashboard"
+      />
     );
   }
 

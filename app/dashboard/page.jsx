@@ -26,6 +26,7 @@ import EcoCard from "@/components/design-system/EcoCard";
 import EcoBadge from "@/components/design-system/EcoBadge";
 import EcoButton from "@/components/design-system/EcoButton";
 import PageWrapper from "@/components/layout/PageWrapper";
+import StatusCard from "@/components/ui/StatusCard";
 
 export default function DashboardPage() {
   const { data, isLoading, error } = useDashboard();
@@ -60,43 +61,23 @@ export default function DashboardPage() {
     treesEquivalent: data?.treesEquivalent || 0,
   };
 
-  // Loading state UI
-  if (isLoading) {
-    return (
-      <PageWrapper className="min-h-screen bg-white bg-grid-pattern pt-20 pb-24 font-body flex items-center justify-center">
-        <div className="text-center">
-          <Loader className="w-12 h-12 animate-spin mx-auto mb-4 text-black" />
-          <p className="font-display font-black text-2xl text-black uppercase">
-            Loading Dashboard...
-          </p>
-        </div>
-      </PageWrapper>
-    );
-  }
-
-  // Error state UI
-  if (error) {
-    return (
-      <PageWrapper className="min-h-screen bg-white bg-grid-pattern pt-20 pb-24 font-body flex items-center justify-center">
-        <div className="text-center">
-          <div className="bg-white border-3 border-black rounded-3xl p-8 shadow-hard max-w-md">
-            <p className="font-display font-black text-3xl text-red-600 uppercase mb-3">
-              Oops!
-            </p>
-            <p className="text-black text-sm mb-6">
-              Failed to load dashboard. Please try refreshing the page.
-            </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="w-full py-3 px-4 bg-yellow border-3 border-black rounded-xl shadow-hard hover:bg-orange transition-all font-display font-black uppercase"
-            >
-              Refresh Page
-            </button>
-          </div>
-        </div>
-      </PageWrapper>
-    );
-  }
+   if (isLoading) {
+      return (
+        <StatusCard emoji="📊" title="Memuat Data Dashboard..." variant="loading" />
+      );
+    }
+  
+    if (error) {
+      return (
+        <StatusCard
+          emoji="📊"
+          title="Data Dashboard Tidak Ditemukan"
+          variant="error"
+          backHref="/dashboard"
+          backLabel="Refresh Dashboard"
+        />
+      );
+    }
 
   const impactChartData = [
     { name: "Karbon", value: impactData.carbonSaved, color: "#f5e642" },
