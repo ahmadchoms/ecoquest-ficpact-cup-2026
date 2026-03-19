@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useUserStore } from "@/store/useUserStore";
+import { useNavbarData } from "@/hooks/useNavbarData"; 
 import XPBar from "@/components/ui/XPBar";
 import LevelBadge from "@/components/ui/LevelBadge";
 import { signOut } from "next-auth/react";
@@ -19,14 +20,32 @@ import {
 } from "lucide-react";
 import { useState, useEffect, useTransition } from "react";
 
+// Konstanta XP per level
+const XP_PER_LEVEL = 500;
+
 export default function Navbar() {
-  const { totalXP, level, explorerName, coins } = useUserStore();
   const pathname = usePathname();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mounted, setMounted] = useState(false); 
   const [, startTransition] = useTransition();
 
+  const { data: dbUser, isLoading } = useNavbarData();
+  const store = useUserStore();
+  console.log("data Peserta untuk Navbar:", dbUser);
+
+  const displayPoints = dbUser?.points ?? store.coins;
+  const displayXP = dbUser?.xp ?? store.totalXP;
+  const displayLevel = dbUser?.level ?? store.level;
+  const displayName = dbUser?.name ?? store.explorerName;
+
+  // LOGIKA PERHITUNGAN XPBAR
+  // currentXP = sisa XP setelah dibagi XP_PER_LEVEL
+  const currentXP = displayXP % XP_PER_LEVEL;
+  const xpToNextLevel = XP_PER_LEVEL;
+
   useEffect(() => {
+    setMounted(true);
     startTransition(() => {
       setMobileOpen(false);
       setDropdownOpen(false);
@@ -34,6 +53,7 @@ export default function Navbar() {
   }, [pathname]);
 
   if (
+    !mounted || 
     pathname === "/" ||
     pathname === "/auth/login" ||
     pathname === "/auth/register" ||
@@ -80,9 +100,7 @@ export default function Navbar() {
   };
 
   const handleLogout = async () => {
-    await signOut({
-      callbackUrl: "/auth/login",
-    });
+    await signOut({ callbackUrl: "/auth/login" });
   };
 
   return (
@@ -103,27 +121,44 @@ export default function Navbar() {
             </span>
           </Link>
 
-          <div className="hidden md:flex items-center gap-2">
-            {navLinks.map((link) => (
-              <NavLink key={link.href} {...link} />
-            ))}
+          <div className="hidden md:flex items-center gap-1">
+            {navLinks.map((link) => {
+              const isActive = pathname === link.href;
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all font-medium text-sm ${
+                    isActive
+                      ? "bg-emerald-50 text-emerald-600"
+                      : "text-slate-600 hover:bg-slate-50 hover:text-emerald-500"
+                  }`}
+                >
+                  {link.icon}
+                  <span>{link.label}</span>
+                </Link>
+              );
+            })}
           </div>
 
           <div className="flex items-center gap-4">
             <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-yellow border-3 border-black shadow-hard transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none cursor-default">
               <span className="text-lg">💰</span>
-              <div className="leading-tight">
-                <p className="text-[10px] font-bold text-black uppercase tracking-wide">
-                  Poin
-                </p>
-                <p className="font-display font-bold text-sm text-black">
-                  {coins}
+              <div>
+                <p className="text-xs font-bold text-slate-600">Points</p>
+                <p className="font-bold text-sm text-emerald-700">
+                  {isLoading ? "..." : displayPoints}
                 </p>
               </div>
             </div>
 
+            {/* XP Bar dengan props baru */}
             <div className="hidden lg:block w-32">
-              <XPBar currentXP={totalXP} />
+              <XPBar 
+                current={currentXP} 
+                max={xpToNextLevel} 
+                level={displayLevel} 
+              />
             </div>
 
             <div className="relative hidden md:block">
@@ -131,27 +166,26 @@ export default function Navbar() {
                 onClick={() => setDropdownOpen(!dropdownOpen)}
                 className="flex items-center gap-2 bg-white hover:bg-pink p-1.5 pr-3 rounded-2xl transition-all border-3 border-transparent hover:border-black hover:shadow-hard outline-none"
               >
-                <LevelBadge level={level} size="sm" />
-                <div className="text-left hidden lg:block">
-                  <p className="text-sm font-display font-bold text-black leading-none mt-0.5">
-                    {explorerName || "Explorer"}
+                <div className="text-right hidden lg:block">
+                  <p className="text-sm font-bold text-slate-700 leading-none">
+                    {displayName || "Explorer"}
+                  </p>
+                  <p className="text-xs text-slate-500 font-medium mt-0.5">
+                    Level {displayLevel}
                   </p>
                 </div>
+                <LevelBadge level={displayLevel} size="sm" />
               </button>
 
               <AnimatePresence>
                 {dropdownOpen && (
                   <>
-                    <div
-                      className="fixed inset-0 z-40"
-                      onClick={() => setDropdownOpen(false)}
-                    />
+                    <div className="fixed inset-0 z-40" onClick={() => setDropdownOpen(false)} />
                     <motion.div
                       initial={{ opacity: 0, scale: 0.95, y: 5 }}
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.95, y: 5 }}
-                      transition={{ duration: 0.15 }}
-                      className="absolute right-0 top-full mt-4 w-56 bg-white rounded-3xl shadow-hard border-3 border-black p-2 z-50 overflow-hidden"
+                      className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 p-1.5 z-50"
                     >
                       <Link
                         href="/profile"
@@ -216,30 +250,15 @@ export default function Navbar() {
       <AnimatePresence>
         {mobileOpen && (
           <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 md:hidden"
-              onClick={() => setMobileOpen(false)}
-            />
-            <motion.div
-              initial={{ opacity: 0, x: "100%" }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: "100%" }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="fixed top-16 right-0 bottom-0 w-72 bg-white z-50 md:hidden border-l-[2.5px] border-black"
-            >
-              <div className="p-6 flex flex-col h-full bg-grid-pattern">
-                <div className="flex items-center gap-3 p-4 bg-yellow border-3 border-black shadow-hard rounded-2xl mb-8">
-                  <LevelBadge level={level} size="sm" />
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 md:hidden" onClick={() => setMobileOpen(false)} />
+            <motion.div initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} className="fixed top-16 right-0 bottom-0 w-72 bg-white z-50 md:hidden shadow-2xl border-l border-slate-100">
+              <div className="p-6 flex flex-col h-full">
+                <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl mb-6">
+                  <LevelBadge level={displayLevel} size="sm" />
                   <div>
-                    <p className="font-display font-bold text-black text-sm">
-                      {explorerName || "Explorer"}
-                    </p>
-                    <p className="text-[11px] font-bold text-black/70 uppercase">
-                      Level {level} • {totalXP} XP
-                    </p>
+                    <p className="font-bold text-slate-800 text-sm">{displayName || "Explorer"}</p>
+                    <p className="text-xs text-slate-500">Level {displayLevel} • {displayXP} XP</p>
+                    <p className="text-xs font-bold text-emerald-600 mt-1">{displayPoints} Points</p>
                   </div>
                 </div>
 

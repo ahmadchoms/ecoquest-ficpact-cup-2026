@@ -102,10 +102,10 @@ export default function SpecialShop({ banners = [] }) {
               <div
                 className="w-full bg-cover bg-center bg-no-repeat py-6 sm:py-8 px-6 sm:px-8 rounded-2xl border-3 border-black shadow-hard relative overflow-hidden"
                 style={{
-                  backgroundImage: currentBanner.imageUrl 
-                    ? `url('${currentBanner.imageUrl}')` 
+                  backgroundImage: currentBanner.bannerUrl 
+                    ? `url('${currentBanner.bannerUrl}')` 
                     : 'none',
-                  backgroundColor: !currentBanner.imageUrl ? '#f0f0f0' : 'transparent',
+                  backgroundColor: !currentBanner.bannerUrl ? '#f0f0f0' : 'transparent',
                 }}
               >
                 {/* Overlay untuk text readability */}

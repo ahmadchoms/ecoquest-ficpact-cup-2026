@@ -2,13 +2,14 @@
 
 import { motion } from "framer-motion";
 import { useParams, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import PageWrapper from "@/components/layout/PageWrapper";
 import ItemCard from "@/components/shop/ItemCard";
 import PurchaseConfirmation from "@/components/shop/PurchaseConfirmation";
 import Toast from "@/components/ui/Toast";
 import { useUserStore } from "@/store/useUserStore";
-import { usePurchaseShopItem } from "@/hooks/useUserMissions";
+import { usePurchaseShopItem, useUserShopItems } from "@/hooks/useUserMissions";
+import { useNavbarData } from "@/hooks/useNavbarData";
 import { staggerContainer, fadeIn } from "@/utils/motion-variants";
 import { ChevronLeft } from "lucide-react";
 
@@ -17,6 +18,8 @@ export default function CollectionDetailPage() {
   const params = useParams();
   const collectionId = params.collectionId;
   const { points: userPoints, deductCoins } = useUserStore();
+  const { data: navbarData } = useNavbarData(); // Fetch fresh points from database
+  const { data: userItems = [] } = useUserShopItems(); // Fetch user's owned items
   const purchaseMutation = usePurchaseShopItem();
 
   const [collection, setCollection] = useState(null);
@@ -26,6 +29,22 @@ export default function CollectionDetailPage() {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [realTimePoints, setRealTimePoints] = useState(userPoints); // State untuk database points
+  const [itemsToConfirm, setItemsToConfirm] = useState(null); // Batch purchase items
+  const [ownedItemsPreview, setOwnedItemsPreview] = useState([]); // Owned items preview
+  const [showBatchConfirmation, setShowBatchConfirmation] = useState(false); // Batch modal
+
+  // Create set of owned item IDs for O(1) lookup
+  const ownedItemIds = useMemo(() => {
+    return new Set(userItems.map((item) => item.itemId));
+  }, [userItems]);
+
+  // Update realTimePoints ketika navbarData berubah
+  useEffect(() => {
+    if (navbarData?.points !== undefined) {
+      setRealTimePoints(navbarData.points);
+    }
+  }, [navbarData?.points]);
 
   // Fetch event + items dari API
   useEffect(() => {
@@ -82,8 +101,8 @@ export default function CollectionDetailPage() {
   }
 
   const handleBuyItem = (item) => {
-    if (userPoints < item.price) {
-      setToastMessage(`Poin tidak cukup! Kamu membutuhkan ${item.price - userPoints} poin lagi.`);
+    if (realTimePoints < item.price) {
+      setToastMessage(`Poin tidak cukup! Kamu membutuhkan ${item.price - realTimePoints} poin lagi.`);
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
       return;
@@ -98,6 +117,9 @@ export default function CollectionDetailPage() {
     try {
       setIsProcessing(true);
       await purchaseMutation.mutateAsync(selectedItem.id);
+      // Update realTimePoints dengan hasil dari response
+      const newPoints = realTimePoints - selectedItem.price;
+      setRealTimePoints(newPoints);
       deductCoins(selectedItem.price);
       setShowConfirmation(false);
       setToastMessage(`${selectedItem.name} berhasil dibeli!`);
@@ -112,28 +134,32 @@ export default function CollectionDetailPage() {
     }
   };
 
-  const handleBuyAll = async () => {
-    if (!collection || !collection.items || collection.items.length === 0) return;
-    
-    // Calculate total cost
-    const totalCost = collection.items.reduce((sum, item) => sum + item.price, 0);
-    
-    if (userPoints < totalCost) {
-      setToastMessage(`Poin tidak cukup! Total kebutuhan ${totalCost} poin, kamu kekurangan ${totalCost - userPoints} poin.`);
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 3000);
-      return;
-    }
-    
+  const handleConfirmBatchPurchase = async () => {
+    if (!itemsToConfirm?.length) return;
+
     try {
       setIsProcessing(true);
-      // Beli semua item satu per satu
-      for (const item of collection.items) {
+
+      // Beli hanya unowned items
+      for (const item of itemsToConfirm) {
         await purchaseMutation.mutateAsync(item.id);
       }
+
+      const totalCost = itemsToConfirm.reduce(
+        (sum, item) => sum + item.price,
+        0
+      );
+
+      // Update points & deduct
+      const newPoints = realTimePoints - totalCost;
+      setRealTimePoints(newPoints);
       deductCoins(totalCost);
+
+      setShowBatchConfirmation(false);
+      setItemsToConfirm(null);
+      setOwnedItemsPreview([]);
       setToastMessage(
-        `${collection.items.length} item berhasil dibeli! Selamat berbelanja!`
+        `${itemsToConfirm.length} item berhasil dibeli! Selamat berbelanja!`
       );
       setShowToast(true);
       setTimeout(() => setShowToast(false), 2000);
@@ -144,6 +170,42 @@ export default function CollectionDetailPage() {
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  const handleBuyAll = async () => {
+    if (!collection || !collection.items || collection.items.length === 0) return;
+
+    // Filter: unowned items only
+    const unownedItems = collection.items.filter(
+      (item) => !ownedItemIds.has(item.id)
+    );
+    const ownedItems = collection.items.filter(
+      (item) => ownedItemIds.has(item.id)
+    );
+
+    // If all items are owned
+    if (unownedItems.length === 0) {
+      setToastMessage("Semua item di koleksi ini sudah Anda miliki!");
+      setShowToast(true);
+      return;
+    }
+
+    // Calculate total cost from unowned items only
+    const totalCost = unownedItems.reduce((sum, item) => sum + item.price, 0);
+
+    // Validate points
+    if (realTimePoints < totalCost) {
+      setToastMessage(
+        `Poin tidak cukup! Total kebutuhan ${totalCost} poin, kamu kekurangan ${totalCost - realTimePoints} poin.`
+      );
+      setShowToast(true);
+      return;
+    }
+
+    // Show batch confirmation modal
+    setItemsToConfirm(unownedItems);
+    setOwnedItemsPreview(ownedItems);
+    setShowBatchConfirmation(true);
   };
 
   const staggerContainer2 = {
@@ -223,26 +285,37 @@ export default function CollectionDetailPage() {
             variants={fadeIn("up", 0.15)}
             className="flex gap-3"
           >
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={handleBuyAll}
-              disabled={isProcessing}
-              className="flex-1 px-6 py-4 bg-emerald-500 text-white font-display font-extrabold text-lg rounded-xl border-3 border-black shadow-hard hover:shadow-hard-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              {isProcessing ? (
-                <>
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity }}
-                    className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
-                  />
-                  Memproses...
-                </>
-              ) : (
-                `🛒 Beli Semua (${collection.items.length} item)`
-              )}
-            </motion.button>
+            {(() => {
+              const allItemsOwned = collection.items.every(item => ownedItemIds.has(item.id));
+              return (
+                <motion.button
+                  whileHover={!allItemsOwned && !isProcessing ? { scale: 1.02 } : {}}
+                  whileTap={!allItemsOwned && !isProcessing ? { scale: 0.98 } : {}}
+                  onClick={handleBuyAll}
+                  disabled={isProcessing || allItemsOwned}
+                  className={`flex-1 px-6 py-4 font-display font-extrabold text-lg rounded-xl border-3 border-black shadow-hard transition-all flex items-center justify-center gap-2 ${
+                    allItemsOwned
+                      ? "bg-slate-300 text-slate-600 cursor-not-allowed shadow-md"
+                      : "bg-emerald-500 text-white hover:shadow-hard-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  }`}
+                >
+                  {isProcessing ? (
+                    <>
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity }}
+                        className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                      />
+                      Memproses...
+                    </>
+                  ) : allItemsOwned ? (
+                    `✓ Semua item sudah dimiliki`
+                  ) : (
+                    `🛒 Beli Semua (${collection.items.length} item)`
+                  )}
+                </motion.button>
+              );
+            })()}
           </motion.div>
         )}
 
@@ -265,6 +338,7 @@ export default function CollectionDetailPage() {
                     item={item} 
                     delay={index * 0.02}
                     onBuyClick={() => handleBuyItem(item)}
+                    isOwned={ownedItemIds.has(item.id)}
                   />
                 </motion.div>
               ))}
@@ -280,6 +354,18 @@ export default function CollectionDetailPage() {
           item={selectedItem}
           onConfirm={handleConfirmPurchase}
           onCancel={() => setShowConfirmation(false)}
+          isLoading={isProcessing}
+        />
+      )}
+
+      {/* Batch Purchase Confirmation Modal */}
+      {showBatchConfirmation && (
+        <PurchaseConfirmation
+          isOpen={showBatchConfirmation}
+          items={itemsToConfirm}
+          ownedItems={ownedItemsPreview}
+          onConfirm={handleConfirmBatchPurchase}
+          onCancel={() => setShowBatchConfirmation(false)}
           isLoading={isProcessing}
         />
       )}

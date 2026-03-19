@@ -7,19 +7,47 @@ import SpecialShop from "@/components/shop/SpecialShop";
 import DailyRefresh from "@/components/shop/DailyRefresh";
 import AllItems from "@/components/shop/AllItems";
 import { staggerContainer, fadeIn } from "@/utils/motion-variants";
-import { useAvailableShopItems } from "@/hooks/useUserMissions";
+import { useAvailableShopItems, useUserShopItems } from "@/hooks/useUserMissions";
 import { useActiveEvents } from "@/hooks/useEvents";
 
-export default function ShopPage() {
-  const { data: shopItems = [], isLoading: shopLoading } =
-    useAvailableShopItems();
-  const { data: activeEvents = [], isLoading: eventsLoading } =
-    useActiveEvents();
+// Helper function untuk seeded random - menghasilkan angka random yang konsisten per seed
+const seededRandom = (seed) => {
+  const x = Math.sin(seed++) * 10000;
+  return x - Math.floor(x);
+};
 
+// Fisher-Yates shuffle dengan seed yang konsisten
+const seededShuffle = (array, seed) => {
+  const shuffled = [...array];
+  let currentSeed = seed;
+
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const r = seededRandom(currentSeed++);
+    const j = Math.floor(r * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+
+  return shuffled;
+};
+
+export default function ShopPage() {
+  const { data: shopItems = [], isLoading } = useAvailableShopItems();
+  const { data: activeEvents = [], isLoading: eventsLoading } = useActiveEvents();
+
+  // Daily Refresh: Items dengan eventId (limited items)
   const dailyItems = useMemo(() => {
     const itemsWithEvent = shopItems.filter((item) => item.eventId);
     if (itemsWithEvent.length === 0) return [];
-    const shuffled = [...itemsWithEvent].sort(() => Math.random() - 0.5);
+
+    // Ambil string tanggal hari ini (format: "2024-05-20")
+    const today = new Date().toISOString().split('T')[0];
+
+    // Ubah string tanggal jadi angka untuk seed
+    const seed = today.split('-').reduce((acc, val) => acc + parseInt(val), 0);
+
+    // Shuffle menggunakan seeded shuffle (konsisten per hari)
+    const shuffled = seededShuffle(itemsWithEvent, seed);
+
     return shuffled.slice(0, 4);
   }, [shopItems]);
 
@@ -71,7 +99,7 @@ export default function ShopPage() {
         />
 
         <motion.div variants={fadeIn("up", 0.25)}>
-          <DailyRefresh items={dailyItems} />
+          <DailyRefresh items={dailyItems} ownedItemIds={ownedItemIds} />
         </motion.div>
 
         <motion.div
@@ -87,7 +115,7 @@ export default function ShopPage() {
               </p>
             </div>
           ) : (
-            <AllItems items={permanentItems} />
+            <AllItems items={permanentItems} ownedItemIds={ownedItemIds} />
           )}
         </motion.div>
       </motion.div>

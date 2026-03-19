@@ -10,7 +10,7 @@ const ITEM_CATEGORIES = [
   { id: "BORDER", label: "Border" },
 ];
 
-export default function AllItems({ items = [] }) {
+export default function AllItems({ items = [], ownedItemIds = new Set() }) {
   const [activeCategory, setActiveCategory] = useState("all");
 
   const filteredItems = items.filter((item) => {
@@ -74,7 +74,11 @@ export default function AllItems({ items = [] }) {
         {filteredItems.length > 0 ? (
           filteredItems.map((item, index) => (
             <motion.div key={item.id} variants={itemVariant}>
-              <ItemCard item={item} delay={index * 0.02} />
+              <ItemCard 
+                item={item} 
+                delay={index * 0.02}
+                isOwned={ownedItemIds.has(item.id)}
+              />
             </motion.div>
           ))
         ) : (
