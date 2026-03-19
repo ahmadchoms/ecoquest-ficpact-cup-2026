@@ -2,7 +2,6 @@ import Navbar from "@/components/layout/Navbar";
 import "./globals.css";
 import "react-easy-crop/react-easy-crop.css";
 import { Syne, DM_Sans } from "next/font/google";
-import BottomNav from "@/components/layout/BottomNav";
 import Providers from "@/components/providers";
 import EcoToaster from "@/components/ui/EcoToaster";
 
@@ -61,7 +60,6 @@ export default function RootLayout({ children }) {
           <Navbar />
           {children}
           <EcoToaster position="bottom-right" />
-          <BottomNav />
         </Providers>
       </body>
     </html>

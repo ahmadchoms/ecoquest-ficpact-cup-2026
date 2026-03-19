@@ -147,7 +147,7 @@ export default function SpeciesQuiz({ province, mission, onComplete, onBack }) {
         }
       } catch (error) {
         if (error.name === "AbortError") {
-          console.log("Quiz fetch dibatalkan");
+          console.error("Quiz fetch dibatalkan");
           return;
         }
         console.error("Error fetching questions:", error);

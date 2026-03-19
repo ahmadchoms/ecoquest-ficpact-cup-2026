@@ -7,7 +7,10 @@ import SpecialShop from "@/components/shop/SpecialShop";
 import DailyRefresh from "@/components/shop/DailyRefresh";
 import AllItems from "@/components/shop/AllItems";
 import { staggerContainer, fadeIn } from "@/utils/motion-variants";
-import { useAvailableShopItems, useUserShopItems } from "@/hooks/useUserMissions";
+import {
+  useAvailableShopItems,
+  useUserShopItems,
+} from "@/hooks/useUserMissions";
 import { useActiveEvents } from "@/hooks/useEvents";
 
 // Helper function untuk seeded random - menghasilkan angka random yang konsisten per seed
@@ -31,11 +34,13 @@ const seededShuffle = (array, seed) => {
 };
 
 export default function ShopPage() {
-  const { data: shopItems = [], isLoading: shopLoading } = useAvailableShopItems();
+  const { data: shopItems = [], isLoading: shopLoading } =
+    useAvailableShopItems();
   const { data: userItems = [] } = useUserShopItems();
-  const { data: activeEvents = [], isLoading: eventsLoading } = useActiveEvents();
+  const { data: activeEvents = [], isLoading: eventsLoading } =
+    useActiveEvents();
 
-    // Create set of owned item IDs for O(1) lookup
+  // Create set of owned item IDs for O(1) lookup
   const ownedItemIds = useMemo(() => {
     return new Set(userItems.map((item) => item.itemId));
   }, [userItems]);
@@ -46,10 +51,10 @@ export default function ShopPage() {
     if (itemsWithEvent.length === 0) return [];
 
     // Ambil string tanggal hari ini (format: "2024-05-20")
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split("T")[0];
 
     // Ubah string tanggal jadi angka untuk seed
-    const seed = today.split('-').reduce((acc, val) => acc + parseInt(val), 0);
+    const seed = today.split("-").reduce((acc, val) => acc + parseInt(val), 0);
 
     // Shuffle menggunakan seeded shuffle (konsisten per hari)
     const shuffled = seededShuffle(itemsWithEvent, seed);
@@ -73,7 +78,7 @@ export default function ShopPage() {
           variants={fadeIn("down", 0.1)}
           className="text-center bg-yellow border-3 border-black shadow-hard p-10 rounded-4xl mx-2 relative overflow-hidden"
         >
-          <h1 className="font-display text-5xl md:text-6xl font-black mb-4 uppercase tracking-tight text-black relative z-10">
+          <h1 className="font-display text-3xl md:text-6xl font-black mb-4 uppercase tracking-tight text-black relative z-10">
             🛍️ Toko EcoQuest
           </h1>
           <p className="text-black font-display font-bold text-lg md:text-xl uppercase relative z-10">

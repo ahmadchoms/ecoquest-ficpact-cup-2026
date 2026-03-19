@@ -29,7 +29,6 @@ export default function CarbonCalculator({
   });
   const [result, setResult] = useState(null);
   const [step, setStep] = useState(0);
-  console.log(mission);
 
   const steps = [
     {

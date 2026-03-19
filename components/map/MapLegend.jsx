@@ -8,7 +8,7 @@ export default function MapLegend() {
   ];
 
   return (
-    <div className="absolute bottom-4 right-4 z-[500] glass rounded-xl p-3">
+    <div className="absolute bottom-4 right-4 z-500 glass rounded-xl p-3">
       <p className="text-xs font-semibold text-gray-700 mb-2">Legenda</p>
       <div className="space-y-1.5">
         {items.map((item) => (

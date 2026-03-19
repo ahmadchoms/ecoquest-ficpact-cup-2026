@@ -134,6 +134,17 @@
     display: none;
   }
 
+  .province-tooltip {
+    background: white !important;
+    border: none !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+    padding: 8px 12px !important;
+  }
+  .province-tooltip::before {
+    border-top-color: white !important;
+  }
+
   @media (min-width: 1024px) {
     .nav-collapsed .sidebar-header {
       justify-content: center;

@@ -19,6 +19,7 @@ function MapController({ center, zoom }) {
   }, [center, zoom, map]);
   return null;
 }
+
 export default function InteractiveMap({
   provinces: filteredProvinces,
   allProvinces = [],
@@ -32,8 +33,8 @@ export default function InteractiveMap({
   useEffect(() => {
     fetch("/data/indonesia.geojson")
       .then((res) => res.json())
-      .then((data) => setGeoData(data))
-      .catch((err) => console.error("Failed to load GeoJSON:", err));
+      .then(setGeoData)
+      .catch(console.error);
   }, []);
 
   const filteredIds = useMemo(
@@ -41,41 +42,73 @@ export default function InteractiveMap({
     [filteredProvinces],
   );
 
-  const getProvinceId = useCallback((feature) => {
-    const props = feature.properties;
-    const name = (props.name || props.NAME_1 || props.Propinsi || "").toLowerCase();
+  const provinceIdMap = useMemo(() => {
+    if (!geoData || !allProvinces.length) return new Map();
 
-    if (!name) return null;
+    const map = new Map();
+    geoData.features.forEach((feature) => {
+      const props = feature.properties;
+      const name = (
+        props.name ||
+        props.NAME_1 ||
+        props.Propinsi ||
+        ""
+      ).toLowerCase();
 
-    for (const p of allProvinces) {
-      const pName = p.name.toLowerCase();
-      const pId = p.id.toLowerCase();
-      
-      if (
-        name === pName ||
-        name.includes(pName) ||
-        pName.includes(name) ||
-        name.replace(/\s+/g, "-") === pId ||
-        name.replace(/\s+/g, "") === pName.replace(/\s+/g, "")
-      ) {
-        return p.id;
+      if (!name) return;
+
+      let matchedId = null;
+      for (const p of allProvinces) {
+        const pName = p.name.toLowerCase();
+        const pId = p.id.toLowerCase();
+
+        if (
+          name === pName ||
+          name.includes(pName) ||
+          pName.includes(name) ||
+          name.replace(/\s+/g, "-") === pId ||
+          name.replace(/\s+/g, "") === pName.replace(/\s+/g, "")
+        ) {
+          matchedId = p.id;
+          break;
+        }
       }
-    }
 
-    const nameNorm = name.replace(/\s+/g, "").replace(/-/g, "");
-    for (const p of allProvinces) {
-      const pNorm = p.name.toLowerCase().replace(/\s+/g, "").replace(/-/g, "");
-      if (nameNorm.includes(pNorm) || pNorm.includes(nameNorm)) {
-        return p.id;
+      if (!matchedId) {
+        const nameNorm = name.replace(/\s+/g, "").replace(/-/g, "");
+        for (const p of allProvinces) {
+          const pNorm = p.name
+            .toLowerCase()
+            .replace(/\s+/g, "")
+            .replace(/-/g, "");
+          if (nameNorm.includes(pNorm) || pNorm.includes(nameNorm)) {
+            matchedId = p.id;
+            break;
+          }
+        }
       }
-    }
 
-    return null;
-  }, [allProvinces]);
+      map.set(name, matchedId);
+    });
+    return map;
+  }, [geoData, allProvinces]);
 
-  const style = useCallback(
+  const getProvinceId = useCallback(
     (feature) => {
-      const provinceId = getProvinceId(feature);
+      const props = feature.properties;
+      const name = (
+        props.name ||
+        props.NAME_1 ||
+        props.Propinsi ||
+        ""
+      ).toLowerCase();
+      return provinceIdMap.get(name);
+    },
+    [provinceIdMap],
+  );
+
+  const getStyleForProvince = useCallback(
+    (provinceId) => {
       if (!provinceId || !filteredIds.has(provinceId)) {
         return {
           fillColor: "#e5e7eb",
@@ -102,8 +135,33 @@ export default function InteractiveMap({
         fillOpacity: 0.7,
       };
     },
-    [filteredIds, getProvinceProgress, getProvinceId, allProvinces],
+    [filteredIds, allProvinces, getProvinceProgress],
   );
+
+  const style = useCallback(
+    (feature) => {
+      const provinceId = getProvinceId(feature);
+      return getStyleForProvince(provinceId);
+    },
+    [getProvinceId, getStyleForProvince],
+  );
+
+  useEffect(() => {
+    if (geoRef.current && geoData) {
+      geoRef.current.eachLayer((layer) => {
+        const provinceId = getProvinceId(layer.feature);
+        const newStyle = getStyleForProvince(provinceId);
+        layer.setStyle(newStyle);
+      });
+    }
+  }, [
+    exploredProvinces,
+    completedMissions,
+    filteredIds,
+    geoData,
+    getProvinceId,
+    getStyleForProvince,
+  ]);
 
   const onEachFeature = useCallback(
     (feature, layer) => {
@@ -147,13 +205,6 @@ export default function InteractiveMap({
     [getProvinceId, getProvinceProgress, onProvinceClick, allProvinces],
   );
 
-  // Force re-render GeoJSON on state changes
-  const geoKey = useMemo(
-    () =>
-      `geo-${completedMissions.length}-${exploredProvinces.length}-${filteredIds.size}`,
-    [completedMissions.length, exploredProvinces.length, filteredIds.size],
-  );
-
   if (!geoData) {
     return (
       <div className="w-full h-full flex items-center justify-center bg-linear-to-br from-blue-50 to-cyan-50">
@@ -178,24 +229,11 @@ export default function InteractiveMap({
     >
       <TileLayer url={TILE_URL} attribution={TILE_ATTRIBUTION} />
       <GeoJSON
-        key={geoKey}
         ref={geoRef}
         data={geoData}
         style={style}
         onEachFeature={onEachFeature}
       />
-      <style>{`
-        .province-tooltip {
-          background: white !important;
-          border: none !important;
-          border-radius: 12px !important;
-          box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
-          padding: 8px 12px !important;
-        }
-        .province-tooltip::before {
-          border-top-color: white !important;
-        }
-      `}</style>
     </MapContainer>
   );
 }

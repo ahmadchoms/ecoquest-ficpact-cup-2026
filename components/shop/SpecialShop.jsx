@@ -9,14 +9,19 @@ import Link from "next/link";
 export default function SpecialShop({ banners = [] }) {
   // Ensure banners is always an array
   const safeBanners = Array.isArray(banners) ? banners : [];
-  
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
   const [autoPlay, setAutoPlay] = useState(true);
 
   // Debug log
   useEffect(() => {
-    console.log("SpecialShop banners:", safeBanners, "length:", safeBanners.length);
+    console.table(
+      "SpecialShop banners:",
+      safeBanners,
+      "length:",
+      safeBanners.length,
+    );
   }, [safeBanners]);
 
   useEffect(() => {
@@ -50,7 +55,7 @@ export default function SpecialShop({ banners = [] }) {
   const paginate = (newDirection) => {
     setDirection(newDirection);
     setCurrentIndex(
-      (prev) => (prev + newDirection + safeBanners.length) % safeBanners.length
+      (prev) => (prev + newDirection + safeBanners.length) % safeBanners.length,
     );
     setAutoPlay(false);
     setTimeout(() => setAutoPlay(true), 5000);
@@ -102,10 +107,12 @@ export default function SpecialShop({ banners = [] }) {
               <div
                 className="w-full bg-cover bg-center bg-no-repeat py-6 sm:py-8 px-6 sm:px-8 rounded-2xl border-3 border-black shadow-hard relative overflow-hidden"
                 style={{
-                  backgroundImage: currentBanner.bannerUrl 
-                    ? `url('${currentBanner.bannerUrl}')` 
-                    : 'none',
-                  backgroundColor: !currentBanner.bannerUrl ? '#f0f0f0' : 'transparent',
+                  backgroundImage: currentBanner.bannerUrl
+                    ? `url('${currentBanner.bannerUrl}')`
+                    : "none",
+                  backgroundColor: !currentBanner.bannerUrl
+                    ? "#f0f0f0"
+                    : "transparent",
                 }}
               >
                 {/* Overlay untuk text readability */}
@@ -133,7 +140,9 @@ export default function SpecialShop({ banners = [] }) {
                   </p>
 
                   {currentBanner.name && (
-                    <Link href={`/shop/collection/${currentBanner.name.toLowerCase().replace(/\s+/g, '-')}`}>
+                    <Link
+                      href={`/shop/collection/${currentBanner.name.toLowerCase().replace(/\s+/g, "-")}`}
+                    >
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
@@ -171,23 +180,25 @@ export default function SpecialShop({ banners = [] }) {
 
       {/* Indicator Dots */}
       <div className="flex items-center justify-center gap-2">
-        {safeBanners && safeBanners.length > 0 && safeBanners.map((_, index) => (
-          <motion.button
-            key={index}
-            onClick={() => {
-              setDirection(index > currentIndex ? 1 : -1);
-              setCurrentIndex(index);
-              setAutoPlay(false);
-              setTimeout(() => setAutoPlay(true), 5000);
-            }}
-            className={`h-2 rounded-full transition-all border-2 border-black ${
-              index === currentIndex
-                ? "bg-black w-8"
-                : "bg-slate-300 w-2 hover:bg-slate-400"
-            }`}
-            whileHover={{ scale: 1.2 }}
-          />
-        ))}
+        {safeBanners &&
+          safeBanners.length > 0 &&
+          safeBanners.map((_, index) => (
+            <motion.button
+              key={index}
+              onClick={() => {
+                setDirection(index > currentIndex ? 1 : -1);
+                setCurrentIndex(index);
+                setAutoPlay(false);
+                setTimeout(() => setAutoPlay(true), 5000);
+              }}
+              className={`h-2 rounded-full transition-all border-2 border-black ${
+                index === currentIndex
+                  ? "bg-black w-8"
+                  : "bg-slate-300 w-2 hover:bg-slate-400"
+              }`}
+              whileHover={{ scale: 1.2 }}
+            />
+          ))}
       </div>
     </div>
   );

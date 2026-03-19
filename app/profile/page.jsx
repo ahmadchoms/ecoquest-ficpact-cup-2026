@@ -34,7 +34,6 @@ export default function ProfilePage() {
   });
   const joinedDate = data?.createdAt ? new Date(data.createdAt) : null;
   const activityHistory = data?.activityHistory || [];
-  console.log("Profile Data:", data);
 
   // Get active banner for header background
   const activeBannerId = itemsData?.activeSelection?.bannerId;
@@ -52,15 +51,15 @@ export default function ProfilePage() {
   // Get active border for avatar
   const activeBorderId = itemsData?.activeSelection?.borderId;
   const activeBorder = itemsData?.borders?.find((b) => b.id === activeBorderId);
-  
+
   // Check if border content is image URL or color
-  const isImageBorder = activeBorder?.content && (
-    activeBorder.content.includes("http") || 
-    activeBorder.content.includes(".png") || 
-    activeBorder.content.includes(".jpg") || 
-    activeBorder.content.includes(".webp") ||
-    activeBorder.content.includes(".gif")
-  );
+  const isImageBorder =
+    activeBorder?.content &&
+    (activeBorder.content.includes("http") ||
+      activeBorder.content.includes(".png") ||
+      activeBorder.content.includes(".jpg") ||
+      activeBorder.content.includes(".webp") ||
+      activeBorder.content.includes(".gif"));
 
   // Sync selected items with active selection when data loads
   useEffect(() => {
@@ -71,11 +70,9 @@ export default function ProfilePage() {
   }, [itemsData?.activeSelection]);
 
   if (isLoading) {
-        return (
-          <StatusCard emoji="🪪" title="Memuat Profil..." variant="loading" />
-        );
-      }
-    
+    return <StatusCard emoji="🪪" title="Memuat Profil..." variant="loading" />;
+  }
+
   if (error) {
     return (
       <StatusCard
@@ -118,10 +115,21 @@ export default function ProfilePage() {
             )}
 
             {/* AVATAR */}
-            <div className="w-full h-full rounded-full bg-white shadow-hard flex items-center justify-center text-6xl overflow-hidden" style={!isImageBorder && activeBorder?.content ? { borderWidth: "4px", borderStyle: "solid", borderColor: activeBorder.content } : {}}>
+            <div
+              className="w-full h-full rounded-full bg-white shadow-hard flex items-center justify-center text-6xl overflow-hidden"
+              style={
+                !isImageBorder && activeBorder?.content
+                  ? {
+                      borderWidth: "4px",
+                      borderStyle: "solid",
+                      borderColor: activeBorder.content,
+                    }
+                  : {}
+              }
+            >
               {data?.profileImage ? (
-                <img 
-                  src={data.profileImage} 
+                <img
+                  src={data.profileImage}
                   alt={explorerName}
                   className="w-full h-full object-cover"
                 />
