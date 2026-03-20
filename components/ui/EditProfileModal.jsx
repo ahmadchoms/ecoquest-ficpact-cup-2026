@@ -19,6 +19,7 @@ export default function EditProfileModal({ isOpen, explorerName, explorerBio, ex
   const [cropPending, setCropPending] = useState(false); // Track if crop is in progress
   const [croppedBlob, setCroppedBlob] = useState(null); // Store cropped blob for re-editing
   const fileInputRef = useRef(null);
+  const scrollRef = useRef(null);
   const [, startTransition] = useTransition();
   const [activeTab, setActiveTab] = useState("profile"); // "profile" | "banner" | "border"
   const [selectedBannerId, setSelectedBannerId] = useState(null);
@@ -48,6 +49,15 @@ export default function EditProfileModal({ isOpen, explorerName, explorerBio, ex
       setSelectedBorderId(items.activeSelection?.borderId || null);
     }
   }, [items, isOpen]);
+
+  useEffect(() => {
+  if (scrollRef.current) {
+    scrollRef.current.scrollTo({
+      top: 0,
+      behavior: "smooth", // opsional (hapus kalau gak mau animasi)
+    });
+  }
+}, [activeTab]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -264,7 +274,7 @@ export default function EditProfileModal({ isOpen, explorerName, explorerBio, ex
             </div>
 
             {/* Tab Content - Scrollable */}
-            <div className="relative z-10 flex-1 overflow-y-auto p-6 sm:p-8 pt-0">
+            <div className="relative z-10 flex-1 overflow-y-auto p-6 sm:p-8 pt-4" ref={scrollRef}>
               {/* Profile Tab */}
               {activeTab === "profile" && (
                 <form id="profile-form" onSubmit={handleSubmit} className="space-y-6">
@@ -471,8 +481,7 @@ export default function EditProfileModal({ isOpen, explorerName, explorerBio, ex
                         </div>
                       ) : (
                         <div
-                          className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-107 overflow-y-auto p-1 pr-2"
-                          style={{ scrollbarGutter: "stable" }}
+                          className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-full overflow-y-auto p-2"
                         >
                           {banners.map((banner) => (
                             <motion.button
@@ -570,8 +579,7 @@ export default function EditProfileModal({ isOpen, explorerName, explorerBio, ex
                         </div>
                       ) : (
                         <div
-                          className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-107 overflow-y-auto p-1 pr-2"
-                          style={{ scrollbarGutter: "stable" }}
+                          className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-full overflow-y-auto p-2"
                         >
                           {borders.map((border) => (
                             <motion.button

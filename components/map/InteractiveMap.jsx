@@ -42,6 +42,12 @@ export default function InteractiveMap({
     [filteredProvinces],
   );
 
+  // Ref so event handlers (created once at GeoJSON mount) always read latest filteredIds
+  const filteredIdsRef = useRef(filteredIds);
+  useEffect(() => {
+    filteredIdsRef.current = filteredIds;
+  }, [filteredIds]);
+
   const provinceIdMap = useMemo(() => {
     if (!geoData || !allProvinces.length) return new Map();
 
@@ -109,7 +115,8 @@ export default function InteractiveMap({
 
   const getStyleForProvince = useCallback(
     (provinceId) => {
-      if (!provinceId || !filteredIds.has(provinceId)) {
+      // Always read from ref so this works both in useEffect and at style-apply time
+      if (!provinceId || !filteredIdsRef.current.has(provinceId)) {
         return {
           fillColor: "#e5e7eb",
           weight: 1,
@@ -135,7 +142,7 @@ export default function InteractiveMap({
         fillOpacity: 0.7,
       };
     },
-    [filteredIds, allProvinces, getProvinceProgress],
+    [allProvinces, getProvinceProgress],
   );
 
   const style = useCallback(
@@ -146,6 +153,8 @@ export default function InteractiveMap({
     [getProvinceId, getStyleForProvince],
   );
 
+  // Update ALL layer styles when filter or progress changes  
+  // This ensures mouseout/resetStyle has correct default to restore to
   useEffect(() => {
     if (geoRef.current && geoData) {
       geoRef.current.eachLayer((layer) => {
@@ -154,14 +163,7 @@ export default function InteractiveMap({
         layer.setStyle(newStyle);
       });
     }
-  }, [
-    exploredProvinces,
-    completedMissions,
-    filteredIds,
-    geoData,
-    getProvinceId,
-    getStyleForProvince,
-  ]);
+  }, [filteredIds, exploredProvinces, completedMissions, geoData, getProvinceId, getStyleForProvince]);
 
   const onEachFeature = useCallback(
     (feature, layer) => {
@@ -186,22 +188,55 @@ export default function InteractiveMap({
 
       layer.on({
         mouseover: (e) => {
-          e.target.setStyle({
-            weight: 3,
-            color: "#22c55e",
-            fillOpacity: 0.85,
-          });
+          // Read from ref — always reflects the current active filter
+          if (filteredIdsRef.current.has(provinceId)) {
+            e.target.setStyle({
+              weight: 3,
+              color: "#22c55e",
+              fillOpacity: 0.85,
+            });
+          } else {
+            // Non-filtered province: subtle hover only, no color change
+            e.target.setStyle({
+              weight: 2,
+              color: "#9ca3af",
+              fillOpacity: 0.4,
+            });
+          }
         },
         mouseout: (e) => {
-          if (geoRef.current) {
-            geoRef.current.resetStyle(e.target);
+          // Read from ref — always reflects the current active filter
+          const baseIsFiltered = filteredIdsRef.current.has(provinceId);
+          let styleToRestore;
+
+          if (!baseIsFiltered) {
+            styleToRestore = {
+              fillColor: "#e5e7eb",
+              weight: 1,
+              color: "#d1d5db",
+              fillOpacity: 0.3,
+            };
+          } else {
+            const province = allProvinces.find((p) => p.id === provinceId);
+            const progress = getProvinceProgress(provinceId, province?.missionsCount || 3);
+            let fillColor = PROGRESS_COLORS.notStarted;
+            if (progress === 100) fillColor = PROGRESS_COLORS.completed;
+            else if (progress > 0) fillColor = PROGRESS_COLORS.inProgress;
+            styleToRestore = {
+              fillColor,
+              weight: 1.5,
+              color: "#ffffff",
+              fillOpacity: 0.7,
+            };
           }
+          e.target.setStyle(styleToRestore);
         },
         click: () => {
           onProvinceClick?.(provinceId);
         },
       });
     },
+    // filteredIds dihapus dari deps — sekarang dibaca lewat filteredIdsRef agar tidak perlu re-create
     [getProvinceId, getProvinceProgress, onProvinceClick, allProvinces],
   );
 

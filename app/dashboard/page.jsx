@@ -43,6 +43,7 @@ export default function DashboardPage() {
         level: data.level || 1,
         totalXP: data.xp || 0,
         coins: data.points || 0,
+        completedMissions: data.completedMissions || [],
         exploredProvinces: data.exploredProvinces || [],
         impactData: data.impactData || {
           carbonSaved: 0,
@@ -61,9 +62,9 @@ export default function DashboardPage() {
   const totalXP = data?.xp || 0;
   const level = data?.level || 1;
   const earnedBadges = data?.badges?.map((badge) => badge.id) || [];
-  const completedMissions = Array.from({
-    length: data?.completedMissions || 0,
-  });
+  const completedMissions = Array.isArray(data?.completedMissions) 
+    ? data.completedMissions 
+    : [];
   const exploredProvinces = data?.exploredProvinces || [];
 
   // Impact data calculated from mission completions
