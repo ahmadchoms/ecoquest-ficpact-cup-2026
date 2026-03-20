@@ -6,7 +6,6 @@ import { AnimatePresence } from "framer-motion";
 import PageWrapper from "@/components/layout/PageWrapper";
 import StatusCard from "@/components/ui/StatusCard";
 import CelebrationOverlay from "@/components/ui/CelebrationOverlay";
-import { fadeIn, zoomIn } from "@/utils/motion-variants";
 import { useUserStore } from "@/store/useUserStore";
 import { useUserMission } from "@/hooks/useUserMissions";
 import { useProvince } from "@/hooks/useProvinces";
@@ -53,6 +52,9 @@ export default function MissionPage() {
   const MissionComponent = missionComponents[mission.category];
 
   const handleMissionComplete = async (resultData) => {
+    // Reset previous badge state so old badge does not reappear on next win.
+    setNewBadge(null);
+
     try {
       const response = await completeMissionMutation.mutateAsync({
         missionId: mission.id,
@@ -110,28 +112,6 @@ export default function MissionPage() {
     }
   };
 
-
-  const getMissionColor = () => {
-    switch (mission.category) {
-      case "WASTE":
-        return "from-orange-400 to-red-500";
-      case "WATER":
-        return "from-sky-400 to-blue-500";
-      case "BIODIVERSITY":
-        return "from-purple-400 to-indigo-500";
-      case "OCEAN":
-        return "from-blue-500 to-cyan-600";
-      case "TRANSPORT":
-        return "from-green-400 to-emerald-600";
-      case "CLIMATE":
-        return "from-orange-400 to-red-500";
-      case "COASTAL":
-        return "from-blue-400 to-cyan-500";
-      default:
-        return "from-slate-400 to-slate-600";
-    }
-  };
-
   return (
     <PageWrapper className="min-h-screen bg-white bg-grid-pattern pt-16 md:pt-20 pb-24 md:pb-8 text-black">
       <AnimatePresence mode="wait">
@@ -168,6 +148,7 @@ export default function MissionPage() {
             onReplay={() => {
               setPhase("briefing");
               setMissionResult(null);
+              setNewBadge(null);
             }}
             router={router}
           />

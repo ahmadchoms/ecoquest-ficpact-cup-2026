@@ -16,5 +16,7 @@ export const useUserBadges = () => {
     },
     staleTime: 10 * 60 * 1000, // 10 minutes (badges don't change often)
     gcTime: 20 * 60 * 1000, // 20 minutes
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 };

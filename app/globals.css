@@ -105,6 +105,81 @@
     @apply font-body bg-white text-black antialiased;
   }
 
+  /* Browser autofill styled to follow EcoQuest palette */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active,
+  input:-webkit-autofill:valid,
+  input:-webkit-autofill:invalid,
+  textarea:-webkit-autofill,
+  textarea:-webkit-autofill:hover,
+  textarea:-webkit-autofill:focus,
+  textarea:-webkit-autofill:active,
+  textarea:-webkit-autofill:valid,
+  textarea:-webkit-autofill:invalid,
+  select:-webkit-autofill,
+  select:-webkit-autofill:hover,
+  select:-webkit-autofill:focus,
+  select:-webkit-autofill:active,
+  select:-webkit-autofill:valid,
+  select:-webkit-autofill:invalid {
+    -webkit-text-fill-color: var(--color-black) !important;
+    -webkit-box-shadow: 0 0 0 1000px var(--color-yellow) inset !important;
+    box-shadow: 0 0 0 1000px var(--color-yellow) inset !important;
+    border: 1px solid var(--color-black) !important;
+    caret-color: var(--color-black) !important;
+    background-color: var(--color-yellow) !important;
+    background-clip: padding-box !important;
+    transition: background-color 9999s ease-out 0s;
+  }
+
+  input:autofill,
+  textarea:autofill,
+  select:autofill {
+    color: var(--color-black) !important;
+    background-color: var(--color-yellow) !important;
+  }
+
+  input:-moz-autofill,
+  input:-moz-autofill:hover,
+  input:-moz-autofill:focus,
+  textarea:-moz-autofill,
+  textarea:-moz-autofill:hover,
+  textarea:-moz-autofill:focus,
+  select:-moz-autofill,
+  select:-moz-autofill:hover,
+  select:-moz-autofill:focus {
+    box-shadow: 0 0 0 1000px var(--color-yellow) inset !important;
+    -moz-text-fill-color: var(--color-black) !important;
+    color: var(--color-black) !important;
+    border: 1px solid var(--color-black) !important;
+  }
+
+  dialog input:-webkit-autofill,
+  dialog input:-webkit-autofill:hover,
+  dialog input:-webkit-autofill:focus,
+  dialog textarea:-webkit-autofill,
+  dialog textarea:-webkit-autofill:hover,
+  dialog textarea:-webkit-autofill:focus,
+  dialog select:-webkit-autofill,
+  dialog select:-webkit-autofill:hover,
+  dialog select:-webkit-autofill:focus,
+  [role="dialog"] input:-webkit-autofill,
+  [role="dialog"] input:-webkit-autofill:hover,
+  [role="dialog"] input:-webkit-autofill:focus,
+  [role="dialog"] textarea:-webkit-autofill,
+  [role="dialog"] textarea:-webkit-autofill:hover,
+  [role="dialog"] textarea:-webkit-autofill:focus,
+  [role="dialog"] select:-webkit-autofill,
+  [role="dialog"] select:-webkit-autofill:hover,
+  [role="dialog"] select:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px var(--color-yellow) inset !important;
+    box-shadow: 0 0 0 1000px var(--color-yellow) inset !important;
+    -webkit-text-fill-color: var(--color-black) !important;
+    color: var(--color-black) !important;
+  }
+
   h1,
   h2,
   h3,

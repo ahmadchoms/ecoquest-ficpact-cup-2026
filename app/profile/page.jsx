@@ -30,7 +30,7 @@ export default function ProfilePage() {
   const totalXP = data?.xp || 0;
   const level = data?.level || 1;
   const completedMissions = Array.from({
-    length: data?.completedMissions?.length|| 0,
+    length: data?.completedMissions?.length || 0,
   });
   const joinedDate = data?.createdAt ? new Date(data.createdAt) : null;
   const activityHistory = data?.activityHistory || [];
@@ -38,15 +38,34 @@ export default function ProfilePage() {
   // Get active banner for header background
   const activeBannerId = itemsData?.activeSelection?.bannerId;
   const activeBanner = itemsData?.banners?.find((b) => b.id === activeBannerId);
+
+  const isImageAsset = (value = "") => {
+    if (!value) return false;
+    return (
+      value.startsWith("http") ||
+      value.startsWith("/") ||
+      value.startsWith("data:image/") ||
+      /\.(png|jpe?g|webp|gif|svg)(\?.*)?$/i.test(value)
+    );
+  };
+
+  const hasBannerImage = isImageAsset(activeBanner?.content || "");
+
   const bannerBgStyle = activeBanner?.content
-    ? {
-        backgroundImage: `url(${activeBanner.content})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }
-    : activeBanner?.content
-      ? { backgroundColor: activeBanner.content }
-      : {};
+    ? hasBannerImage
+      ? {
+          backgroundImage: `url(${activeBanner.content})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }
+      : { backgroundColor: activeBanner.content }
+    : {};
+
+  const headingTextClass = hasBannerImage ? "text-white" : "text-black";
+  const subTextClass = hasBannerImage ? "text-white/90" : "text-slate-600";
+  const infoPanelClass = hasBannerImage
+    ? "bg-black/15 backdrop-blur-[2px] rounded-3xl p-4 border border-white/20"
+    : "";
 
   // Get active border for avatar
   const activeBorderId = itemsData?.activeSelection?.borderId;
@@ -96,18 +115,25 @@ export default function ProfilePage() {
             backgroundColor: bannerBgStyle.backgroundColor || "#d4fce8", // Default bg-mint
           }}
         >
+          {hasBannerImage && (
+            <div className="absolute inset-0 bg-linear-to-b from-black/30 via-black/20 to-black/45 pointer-events-none" />
+          )}
+
           {/* Dekorasi background bulat */}
           <div className="absolute -top-16 -right-16 w-48 h-48 bg-yellow rounded-full border-3 border-black shadow-hard opacity-80 pointer-events-none" />
 
           {/* Avatar Profile */}
           <div className="relative z-10 w-36 h-36">
-            {/* BORDER IMAGE - only if it's an image */}
+            {/* BORDER IMAGE */}
             {isImageBorder && (
               <div
-                className="absolute inset-0 rounded-full pointer-events-none"
+                className="absolute top-1/2 left-1/2 z-10 pointer-events-none"
                 style={{
+                  width: "137%", // lebih besar dari avatar
+                  height: "137%",
+                  transform: "translate(-50%, -50%)",
                   backgroundImage: `url(${activeBorder.content})`,
-                  backgroundSize: "130%",
+                  backgroundSize: "contain",
                   backgroundPosition: "center",
                   backgroundRepeat: "no-repeat",
                 }}
@@ -116,7 +142,7 @@ export default function ProfilePage() {
 
             {/* AVATAR */}
             <div
-              className="w-full h-full rounded-full bg-white shadow-hard flex items-center justify-center text-6xl overflow-hidden"
+              className="relative z-0 w-full h-full rounded-full bg-white shadow-hard flex items-center justify-center text-6xl overflow-hidden"
               style={
                 !isImageBorder && activeBorder?.content
                   ? {
@@ -139,25 +165,27 @@ export default function ProfilePage() {
             </div>
 
             {/* LEVEL BADGE */}
-            <div className="absolute -bottom-2 -right-2">
+            <div className="absolute -bottom-2 -right-2 z-20">
               <LevelBadge level={level} size="md" />
             </div>
           </div>
 
           {/* Info & Stats */}
-          <div className="flex-1 text-center md:text-left z-10">
-            <h1 className="text-4xl font-display font-black text-black uppercase tracking-wide mb-2">
+          <div className={`flex-1 text-center md:text-left z-10 ${infoPanelClass}`}>
+            <h1 className={`text-4xl font-display font-black uppercase tracking-wide mb-2 ${headingTextClass}`}>
               {explorerName || "Explorer"}
             </h1>
-            <p className="text-sm font-bold text-slate-600 mb-4">
+            <p className={`text-sm font-bold mb-4 ${subTextClass}`}>
               @{data?.username || "username"}
             </p>
             {explorerBio && (
-              <p className="text-black font-medium mb-4 italic text-sm">
+              <p className={`font-medium mb-4 italic text-sm ${headingTextClass}`}>
                 "{explorerBio}"
               </p>
             )}
-            <p className="text-black font-medium flex items-center justify-center md:justify-start gap-2 mb-6">
+            <p
+              className={`font-medium flex items-center justify-center md:justify-start gap-2 mb-6 ${headingTextClass}`}
+            >
               <Calendar size={18} strokeWidth={2.5} /> Bergabung sejak{" "}
               {joinedDate ? joinedDate.getFullYear() : "2024"}
             </p>
@@ -209,7 +237,8 @@ export default function ProfilePage() {
                   <div className="col-span-full flex items-center justify-center py-8">
                     <Loader className="w-6 h-6 animate-spin text-black" />
                   </div>
-                ) : (allBadges || []).filter((badge) => badge.earned).length > 0 ? (
+                ) : (allBadges || []).filter((badge) => badge.earned).length >
+                  0 ? (
                   (allBadges || [])
                     .filter((badge) => badge.earned)
                     .slice(0, 4)

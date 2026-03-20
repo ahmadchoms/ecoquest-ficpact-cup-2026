@@ -8,8 +8,8 @@ import { motion } from "framer-motion";
 import PageWrapper from "@/components/layout/PageWrapper";
 import AnimatedButton from "@/components/ui/AnimatedButton";
 import { useRegister } from "@/hooks/useAuth";
+import { toast } from "@/lib/toast";
 import { Leaf, User, Lock, Mail, ArrowRight, Eye, EyeOff, Loader2 } from "lucide-react";
-import { set } from "zod";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -34,22 +34,21 @@ export default function RegisterPage() {
     confirmPassword: "",
   });
 
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
 
     // Validasi client-side
     if (formData.password !== formData.confirmPassword) {
-      setError("Password tidak cocok.");
+      toast.error("Registrasi Gagal", "Password tidak cocok.");
+      return;
     }
 
     if (formData.password.length < 6) {
-      setError("Password minimal 6 karakter.");
+      toast.error("Registrasi Gagal", "Password minimal 6 karakter.");
       return;
     }
 
@@ -60,16 +59,19 @@ export default function RegisterPage() {
         password: formData.password,
       });
 
+      toast.success("Registrasi Berhasil", "Akun berhasil dibuat. Silakan login.");
       // Redirect ke login setelah berhasil
       router.push("/auth/login?success=registered");
     } catch (err) {
-      setError(err?.response?.data?.error || "Terjadi kesalahan saat mendaftar");
+      toast.error(
+        "Registrasi Gagal",
+        err?.response?.data?.error || "Terjadi kesalahan saat mendaftar."
+      );
     }
   };
 
   const handleGoogleRegister = async () => {
       setLoading(true);
-      setError("");
   
       try {
         const result = await signIn("google", {
@@ -77,13 +79,13 @@ export default function RegisterPage() {
         });
   
         if (!result?.ok) {
-          // setError(result?.error || "Terjadi kesalahan saat login dengan Google");
+          // toast.error("Google Sign-In Gagal", result?.error || "Terjadi kesalahan saat login dengan Google.");
           setLoading(false);
           return;
         }
       } catch (error) {
         console.error("Google Sign-In error:", error);
-        setError("Terjadi kesalahan. Silakan coba lagi.");
+        // toast.error("Google Sign-In Gagal", "Terjadi kesalahan. Silakan coba lagi.");
         setLoading(false);
       }
     }
@@ -93,8 +95,8 @@ export default function RegisterPage() {
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
           <Link href="/" className="inline-flex items-center gap-2 mb-4">
-           <div className="w-9 h-9 md:w-10 md:h-10 bg-linear-to-br from-emerald-400 to-teal-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-transform">
-              <Leaf size={18} />
+           <div className="w-9 h-9 md:w-10 md:h-10 bg-green border-3 border-black rounded-2xl flex items-center justify-center text-black shadow-hard transition-all duration-200 group-hover:translate-x-0.5 group-hover:translate-y-0.5 group-hover:shadow-none">
+              <Leaf size={20} strokeWidth={2.5} />
             </div>
             <span className="font-heading font-bold text-2xl text-slate-800">
               EcoQuest
@@ -219,16 +221,6 @@ export default function RegisterPage() {
                 </button>
               </div>
             </div>
-
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                className="text-red-600 text-sm bg-red-50 p-3 rounded-lg flex items-center gap-2"
-              >
-                ⚠️ {error}
-              </motion.div>
-            )}
 
             <AnimatedButton
               type="submit"

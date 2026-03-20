@@ -5,6 +5,18 @@ import { logger } from "@/lib/server/utils/logger";
 import prisma from "@/lib/prisma";
 import { calculatePerformanceReward } from "@/data/missions";
 
+const DEFAULT_BADGE_UNLOCK_THRESHOLD = 3;
+
+const BADGE_UNLOCK_THRESHOLD_BY_CATEGORY = {
+  OCEAN: 5,
+  TRANSPORT: 5,
+  WATER: 5,
+  COASTAL: 5,
+  BIODIVERSITY: 5,
+  WASTE: 5,
+  CLIMATE: 5,
+};
+
 /**
  * POST /api/user/missions/[id]/complete
  * Complete a mission and record it in database
@@ -67,13 +79,44 @@ export async function POST(request, { params }) {
           },
         });
 
-        if (mission.badgeRewardId) {
+        const categoryThreshold =
+          BADGE_UNLOCK_THRESHOLD_BY_CATEGORY[mission.category] ??
+          DEFAULT_BADGE_UNLOCK_THRESHOLD;
+
+        const sameCategoryCompletions = await tx.missionCompletion.count({
+          where: {
+            userId: session.user.id,
+            mission: {
+              category: mission.category,
+            },
+          },
+        });
+
+        const hasBadgeAlready = mission.badgeRewardId
+          ? (await tx.user.findFirst({
+              where: {
+                id: session.user.id,
+                badges: { some: { id: mission.badgeRewardId } },
+              },
+              select: { id: true },
+            })) !== null
+          : false;
+
+        let newlyEarnedBadge = null;
+
+        if (
+          mission.badgeRewardId &&
+          !hasBadgeAlready &&
+          sameCategoryCompletions >= categoryThreshold
+        ) {
           await tx.user.update({
             where: { id: session.user.id },
             data: {
               badges: { connect: { id: mission.badgeRewardId } },
             },
           });
+
+          newlyEarnedBadge = mission.badgeReward;
         }
 
         return {
@@ -82,7 +125,13 @@ export async function POST(request, { params }) {
           earnedPoints,
           newLevel,
           isLevelUp: newLevel > oldLevel,
-          badge: mission.badgeReward || null,
+          badge: newlyEarnedBadge,
+          badgeProgress: {
+            category: mission.category,
+            completed: sameCategoryCompletions,
+            required: categoryThreshold,
+            remaining: Math.max(categoryThreshold - sameCategoryCompletions, 0),
+          },
         };
       });
 

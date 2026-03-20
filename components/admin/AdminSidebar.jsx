@@ -35,17 +35,17 @@ const menuItems = [
 
 function SidebarContent({ pathname, setMobileSidebar }) {
   const handleLogout = async () => {
-      await signOut({
-        callbackUrl: "/auth/login",
-      });
-    };
+    await signOut({
+      callbackUrl: "/auth/login",
+    });
+  };
   return (
     <div className="flex flex-col h-full bg-white border-r-3 border-black">
       {/* Sidebar Header */}
       <div className="px-6 py-5.75 border-b-3 border-black flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center text-white shadow-hard group-hover:scale-105 transition-transform">
-            <Leaf size={20} />
+          <div className="w-9 h-9 md:w-10 md:h-10 bg-green border-3 border-black rounded-2xl flex items-center justify-center text-black shadow-hard transition-all duration-200 group-hover:translate-x-0.5 group-hover:translate-y-0.5 group-hover:shadow-none">
+            <Leaf size={20} strokeWidth={2.5} />
           </div>
           <span className="font-display font-black text-lg text-black tracking-tight">
             ECO<span className="text-emerald-600">ADMIN</span>

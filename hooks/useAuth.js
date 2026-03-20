@@ -1,5 +1,5 @@
 import { useQueryClient, useMutation } from "@tanstack/react-query";
-import { API } from "@/lib/api/auth";
+import { API } from "@/lib/api/api";
 
 export const authKeys = {
   all: ["auth"],

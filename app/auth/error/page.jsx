@@ -1,10 +1,12 @@
 "use client";
 
+import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import PageWrapper from "@/components/layout/PageWrapper";
 import AnimatedButton from "@/components/ui/AnimatedButton";
+import { toast } from "@/lib/toast";
 import { Leaf, AlertTriangle, ArrowLeft } from "lucide-react";
 import { Suspense } from "react";
 
@@ -32,6 +34,10 @@ function ErrorContent() {
   ) {
      errorMessage = "Gagal masuk. Periksa kembali kredensial atau akun Anda.";
   }
+
+  useEffect(() => {
+    toast.error("Autentikasi Gagal", errorMessage);
+  }, [errorMessage]);
 
   return (
     <PageWrapper className="min-h-screen flex items-center justify-center bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">

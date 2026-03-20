@@ -43,24 +43,6 @@ export default function ItemCard({ item, delay = 0, onBuyClick = null, isOwned =
     legendary: "from-yellow-300 to-orange-400",
   };
 
-  const rarityBgColor = {
-    common: "bg-slate-100",
-    exclusive: "bg-purple-100",
-    uncommon: "bg-green-100",
-    rare: "bg-blue-100",
-    epic: "bg-purple-100",
-    legendary: "bg-yellow-100",
-  };
-
-  const rarityTextColor = {
-    common: "text-slate-700",
-    exclusive: "text-purple-700",
-    uncommon: "text-green-700",
-    rare: "text-blue-700",
-    epic: "text-purple-700",
-    legendary: "text-yellow-700",
-  };
-
   const handlePurchaseClick = () => {
     if (localIsOwned) {
       return; // Don't do anything if already owned
@@ -113,8 +95,8 @@ export default function ItemCard({ item, delay = 0, onBuyClick = null, isOwned =
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
             className="relative z-10"
           >
-            {item.previewUrl ? (
-              <img src={item.previewUrl} alt={item.name} className="w-full h-full object-cover" />
+            {item.content ? (
+              <img src={item.content} alt={item.name} className="w-full h-full object-cover" />
             ) : (
               "📦"
             )}
@@ -128,11 +110,11 @@ export default function ItemCard({ item, delay = 0, onBuyClick = null, isOwned =
           {/* Type & Rarity Badges */}
           <div className="mb-2 flex flex-wrap gap-2">
             <span
-              className={`inline-block px-3 py-1 text-xs font-bold rounded-lg ${
-                item.type === "BANNER"
-                  ? "bg-blue-100 text-blue-700"
-                  : item.type === "BORDER"
-                  ? "bg-purple-100 text-purple-700"
+              className={`border inline-block px-3 py-1 text-xs font-bold rounded-lg ${
+                item.type === "BORDER"
+                  ? "bg-indigo-100 text-indigo-700 border-indigo-400"
+                  : item.type === "BANNER"
+                  ? "bg-pink-100 text-pink-700 border-pink-400"
                   : "bg-slate-100 text-slate-700"
               }`}
             >
@@ -143,8 +125,8 @@ export default function ItemCard({ item, delay = 0, onBuyClick = null, isOwned =
             <span
               className={`inline-block px-3 py-1 text-xs font-bold rounded-lg ${
                 item.rarity === "exclusive"
-                  ? "bg-amber-100 text-amber-700 border border-amber-300"
-                  : "bg-slate-100 text-slate-600"
+                  ? "bg-purple-100 text-purple-700 border-purple-400"
+                  : "bg-blue-100 text-blue-700 border-blue-400"
               }`}
             >
               {item.rarity === "exclusive" ? "⏰ LIMITED" : "✓ PERMANENT"}

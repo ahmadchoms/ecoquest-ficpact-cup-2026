@@ -16,6 +16,8 @@ export const userShopKeys = {
 
 import { navbarKeys } from "./useNavbarData";
 import { userDashboardKeys } from "./useDashboard";
+import { userBadgesKeys } from "./useUserBadges";
+import { userItemsKeys } from "./useUserItems";
 
 const invalidateMissionQueries = (queryClient) => {
   queryClient.invalidateQueries({ queryKey: userMissionKeys.lists() });
@@ -61,10 +63,19 @@ export const useCompleteMission = () => {
   return useMutation({
     mutationFn: ({ missionId, performanceScore }) =>
       API.completeMission(missionId, performanceScore),
-    onSuccess: () => {
+    onSuccess: async () => {
       invalidateMissionQueries(queryClient);
-      queryClient.invalidateQueries({ queryKey: navbarKeys.stats() });
-      queryClient.invalidateQueries({ queryKey: ["user", "profile"] });
+
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: navbarKeys.stats() }),
+        queryClient.invalidateQueries({ queryKey: ["user", "profile"] }),
+        queryClient.invalidateQueries({ queryKey: userBadgesKeys.list() }),
+      ]);
+
+      await Promise.all([
+        queryClient.refetchQueries({ queryKey: userDashboardKeys.dashboard(), type: "active" }),
+        queryClient.refetchQueries({ queryKey: userBadgesKeys.list(), type: "active" }),
+      ]);
     },
   });
 };
@@ -97,10 +108,18 @@ export const usePurchaseShopItem = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (itemId) => API.purchaseShopItem(itemId),
-    onSuccess: () => {
+    onSuccess: async () => {
       invalidateShopQueries(queryClient);
-      // Invalidate user profile/stats data if needed
-      queryClient.invalidateQueries({ queryKey: ["user", "profile"] });
+
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["user", "profile"] }),
+        queryClient.invalidateQueries({ queryKey: userItemsKeys.items() }),
+      ]);
+
+      await Promise.all([
+        queryClient.refetchQueries({ queryKey: userDashboardKeys.dashboard(), type: "active" }),
+        queryClient.refetchQueries({ queryKey: userItemsKeys.items(), type: "active" }),
+      ]);
     },
   });
 };

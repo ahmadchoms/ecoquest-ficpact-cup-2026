@@ -18,6 +18,8 @@ export const useUserItems = () => {
     },
     staleTime: 10 * 60 * 1000, // 10 minutes
     gcTime: 20 * 60 * 1000, // 20 minutes
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 };
 
