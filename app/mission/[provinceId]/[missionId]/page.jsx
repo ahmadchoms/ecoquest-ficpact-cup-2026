@@ -145,6 +145,7 @@ export default function MissionPage() {
             mission={mission}
             missionResult={missionResult}
             provinceId={provinceId}
+            alreadyDone={alreadyDone}
             onReplay={() => {
               setPhase("briefing");
               setMissionResult(null);

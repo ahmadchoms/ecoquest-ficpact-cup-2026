@@ -13,6 +13,7 @@ export default function ResultPhase({
   mission,
   missionResult,
   provinceId,
+  alreadyDone,
   onReplay,
   router,
 }) {
@@ -58,13 +59,15 @@ export default function ResultPhase({
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-        <button
-          onClick={onReplay}
-          className="flex-1 py-3.5 sm:py-4 bg-white hover:bg-pink border-3 border-black text-black rounded-2xl sm:rounded-3xl font-display font-bold text-base sm:text-lg md:text-xl uppercase flex items-center justify-center gap-2 sm:gap-3 shadow-hard hover:-translate-x-1 hover:-translate-y-1 transition-all active:translate-x-0 active:translate-y-0 active:shadow-none"
-        >
-          <RotateCcw size={20} strokeWidth={3} />
-          Main Lagi
-        </button>
+        {!alreadyDone && (
+          <button
+            onClick={onReplay}
+            className="flex-1 py-3.5 sm:py-4 bg-white hover:bg-pink border-3 border-black text-black rounded-2xl sm:rounded-3xl font-display font-bold text-base sm:text-lg md:text-xl uppercase flex items-center justify-center gap-2 sm:gap-3 shadow-hard hover:-translate-x-1 hover:-translate-y-1 transition-all active:translate-x-0 active:translate-y-0 active:shadow-none"
+          >
+            <RotateCcw size={20} strokeWidth={3} />
+            Main Lagi
+          </button>
+        )}
         <button
           onClick={() => router.push(`/province/${provinceId}`)}
           className="flex-1 py-3.5 sm:py-4 bg-green hover:bg-yellow border-3 border-black text-black rounded-2xl sm:rounded-3xl font-display font-bold text-base sm:text-lg md:text-xl uppercase flex items-center justify-center gap-2 sm:gap-3 shadow-hard hover:-translate-x-1 hover:-translate-y-1 transition-all active:translate-x-0 active:translate-y-0 active:shadow-none"

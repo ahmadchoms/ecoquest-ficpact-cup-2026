@@ -49,11 +49,21 @@ export async function POST(request, { params }) {
           },
         });
 
+        const previousXP = await tx.user.findUnique({
+          where: { id: session.user.id },
+          select: { xp: true },
+        });
+
+        const newTotalXP = previousXP.xp + earnedXP;
+        const oldLevel = Math.floor(previousXP.xp / 500) + 1;
+        const newLevel = Math.floor(newTotalXP / 500) + 1;
+
         const updatedUser = await tx.user.update({
           where: { id: session.user.id },
           data: {
             xp: { increment: earnedXP },
             points: { increment: earnedPoints },
+            level: newLevel,
           },
         });
 
@@ -65,10 +75,6 @@ export async function POST(request, { params }) {
             },
           });
         }
-
-        const previousXP = updatedUser.xp - earnedXP;
-        const oldLevel = Math.floor(previousXP / 500) + 1;
-        const newLevel = Math.floor(updatedUser.xp / 500) + 1;
 
         return {
           completion,
