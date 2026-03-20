@@ -153,8 +153,8 @@ export default function MissionPage() {
 
       <CelebrationOverlay
         show={showCelebration}
-        xpEarned={missionResult?.xpEarned}
-        pointsEarned={missionResult?.pointsEarned}
+        xpEarned={missionResult?.earnedXP}
+        pointsEarned={missionResult?.earnedPoints}
         performancePercent={missionResult?.performancePercent}
         badgeEarned={newBadge}
         onClose={() => setShowCelebration(false)}

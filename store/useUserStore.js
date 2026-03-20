@@ -97,7 +97,7 @@ export const useUserStore = create(
           completedMissions: newCompleted,
           exploredProvinces: newExplored,
           impactData: newImpact,
-          missionScores: { ...prev.missionScores, [key]: xpEarned },
+          missionScores: { ...prev.missionScores, [key]: xpEarned, [key]: pointsEarned },
         });
 
         get().addXP(xpEarned);
