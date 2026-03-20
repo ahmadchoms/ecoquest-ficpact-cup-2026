@@ -15,6 +15,17 @@ import { REGIONS } from "@/utils/constants";
 import { Filter } from "lucide-react";
 import { getRecommendedMission } from "@/utils/achievements";
 
+// Map enum values to display labels
+const REGION_LABELS = {
+  SUMATERA: "Sumatera",
+  JAWA: "Jawa",
+  KALIMANTAN: "Kalimantan",
+  SULAWESI: "Sulawesi",
+  BALI_NUSA_TENGGARA: "Bali & Nusa Tenggara",
+  MALUKU: "Maluku",
+  PAPUA: "Papua",
+};
+
 const InteractiveMap = dynamic(
   () => import("@/components/map/InteractiveMap"),
   {
@@ -62,6 +73,7 @@ export default function MapPage() {
         level: dashboardData.level || 1,
         totalXP: dashboardData.xp || 0,
         coins: dashboardData.points || 0,
+        completedMissions: dashboardData.completedMissions || [],
         exploredProvinces: dashboardData.exploredProvinces || [],
         impactData: dashboardData.impactData || {
           carbonSaved: 0,
@@ -116,16 +128,14 @@ export default function MapPage() {
               {REGIONS.map((region) => (
                 <button
                   key={region}
-                  onClick={() =>
-                    setActiveFilter(activeFilter === region ? null : region)
-                  }
+                  onClick={() => setActiveFilter(region)}
                   className={`text-xs px-3 py-1.5 rounded-full font-medium transition-all ${
                     activeFilter === region
                       ? "bg-green-500 text-white"
                       : "bg-white/80 text-gray-600 hover:bg-primary-50"
                   }`}
                 >
-                  {region}
+                  {REGION_LABELS[region]}
                 </button>
               ))}
             </div>

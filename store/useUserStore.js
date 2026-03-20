@@ -29,8 +29,7 @@ export const useUserStore = create(
       /**
        * Sync dashboard data from database to local store
        * Called when dashboard query updates - keeps Zustand in sync with server
-       * Note: completedMissions is not synced (API returns count, store expects array of keys)
-       * exploredProvinces is synced from database
+       * Now includes completedMissions array from backend
        */
       setDashboardData: (data) => {
         set({
@@ -38,7 +37,8 @@ export const useUserStore = create(
           level: data.level || 1,
           totalXP: data.totalXP || 0,
           coins: data.coins || 0,
-          exploredProvinces: data.exploredProvinces || [],
+          completedMissions: Array.isArray(data.completedMissions) ? data.completedMissions : [],
+          exploredProvinces: Array.isArray(data.exploredProvinces) ? data.exploredProvinces : [],
           impactData: data.impactData || {
             carbonSaved: 0,
             waterSaved: 0,
@@ -46,7 +46,7 @@ export const useUserStore = create(
             speciesLearned: 0,
             mangroveRestored: 0,
           },
-          earnedBadges: data.earnedBadges || [],
+          earnedBadges: Array.isArray(data.earnedBadges) ? data.earnedBadges : [],
         });
       },
 

@@ -16,8 +16,13 @@ export const PROGRESS_COLORS = {
 };
 
 export const REGIONS = [
-  "Sumatera", "Jawa", "Kalimantan", "Sulawesi",
-  "Bali & Nusa Tenggara", "Maluku", "Papua",
+  "SUMATERA",
+  "JAWA",
+  "KALIMANTAN",
+  "SULAWESI",
+  "BALI_NUSA_TENGGARA",
+  "MALUKU",
+  "PAPUA",
 ];
 
 export const RARITY_ORDER = ['common', 'uncommon', 'rare', 'epic', 'legendary'];
