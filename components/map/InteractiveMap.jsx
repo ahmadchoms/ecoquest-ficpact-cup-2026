@@ -205,7 +205,7 @@ export default function InteractiveMap({
     [getProvinceId, getProvinceProgress, onProvinceClick, allProvinces],
   );
 
-  if (!geoData) {
+  if (!geoData || allProvinces.length === 0) {
     return (
       <div className="w-full h-full flex items-center justify-center bg-linear-to-br from-blue-50 to-cyan-50">
         <div className="text-center">

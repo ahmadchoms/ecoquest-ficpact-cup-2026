@@ -152,6 +152,11 @@ export default function ProfilePage() {
             <p className="text-sm font-bold text-slate-600 mb-4">
               @{data?.username || "username"}
             </p>
+            {explorerBio && (
+              <p className="text-black font-medium mb-4 italic text-sm">
+                "{explorerBio}"
+              </p>
+            )}
             <p className="text-black font-medium flex items-center justify-center md:justify-start gap-2 mb-6">
               <Calendar size={18} strokeWidth={2.5} /> Bergabung sejak{" "}
               {joinedDate ? joinedDate.getFullYear() : "2024"}
@@ -204,8 +209,9 @@ export default function ProfilePage() {
                   <div className="col-span-full flex items-center justify-center py-8">
                     <Loader className="w-6 h-6 animate-spin text-black" />
                   </div>
-                ) : (
+                ) : (allBadges || []).filter((badge) => badge.earned).length > 0 ? (
                   (allBadges || [])
+                    .filter((badge) => badge.earned)
                     .slice(0, 4)
                     .map((badge) => (
                       <BadgeCard
@@ -214,6 +220,12 @@ export default function ProfilePage() {
                         earned={badge.earned}
                       />
                     ))
+                ) : (
+                  <div className="col-span-full flex items-center justify-center py-8">
+                    <p className="text-black font-bold uppercase text-center">
+                      Belum ada badge yang diraih
+                    </p>
+                  </div>
                 )}
               </div>
             </section>

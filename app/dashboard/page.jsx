@@ -61,7 +61,9 @@ export default function DashboardPage() {
   const totalXP = data?.xp || 0;
   const level = data?.level || 1;
   const earnedBadges = data?.badges?.map((badge) => badge.id) || [];
-  const completedMissions = Array.from({ length: data?.completedMissions || 0 });
+  const completedMissions = Array.from({
+    length: data?.completedMissions || 0,
+  });
   const exploredProvinces = data?.exploredProvinces || [];
 
   // Impact data calculated from mission completions
@@ -85,23 +87,27 @@ export default function DashboardPage() {
     treesEquivalent: data?.treesEquivalent || 0,
   };
 
-   if (isLoading) {
-      return (
-        <StatusCard emoji="📊" title="Memuat Data Dashboard..." variant="loading" />
-      );
-    }
-  
-    if (error) {
-      return (
-        <StatusCard
-          emoji="📊"
-          title="Data Dashboard Tidak Ditemukan"
-          variant="error"
-          backHref="/dashboard"
-          backLabel="Refresh Dashboard"
-        />
-      );
-    }
+  if (isLoading) {
+    return (
+      <StatusCard
+        emoji="📊"
+        title="Memuat Data Dashboard..."
+        variant="loading"
+      />
+    );
+  }
+
+  if (error) {
+    return (
+      <StatusCard
+        emoji="📊"
+        title="Data Dashboard Tidak Ditemukan"
+        variant="error"
+        backHref="/dashboard"
+        backLabel="Refresh Dashboard"
+      />
+    );
+  }
 
   const impactChartData = [
     { name: "Karbon", value: impactData.carbonSaved, color: "#f5e642" },
@@ -353,7 +359,7 @@ export default function DashboardPage() {
             </div>
 
             <div>
-              <h2 className="text-xl font-display font-black text-black mb-6 flex items-center gap-3 uppercase tracking-wide">
+              <h2 className="text-xl font-display font-black text-black flex items-center gap-3 uppercase tracking-wide">
                 <div className="p-1.5 bg-orange border-2 border-black rounded-lg shadow-[3px_3px_0_#0f0f0f]">
                   <Share2
                     size={20}
@@ -378,13 +384,13 @@ export default function DashboardPage() {
 
         <motion.div
           variants={fadeIn("up", 0.5)}
-          className="flex flex-col sm:flex-row gap-5 pt-8"
+          className="flex flex-col sm:flex-row gap-5"
         >
           <Link href="/map" className="flex-1">
             <button className="w-full py-4 px-6 bg-yellow border-3 border-black rounded-2xl shadow-hard hover:bg-orange hover:-translate-y-1 hover:shadow-hard-lg active:translate-x-1 active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-3 font-display font-black text-black uppercase tracking-widest text-lg">
               <Map size={24} strokeWidth={2.5} /> Jelajahi Peta
             </button>
-          </Link> 
+          </Link>
         </motion.div>
       </motion.div>
     </PageWrapper>
