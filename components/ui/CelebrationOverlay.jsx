@@ -93,7 +93,7 @@ export default function CelebrationOverlay({
           >
             <div className="text-6xl mb-4">🎉</div>
             <h2 className="font-heading text-2xl font-bold text-gray-800 mb-2">
-              Misi Selesai!
+              Mision Selesai!
             </h2>
 
             {performancePercent && (
@@ -121,10 +121,10 @@ export default function CelebrationOverlay({
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ delay: 0.3, type: "spring" }}
-                className="inline-flex items-center gap-2 bg-linear-to-r from-primary-400 to-primary-600 text-white rounded-full px-6 py-2 mb-4"
+                className="inline-flex items-center gap-2 bg-linear-to-r from-yellow-400 to-yellow-500 text-black rounded-full px-6 py-2 mb-4 font-heading font-bold shadow-md"
               >
                 <span className="text-xl">⚡</span>
-                <span className="font-heading font-bold text-lg">
+                <span className="text-lg">
                   +{Math.floor(xpEarned)} XP
                 </span>
               </motion.div>
@@ -146,21 +146,29 @@ export default function CelebrationOverlay({
 
             {badgeEarned && (
               <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.6, type: "spring" }}
-                className="mt-3"
+                initial={{ scale: 0, y: 20 }}
+                animate={{ scale: 1, y: 0 }}
+                transition={{ delay: 0.6, type: "spring", stiffness: 100 }}
+                className="mt-6 pt-6 border-t border-gray-200"
               >
-                <p className="text-sm text-gray-500 mb-2">
-                  Badge Baru Terbuka!
-                </p>
-                <div className="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3">
-                  <span className="text-3xl">{badgeEarned.icon}</span>
-                  <div className="text-left">
-                    <p className="font-semibold text-sm text-gray-800">
+                <motion.div
+                  animate={{ rotate: [0, -5, 5, 0] }}
+                  transition={{ delay: 0.8, duration: 0.6 }}
+                  className="inline-block mb-3"
+                >
+                  <p className="text-sm font-heading font-bold text-amber-600">
+                    🏆 Badge Baru Terbuka!
+                  </p>
+                </motion.div>
+                <div className="inline-flex flex-col items-center gap-3 bg-linear-to-br from-amber-50 to-amber-100 border-2 border-amber-300 rounded-2xl px-6 py-4 w-full">
+                  <span className="text-5xl">
+                    {badgeEarned.icon || "🎖️"}
+                  </span>
+                  <div className="text-center">
+                    <p className="font-heading font-bold text-sm text-gray-900">
                       {badgeEarned.name}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-600 mt-2">
                       {badgeEarned.description}
                     </p>
                   </div>

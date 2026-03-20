@@ -39,7 +39,7 @@ export function MissionCard({
         {!isLocked ? (
           <Link
             href={`/mission/${provinceId}/${mission.id}`}
-            className="flex flex-col md:flex-row items-center gap-8 group"
+            className={`flex flex-col md:flex-row items-center gap-8 group ${isCompleted ? "pointer-events-none" : ""}`}
           >
             <div className="relative z-10 shrink-0">
               <div className="w-24 h-24 rounded-3xl bg-white border-3 border-black flex items-center justify-center text-5xl shadow-hard-lg group-hover:scale-110 group-hover:rotate-6 group-hover:bg-pink transition-all duration-300">
@@ -79,7 +79,7 @@ export function MissionCard({
 
             <div className="shrink-0 mt-6 md:mt-0">
               <div
-                className={`w-16 h-16 rounded-2xl flex items-center justify-center border-3 border-black shadow-hard transition-all duration-300 ${isCompleted ? "bg-green text-black" : "bg-orange text-black group-hover:scale-110"}`}
+                className={`w-16 h-16 rounded-2xl flex items-center justify-center border-3 border-black shadow-hard transition-all duration-300 ${isCompleted ? "bg-gray-300 text-gray-500 cursor-not-allowed opacity-60" : "bg-orange text-black group-hover:scale-110"}`}
               >
                 {isCompleted ? (
                   <CheckCircle2 size={32} strokeWidth={3} />

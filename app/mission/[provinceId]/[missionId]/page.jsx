@@ -67,11 +67,12 @@ export default function MissionPage() {
           response.earnedPoints,
           resultData.impactValues ?? {},
         );
-        
-        if (response.badge?.id) {
-          const wasNew = unlockBadge(response.badge.id);
-          if (wasNew) setNewBadge(response.badge);
-        }
+      }
+
+      // Show badge popup regardless of whether it's new or not
+      if (response.badge?.id) {
+        unlockBadge(response.badge.id);
+        setNewBadge(response.badge);
       }
 
       const missionResultData = {
@@ -142,6 +143,7 @@ export default function MissionPage() {
             mission={mission}
             missionResult={missionResult}
             provinceId={provinceId}
+            alreadyDone={alreadyDone}
             onReplay={() => {
               setPhase("briefing");
               setMissionResult(null);
