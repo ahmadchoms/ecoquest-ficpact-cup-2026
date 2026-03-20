@@ -126,27 +126,17 @@ export const missionList = Object.values(missions);
 export const calculatePerformanceReward = (performancePercent, baseXP, basePoints) => {
   // Normalize performance to 0-1 if it's 0-100
   const perfScore = performancePercent > 1 ? performancePercent / 100 : performancePercent;
-  
-  // Performance tiers:
-  // 0-40%: 30% of reward
-  // 40-60%: 50% of reward
-  // 60-80%: 75% of reward
-  // 80-100%: 100% of reward
-  let multiplier = 0.3; // Default untuk < 40%
-  
-  if (perfScore >= 0.8) {
-    multiplier = 1.0; // 80-100% = full reward
-  } else if (perfScore >= 0.6) {
-    multiplier = 0.75; // 60-80% = 75% reward
-  } else if (perfScore >= 0.4) {
-    multiplier = 0.5; // 40-60% = 50% reward
-  }
-  
+
+  // Linear scaling: performa 80% → dapat 80% reward, bukan 100%
+  // Minimum 10% reward supaya selalu ada insentif menyelesaikan misi
+  const multiplier = Math.max(0.1, Math.min(1.0, perfScore));
+
   return {
     earnedXP: Math.max(Math.round(baseXP * multiplier), 10), // Minimum 10 XP
     earnedPoints: Math.max(Math.round(basePoints * multiplier), 5), // Minimum 5 points
   };
 };
+
 
 /**
  * Calculate reward based on percentage correct (for quiz type missions)

@@ -59,26 +59,29 @@ export default function MissionPage() {
         performanceScore: resultData.performancePercent ?? 80,
       });
 
+      // Axios interceptor unwraps { success, data } → { data: payload, ... }
+      const payload = response.data ?? response;
+
       if (!alreadyDone) {
         completeMission(
           missionId,
           provinceId,
-          response.earnedXP,
-          response.earnedPoints,
+          payload.earnedXP,
+          payload.earnedPoints,
           resultData.impactValues ?? {},
         );
         
-        if (response.badge?.id) {
-          const wasNew = unlockBadge(response.badge.id);
-          if (wasNew) setNewBadge(response.badge);
+        if (payload.badge?.id) {
+          const wasNew = unlockBadge(payload.badge.id);
+          if (wasNew) setNewBadge(payload.badge);
         }
       }
 
       const missionResultData = {
         ...resultData,
-        earnedXP: response.earnedXP,
-        earnedPoints: response.earnedPoints,
-        isLevelUp: response.isLevelUp,
+        earnedXP: payload.earnedXP,
+        earnedPoints: payload.earnedPoints,
+        isLevelUp: payload.isLevelUp,
       };
 
       setMissionResult(missionResultData);

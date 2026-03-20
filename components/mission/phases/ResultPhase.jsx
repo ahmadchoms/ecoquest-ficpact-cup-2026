@@ -50,10 +50,10 @@ export default function ResultPhase({
       <div className="flex flex-wrap justify-center gap-3 mb-6 sm:mb-8">
         <div className="flex items-center gap-2 bg-yellow border-3 border-black shadow-hard rounded-2xl px-4 py-2.5 font-display font-bold text-base sm:text-lg">
           <Zap size={18} strokeWidth={2.5} fill="currentColor" />+
-          {missionResult?.earnedXP || mission?.xpReward} XP
+          {missionResult?.earnedXP ?? mission?.xpReward} XP
         </div>
         <div className="flex items-center gap-2 bg-green border-3 border-black shadow-hard rounded-2xl px-4 py-2.5 font-display font-bold text-base sm:text-lg">
-          💰 +{missionResult?.earnedPoints || mission?.pointReward || 0} Poin
+          💰 +{missionResult?.earnedPoints ?? mission?.pointsReward ?? mission?.pointReward ?? 0} Poin
         </div>
       </div>
 
