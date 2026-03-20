@@ -192,7 +192,9 @@ export default function SpeciesQuiz({ province, mission, onComplete, onBack }) {
       } else {
         setIsFinished(true);
         const score = newCorrect * 20;
-        const performancePercent = Math.round((newCorrect / questions.length) * 100);
+        const performancePercent = Math.round(
+          (newCorrect / questions.length) * 100,
+        );
         onComplete({
           score,
           performancePercent: performancePercent,
@@ -203,25 +205,18 @@ export default function SpeciesQuiz({ province, mission, onComplete, onBack }) {
           ],
         });
       }
-    }, 2500);
+    }, 7000);
   };
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-center">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-          className="w-12 h-12 border-4 border-emerald-200 border-t-emerald-500 rounded-full mb-4"
-        />
-        <p className="text-slate-600 font-medium animate-pulse">
-          Sedang mempersiapkan kuis yang dipersonalisasi
-          {province ? ` tentang spesies ${province.name}` : ""}...
-        </p>
-        <p className="text-xs text-slate-400 mt-2 flex items-center gap-1">
-          <Sparkles size={12} className="text-purple-400" />
-          Mengambil data dari GBIF & Gemini AI
-        </p>
+      <div className="fixed inset-0 flex items-center justify-center">
+        <div className="text-center bg-yellow animate-wiggle border-3 border-black shadow-hard p-8 sm:p-10 rounded-4xl max-w-xs w-full">
+          <p className="text-6xl sm:text-8xl mb-4 sm:mb-6">✨</p>
+          <h2 className="font-display text-xl sm:text-2xl font-bold text-black mb-4 sm:mb-6">
+            Memproses Quiz dengan AI...
+          </h2>
+        </div>
       </div>
     );
   }

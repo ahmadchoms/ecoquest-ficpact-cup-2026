@@ -30,7 +30,7 @@ export default function ProfilePage() {
   const totalXP = data?.xp || 0;
   const level = data?.level || 1;
   const completedMissions = Array.from({
-    length: data?.completedMissions || 0,
+    length: data?.completedMissions?.length|| 0,
   });
   const joinedDate = data?.createdAt ? new Date(data.createdAt) : null;
   const activityHistory = data?.activityHistory || [];

@@ -5,10 +5,10 @@ import { useState, useEffect } from "react";
 import { useUserStore } from "@/store/useUserStore";
 import { usePurchaseShopItem } from "@/hooks/useUserMissions";
 import { useNavbarData } from "@/hooks/useNavbarData";
+import { toast } from "@/lib/toast";
 import EcoCard from "@/components/design-system/EcoCard";
 import EcoButton from "@/components/design-system/EcoButton";
 import PurchaseConfirmation from "./PurchaseConfirmation";
-import Toast from "@/components/ui/Toast";
 
 export default function ItemCard({ item, delay = 0, onBuyClick = null, isOwned = false }) {
   // Safety check
@@ -19,8 +19,6 @@ export default function ItemCard({ item, delay = 0, onBuyClick = null, isOwned =
   const purchaseMutation = usePurchaseShopItem();
   
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState("");
   const [realTimePoints, setRealTimePoints] = useState(userPoints); // State untuk database points
   const [localIsOwned, setLocalIsOwned] = useState(isOwned); // Track ownership state
 
@@ -69,9 +67,7 @@ export default function ItemCard({ item, delay = 0, onBuyClick = null, isOwned =
     }
     
     if (realTimePoints < item.price) {
-      setToastMessage(`Poin tidak cukup! Kamu membutuhkan ${item.price - realTimePoints} poin lagi.`);
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 3000);
+      toast.warning("Poin Tidak Cukup!", `Kamu membutuhkan ${item.price - realTimePoints} poin lagi.`);
       return;
     }
     if (onBuyClick) {
@@ -91,13 +87,9 @@ export default function ItemCard({ item, delay = 0, onBuyClick = null, isOwned =
       setRealTimePoints(newPoints);
       deductCoins(item.price);
       setShowConfirmation(false);
-      setToastMessage(`${item.name} berhasil dibeli!`);
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 2000);
+      toast.success("Berhasil Dibeli!", `${item.name} berhasil ditambahkan ke koleksi kamu.`);
     } catch (error) {
-      setToastMessage(error.response?.data?.message || "Gagal membeli item. Silakan coba lagi.");
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 3000);
+      toast.error("Gagal Membeli!", error.response?.data?.message || "Gagal membeli item. Silakan coba lagi.");
     }
   };
 
@@ -214,16 +206,6 @@ export default function ItemCard({ item, delay = 0, onBuyClick = null, isOwned =
           onConfirm={handleConfirmPurchase}
           onCancel={() => setShowConfirmation(false)}
           isLoading={purchaseMutation.isPending}
-        />
-      )}
-
-      {/* Toast Notification */}
-      {showToast && (
-        <Toast
-          isOpen={showToast}
-          message={toastMessage || `${item.name} berhasil dibeli!`}
-          type={toastMessage?.includes("kurang") || toastMessage?.includes("Gagal") ? "error" : "success"}
-          onClose={() => setShowToast(false)}
         />
       )}
     </motion.div>

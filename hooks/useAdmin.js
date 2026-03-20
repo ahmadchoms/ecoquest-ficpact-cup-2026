@@ -10,7 +10,7 @@ export const useAdmin = () => {
   const statsQuery = useQuery({
     queryKey: adminQueryKeys.stats,
     queryFn: async () => {
-      const { data } = await API.getStats();
+      const { data } = await API.getAdminStats();
       return data;
     },
     staleTime: 1000 * 60 * 5, // 5 minutes fresh

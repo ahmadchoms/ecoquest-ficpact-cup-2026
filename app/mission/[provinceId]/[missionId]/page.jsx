@@ -88,9 +88,28 @@ export default function MissionPage() {
       setPhase("result");
       setShowCelebration(true);
     } catch (error) {
-      console.error("Gagal menyelesaikan misi:", error);
+      const isAlreadyDone = error?.message?.includes("sudah menyelesaikan");
+
+      if (isAlreadyDone) {
+        // Misi sudah pernah selesai — hitung reward lokal dan tetap tampilkan result
+        const perfScore = Math.max(0.1, Math.min(1.0, (resultData.performancePercent ?? 80) / 100));
+        const localXP = Math.max(Math.round((mission?.xpReward || 0) * perfScore), 10);
+        const localPoints = Math.max(Math.round((mission?.pointsReward || mission?.pointReward || 0) * perfScore), 5);
+
+        setMissionResult({
+          ...resultData,
+          earnedXP: localXP,
+          earnedPoints: localPoints,
+          isLevelUp: false,
+        });
+        setPhase("result");
+        // Jangan tampilkan celebration untuk replay misi yang sudah selesai
+      } else {
+        console.error("Gagal menyelesaikan misi:", error);
+      }
     }
   };
+
 
   const getMissionColor = () => {
     switch (mission.category) {

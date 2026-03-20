@@ -344,7 +344,7 @@ export default function OceanRescue({
                 patternUnits="objectBoundingBox"
               >
                 <path
-                  d="M 10% 0 L 0 0 0 10%"
+                  d="M 0.1 0 L 0 0 0 0.1"
                   fill="none"
                   stroke="white"
                   strokeWidth="0.5"
