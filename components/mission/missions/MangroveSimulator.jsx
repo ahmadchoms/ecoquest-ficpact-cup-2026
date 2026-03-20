@@ -87,16 +87,8 @@ export default function MangroveSimulator({
 
   const handleFinish = () => {
     setPhase("result");
-    const { earnedXP, earnedPoints } = calculateProgressReward(
-      restoredPercent,
-      mission.xpReward,
-      mission.pointReward
-    );
-
     onComplete({
       score: restoredPercent,
-      earnedXP: earnedXP,
-      earnedPoints: earnedPoints,
       performancePercent: restoredPercent,
       impactValues: {
         mangroveRestored: plantedCount,

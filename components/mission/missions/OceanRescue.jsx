@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, RefreshCw } from "lucide-react";
-import { calculateProgressReward } from "@/utils/calculations";
 
 const TRASH_TYPES = {
   // Organik (Organic)
@@ -195,16 +194,9 @@ export default function OceanRescue({
 
     // Calculate performance based on score (max score is 500)
     const performancePercent = Math.min(100, (score / 500) * 100);
-    const { earnedXP, earnedPoints } = calculateProgressReward(
-      performancePercent,
-      mission.xpReward,
-      mission.pointReward
-    );
 
     onComplete({
       score: result.score,
-      earnedXP: earnedXP,
-      earnedPoints: earnedPoints,
       performancePercent: Math.round(performancePercent),
       impactValues: { oceanCleaned: result.collectedCount * 2 },
       tips,

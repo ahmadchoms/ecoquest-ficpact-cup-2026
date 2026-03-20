@@ -1,4 +1,5 @@
 import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
 import { successResponse, errorResponse, notFoundResponse, serverErrorResponse } from "@/lib/server/utils/response";
 import { logger } from "@/lib/server/utils/logger";
 import prisma from "@/lib/prisma";
@@ -11,8 +12,8 @@ import { calculatePerformanceReward } from "@/data/missions";
  */
 export async function POST(request, { params }) {
   try {
-    const session = await getServerSession();
-    if (!session) {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
       return errorResponse("Tidak terautentikasi", 401);
     }
 
@@ -21,73 +22,76 @@ export async function POST(request, { params }) {
 
     logger.apiRequest("POST", `/api/user/missions/${id}/complete`);
 
-    // Get mission
     const mission = await prisma.mission.findUnique({
       where: { id },
+      include: { badgeReward: true },
     });
 
     if (!mission) return notFoundResponse("Misi");
 
-    // Check if already completed
-    const existing = await prisma.missionCompletion.findUnique({
-      where: { userId_missionId: { userId: session.user.id, missionId: id } },
-    });
-
-    if (existing) {
-      return errorResponse("Anda sudah menyelesaikan misi ini sebelumnya.", 400);
-    }
-
-    // Calculate earned rewards based on performance
-    const { earnedXP, earnedPoints } = calculatePerformanceReward(
+    const { earnedXP: rawXP, earnedPoints: rawPoints } = calculatePerformanceReward(
       performanceScore,
       mission.xpReward,
-      mission.pointsReward
+      mission.pointsReward || 0
     );
 
-    // Create mission completion record in a transaction
-    const result = await prisma.$transaction(async (tx) => {
-      // Record completion
-      const completion = await tx.missionCompletion.create({
-        data: {
-          userId: session.user.id,
-          missionId: id,
-          xpEarned: earnedXP,
-        },
-      });
+    const earnedXP = Math.floor(rawXP);
+    const earnedPoints = Math.floor(rawPoints);
 
-      // Update user XP and points
-      const updatedUser = await tx.user.update({
-        where: { id: session.user.id },
-        data: {
-          xp: { increment: earnedXP },
-          points: { increment: earnedPoints },
-        },
-      });
-
-      // Award badge if mission has one
-      if (mission.badgeRewardId) {
-        await tx.user.update({
-          where: { id: session.user.id },
+    try {
+      const result = await prisma.$transaction(async (tx) => {
+        const completion = await tx.missionCompletion.create({
           data: {
-            badges: { connect: { id: mission.badgeRewardId } },
+            userId: session.user.id,
+            missionId: id,
+            xpEarned: earnedXP,
+            pointsEarned: earnedPoints,
           },
         });
+
+        const updatedUser = await tx.user.update({
+          where: { id: session.user.id },
+          data: {
+            xp: { increment: earnedXP },
+            points: { increment: earnedPoints },
+          },
+        });
+
+        if (mission.badgeRewardId) {
+          await tx.user.update({
+            where: { id: session.user.id },
+            data: {
+              badges: { connect: { id: mission.badgeRewardId } },
+            },
+          });
+        }
+
+        const previousXP = updatedUser.xp - earnedXP;
+        const oldLevel = Math.floor(previousXP / 500) + 1;
+        const newLevel = Math.floor(updatedUser.xp / 500) + 1;
+
+        return {
+          completion,
+          earnedXP,
+          earnedPoints,
+          newLevel,
+          isLevelUp: newLevel > oldLevel,
+          badge: mission.badgeReward || null,
+        };
+      });
+
+      logger.apiSuccess("POST", `/api/user/missions/${id}/complete`, {
+        earnedXP: result.earnedXP,
+        earnedPoints: result.earnedPoints,
+      });
+
+      return successResponse(result);
+    } catch (error) {
+      if (error.code === "P2002") {
+        return errorResponse("Anda sudah menyelesaikan misi ini sebelumnya.", 400);
       }
-
-      return {
-        completion,
-        earnedXP,
-        earnedPoints,
-        newLevel: Math.floor(updatedUser.xp / 500) + 1,
-      };
-    });
-
-    logger.apiSuccess("POST", `/api/user/missions/${id}/complete`, {
-      earnedXP: result.earnedXP,
-      earnedPoints: result.earnedPoints,
-    });
-
-    return successResponse(result);
+      throw error;
+    }
   } catch (error) {
     logger.apiError("POST", `/api/user/missions/[id]/complete`, error);
     return serverErrorResponse("Gagal menyelesaikan misi.");

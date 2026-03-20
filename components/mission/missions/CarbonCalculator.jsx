@@ -142,16 +142,8 @@ export default function CarbonCalculator({
       );
     }
 
-    const { earnedXP, earnedPoints } = calculateProgressReward(
-      performancePercent,
-      mission.xpReward,
-      mission.pointReward,
-    );
-
     onComplete({
       score: Math.max(0, 100 - Math.round(result.total * 5)),
-      earnedXP: earnedXP,
-      earnedPoints: earnedPoints,
       performancePercent: Math.round(performancePercent),
       impactValues: { carbonSaved: result.total * 0.3 },
       tips,

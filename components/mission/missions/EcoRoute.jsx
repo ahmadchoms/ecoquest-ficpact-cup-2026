@@ -3,7 +3,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, RefreshCw, Zap } from "lucide-react";
-import { calculateProgressReward } from "@/utils/calculations";
 
 const VEHICLES = {
   walk: { name: "Jalan Kaki", emoji: "🚶", emissionPerTile: 0, color: "bg-green-400" },
@@ -299,16 +298,8 @@ export default function EcoRoute({ province, mission, onComplete, onBack }) {
                     );
                   }
 
-                  const { earnedXP, earnedPoints } = calculateProgressReward(
-                    performancePercent,
-                    mission.xpReward,
-                    mission.pointReward
-                  );
-
                   onComplete({
                     score: Math.max(0, 100 - Math.round(result.totalCarbon * 50)),
-                    earnedXP: earnedXP,
-                    earnedPoints: earnedPoints,
                     performancePercent: Math.round(performancePercent),
                     impactValues: { carbonReduced: 100 - result.totalCarbon * 10 },
                     tips: [

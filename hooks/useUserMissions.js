@@ -63,7 +63,7 @@ export const useCompleteMission = () => {
       API.completeMission(missionId, performanceScore),
     onSuccess: () => {
       invalidateMissionQueries(queryClient);
-      // Invalidate user profile/stats data if needed
+      queryClient.invalidateQueries({ queryKey: navbarKeys.stats() });
       queryClient.invalidateQueries({ queryKey: ["user", "profile"] });
     },
   });

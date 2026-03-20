@@ -137,16 +137,8 @@ export default function WaterConservation({
       );
     }
 
-    const { earnedXP, earnedPoints } = calculateProgressReward(
-      performancePercent,
-      mission.xpReward,
-      mission.pointReward
-    );
-
     onComplete({
       score: Math.max(0, 100 - Math.round((result.total / 300) * 100)),
-      earnedXP: earnedXP,
-      earnedPoints: earnedPoints,
       performancePercent: Math.round(performancePercent),
       impactValues: { waterSaved: Math.max(0, result.total * 0.2) },
       tips,

@@ -192,17 +192,9 @@ export default function SpeciesQuiz({ province, mission, onComplete, onBack }) {
       } else {
         setIsFinished(true);
         const score = newCorrect * 20;
-        const { earnedXP, earnedPoints, performancePercent } =
-          calculateQuizReward(
-            newCorrect,
-            questions.length,
-            mission.xpReward,
-            mission.pointReward,
-          );
+        const performancePercent = Math.round((newCorrect / questions.length) * 100);
         onComplete({
           score,
-          earnedXP: earnedXP,
-          earnedPoints: earnedPoints,
           performancePercent: performancePercent,
           impactValues: { speciesLearned: newCorrect },
           tips: [

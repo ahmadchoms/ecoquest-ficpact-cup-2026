@@ -54,29 +54,38 @@ export default function MissionPage() {
 
   const handleMissionComplete = async (resultData) => {
     try {
-      await completeMissionMutation.mutateAsync({
+      const response = await completeMissionMutation.mutateAsync({
         missionId: mission.id,
         performanceScore: resultData.performancePercent ?? 80,
       });
-    } catch (error) {
-      console.error("Gagal menyelesaikan misi:", error);
-    } finally {
+
       if (!alreadyDone) {
         completeMission(
           missionId,
           provinceId,
-          resultData.earnedXP ?? mission.xpReward,
-          resultData.earnedPoints ?? mission.pointReward ?? 0,
+          response.earnedXP,
+          response.earnedPoints,
           resultData.impactValues ?? {},
         );
-        if (mission.badgeReward?.id) {
-          const wasNew = unlockBadge(mission.badgeReward.id);
-          if (wasNew) setNewBadge(mission.badgeReward);
+        
+        if (response.badge?.id) {
+          const wasNew = unlockBadge(response.badge.id);
+          if (wasNew) setNewBadge(response.badge);
         }
       }
-      setMissionResult(resultData);
+
+      const missionResultData = {
+        ...resultData,
+        earnedXP: response.earnedXP,
+        earnedPoints: response.earnedPoints,
+        isLevelUp: response.isLevelUp,
+      };
+
+      setMissionResult(missionResultData);
       setPhase("result");
       setShowCelebration(true);
+    } catch (error) {
+      console.error("Gagal menyelesaikan misi:", error);
     }
   };
 
@@ -144,8 +153,8 @@ export default function MissionPage() {
 
       <CelebrationOverlay
         show={showCelebration}
-        xpEarned={missionResult?.earnedXP ?? mission?.xpReward}
-        pointsEarned={missionResult?.earnedPoints ?? mission?.pointReward ?? 0}
+        xpEarned={missionResult?.xpEarned}
+        pointsEarned={missionResult?.pointsEarned}
         performancePercent={missionResult?.performancePercent}
         badgeEarned={newBadge}
         onClose={() => setShowCelebration(false)}

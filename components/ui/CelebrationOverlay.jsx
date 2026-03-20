@@ -116,7 +116,7 @@ export default function CelebrationOverlay({
               </motion.div>
             )}
 
-            {xpEarned && (
+            {xpEarned ? (
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
@@ -125,12 +125,12 @@ export default function CelebrationOverlay({
               >
                 <span className="text-xl">⚡</span>
                 <span className="font-heading font-bold text-lg">
-                  +{xpEarned} XP
+                  +{Math.floor(xpEarned)} XP
                 </span>
               </motion.div>
-            )}
+            ) : null}
 
-            {pointsEarned && (
+            {pointsEarned ? (
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
@@ -139,10 +139,10 @@ export default function CelebrationOverlay({
               >
                 <span className="text-xl">💰</span>
                 <span className="font-heading font-bold text-lg">
-                  +{pointsEarned} Poin
+                  +{Math.floor(pointsEarned)} Poin
                 </span>
               </motion.div>
-            )}
+            ) : null}
 
             {badgeEarned && (
               <motion.div

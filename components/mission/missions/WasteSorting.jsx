@@ -213,16 +213,9 @@ export default function WasteSorting({
         } else {
           setIsFinished(true);
           const finalScore = newScore * 10;
-          const { earnedXP, earnedPoints, performancePercent } = calculateQuizReward(
-            newScore,
-            items.length,
-            mission.xpReward,
-            mission.pointReward
-          );
+          const performancePercent = Math.round((newScore / items.length) * 100);
           onComplete({
             score: finalScore,
-            earnedXP: earnedXP,
-            earnedPoints: earnedPoints,
             performancePercent: performancePercent,
             impactValues: { wasteClassified: newScore },
             tips: [
