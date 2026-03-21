@@ -241,7 +241,7 @@ export default function EcoRoute({ province, mission, onComplete, onBack }) {
         className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
       >
         <motion.div
-          className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl"
+          className="bg-white rounded-3xl p-10 max-w-lg w-full shadow-2xl"
           initial={{ y: 20 }}
           animate={{ y: 0 }}
         >

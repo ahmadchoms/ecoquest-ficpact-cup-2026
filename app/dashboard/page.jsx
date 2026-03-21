@@ -88,6 +88,9 @@ export default function DashboardPage() {
     treesEquivalent: data?.treesEquivalent || 0,
   };
 
+  // Check jika ada kata individual yang panjang (> 15 karakter)
+  const hasLongWord = explorerName?.split(' ').some(word => word.length > 10);
+
   if (isLoading) {
     return (
       <StatusCard
@@ -142,7 +145,7 @@ export default function DashboardPage() {
                 </motion.div>
 
                 <div className="flex-1 text-center md:text-left">
-                  <h1 className="font-display text-4xl font-black mb-3 text-black uppercase tracking-wide">
+                   <h1 className={`text-3xl md:text-4xl font-display font-black uppercase tracking-wide mb-2 ${hasLongWord ? 'break-all' : 'wrap-break-word'}`}>
                     {explorerName || "Eco Explorer"}
                   </h1>
                   <span className="inline-block bg-white border-2 border-black px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest shadow-[2px_2px_0_#0f0f0f]">
@@ -188,9 +191,9 @@ export default function DashboardPage() {
                 </p>
               </div>
               <div className="p-6 text-center group hover:bg-green transition-colors cursor-default">
-                <p className="font-display text-4xl font-black text-black group-hover:scale-110 transition-transform">
+                <p className="font-display text-3xl sm:text-4xl font-black text-black group-hover:scale-110 transition-transform inline-block">
                   {exploredProvinces.length}
-                  <span className="text-xl text-black/40 font-bold ml-1">
+                  <span className="text-sm sm:text-xl text-black/40 font-bold ml-1">
                     /34
                   </span>
                 </p>
@@ -211,11 +214,11 @@ export default function DashboardPage() {
         </motion.div>
 
         <motion.div variants={fadeIn("up", 0.2)}>
-          <h2 className="text-2xl font-display font-black text-black mb-6 flex items-center gap-3 uppercase tracking-wide">
-            <div className="p-2 bg-green border-3 border-black rounded-xl shadow-hard">
+          <h2 className="text-xl sm:text-2xl font-display font-black text-black mb-6 flex items-start sm:items-center gap-2 sm:gap-3 uppercase tracking-normal sm:tracking-wide leading-tight">
+            <div className="p-2 bg-green border-3 border-black rounded-xl shadow-hard shrink-0 mt-0.5 sm:mt-0">
               <TreePine size={24} className="text-green-800" strokeWidth={3} />
             </div>
-            Dampak Lingkunganmu
+            <span className="min-w-0 wrap-break-word">Dampak Lingkunganmu</span>
           </h2>
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
@@ -360,7 +363,7 @@ export default function DashboardPage() {
             </div>
 
             <div>
-              <h2 className="text-xl font-display font-black text-black flex items-center gap-3 uppercase tracking-wide">
+              <h2 className="pb-3 text-xl font-display font-black text-black flex items-center gap-3 uppercase tracking-wide">
                 <div className="p-1.5 bg-orange border-2 border-black rounded-lg shadow-[3px_3px_0_#0f0f0f]">
                   <Share2
                     size={20}

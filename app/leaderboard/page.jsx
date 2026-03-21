@@ -6,7 +6,7 @@ import PageWrapper from "@/components/layout/PageWrapper";
 import { Trophy, Crown, Sparkles, Medal, Coins } from "lucide-react";
 import { useUserStore } from "@/store/useUserStore";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
-import { useUserRanks } from "@/hooks/useUsers";
+import { useUserRanks, useUserRank } from "@/hooks/useUsers";
 import LeaderboardCard from "@/components/leaderboard/LeaderboardCard";
 
 const TrophyScene = dynamic(() => import("@/components/3d/TrophyScene"), {
@@ -31,6 +31,7 @@ function LeaderboardSkeleton() {
 
 export default function LeaderboardPage() {
   const { data: responseData, isLoading, isError } = useUserRanks();
+  const { data: userRankData } = useUserRank();
 
   const {
     email: currentUserEmail,
@@ -42,6 +43,19 @@ export default function LeaderboardPage() {
 
   const users = responseData?.data || [];
   const shouldShowFallback = !isLoading && (isError || users.length === 0);
+
+  // Use email from userRankData if available (more reliable), otherwise use store
+  const authenticatedEmail = userRankData?.data?.email || currentUserEmail;
+
+  // Helper function to check if user is current user
+  const isCurrentUserHelper = (userEmail) => {
+    if (!authenticatedEmail || !userEmail) return false;
+    const result = userEmail.toLowerCase() === authenticatedEmail.toLowerCase();
+    return result;
+  };
+
+  // Check if current user is in top 10
+  const isUserInTop10 = users.some((user) => isCurrentUserHelper(user.email));
 
   const leaderboardData = shouldShowFallback
     ? [
@@ -55,6 +69,12 @@ export default function LeaderboardPage() {
         },
       ]
     : users;
+
+  // Add user's rank at the bottom if not in top 10
+  const finalData =
+    !isUserInTop10 && userRankData?.data && userRankData.data.rank > 10
+      ? [...leaderboardData, userRankData.data]
+      : leaderboardData;
 
   return (
     <PageWrapper className="min-h-screen bg-white bg-grid-pattern pt-24 pb-20">
@@ -96,14 +116,28 @@ export default function LeaderboardPage() {
           {isLoading ? (
             <LeaderboardSkeleton />
           ) : (
-            leaderboardData.map((user, index) => (
-              <LeaderboardCard
-                key={user.id}
-                user={user}
-                index={index}
-                isCurrentUser={user.email === currentUserEmail}
-              />
-            ))
+            <>
+              {finalData.slice(0, 10).map((user, index) => (
+                <LeaderboardCard
+                  key={user.id || user.email}
+                  user={user}
+                  index={index}
+                  isCurrentUser={isCurrentUserHelper(user.email)}
+                />
+              ))}
+              
+              {/* Show separator and user's rank if not in top 10 */}
+              {!isUserInTop10 && userRankData?.data && userRankData.data.rank > 10 && (
+                <div className="mt-8 pt-6 border-t-3 border-black">
+                  <LeaderboardCard
+                    user={userRankData.data}
+                    index={userRankData.data.rank - 1}
+                    isCurrentUser={true}
+                    isUserRank={true}
+                  />
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

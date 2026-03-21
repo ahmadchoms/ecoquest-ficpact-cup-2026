@@ -1,8 +1,10 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect, useTransition, useRef } from "react";
-import { X, ChevronDown, Loader, Upload, Trash2 } from "lucide-react";
+import { useState, useEffect, useTransition, useRef, useCallback, useMemo } from "react";
+import { X, ChevronDown, Loader, Upload, Trash2, AlertCircle, Check } from "lucide-react";
 import { useUserItems, useUpdateUserItems } from "@/hooks/useUserItems";
+import { useDashboard } from "@/hooks/useDashboard";
 import { useUpdateUserProfile } from "@/hooks/useUpdateUserProfile";
+import { useCheckUsername } from "@/hooks/useUsers";
 import { toast } from "@/lib/toast";
 import ImageCropper from "./ImageCropper";
 import { set } from "zod";
@@ -10,6 +12,8 @@ import { set } from "zod";
 export default function EditProfileModal({ isOpen, explorerName, explorerBio, explorerImage, onClose }) {
   // Mengambil state dari zustand store kamu
   const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
+  const [debouncedUsername, setDebouncedUsername] = useState("");
   const [bio, setBio] = useState("");
   const [profileImageFile, setProfileImageFile] = useState(null);
   const [profileImagePreview, setProfileImagePreview] = useState(null);
@@ -20,20 +24,65 @@ export default function EditProfileModal({ isOpen, explorerName, explorerBio, ex
   const [croppedBlob, setCroppedBlob] = useState(null); // Store cropped blob for re-editing
   const fileInputRef = useRef(null);
   const scrollRef = useRef(null);
+  const debounceTimerRef = useRef(null);
   const [, startTransition] = useTransition();
   const [activeTab, setActiveTab] = useState("profile"); // "profile" | "banner" | "border"
   const [selectedBannerId, setSelectedBannerId] = useState(null);
   const [selectedBorderId, setSelectedBorderId] = useState(null);
+  const [isDeletingImage, setIsDeletingImage] = useState(false); // Track delete operation separately
 
   // Fetch user items
   const { data: items, isLoading: itemsLoading } = useUserItems();
+  const { data, isLoading: dashboardLoading } = useDashboard();
   const updateProfileMutation = useUpdateUserProfile();
   const updateItemsMutation = useUpdateUserItems();
+
+  // Debounce username input (1300ms delay)
+  useEffect(() => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    debounceTimerRef.current = setTimeout(() => {
+      setDebouncedUsername(username);
+    }, 1300);
+
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, [username]);
+
+  // Username validation hook - triggered with debounced username
+  const usernameCheckEnabled =
+    debouncedUsername.length >= 3 &&
+    /^[a-zA-Z0-9_-]+$/.test(debouncedUsername);
+  
+  const { data: usernameCheckData, isLoading: isCheckingUsername } =
+    useCheckUsername(debouncedUsername, usernameCheckEnabled);
+
+  // Determine username status for UI
+  const usernameStatus = useMemo(() => {
+    if (!username) return null;
+    if (username.length < 3) return null;
+    if (!/^[a-zA-Z0-9_-]+$/.test(username)) return "invalid";
+    
+    // Only check API results if debounce has updated
+    if (debouncedUsername === username && debouncedUsername.length >= 3) {
+      if (isCheckingUsername) return "checking";
+      if (usernameCheckData?.data?.available) return "available";
+      if (!usernameCheckData?.data?.available) return "taken";
+    }
+    
+    return null;
+  }, [username, debouncedUsername, isCheckingUsername, usernameCheckData]);
 
   // Sync nama saat modal dibuka
   useEffect(() => {
     if (isOpen) {
       startTransition(() => setName(explorerName || ""));
+      setUsername(data?.username || "");
       setBio(explorerBio || "");
       setProfileImagePreview(explorerImage || null);
       setActiveTab("profile");
@@ -51,13 +100,13 @@ export default function EditProfileModal({ isOpen, explorerName, explorerBio, ex
   }, [items, isOpen]);
 
   useEffect(() => {
-  if (scrollRef.current) {
-    scrollRef.current.scrollTo({
-      top: 0,
-      behavior: "smooth", // opsional (hapus kalau gak mau animasi)
-    });
-  }
-}, [activeTab]);
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    }
+  }, [activeTab]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -72,11 +121,35 @@ export default function EditProfileModal({ isOpen, explorerName, explorerBio, ex
       return;
     }
 
+    // Check username if provided and validate it's available
+    if (username.trim()) {
+      if (username.length < 3) {
+        toast.error("Error", "Username minimal 3 karakter!");
+        return;
+      }
+      if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
+        toast.error("Error", "Username hanya boleh mengandung huruf, angka, underscore, dan dash!");
+        return;
+      }
+      if (usernameStatus === "taken") {
+        toast.error("Error", "Username sudah digunakan!");
+        return;
+      }
+      if (usernameStatus === "checking") {
+        toast.error("Error", "Silakan tunggu validasi username selesai!");
+        return;
+      }
+    }
+
     // Only send fields that have content
     const updateData = {
       name: name.trim(),
       bio: bio.trim() || "", // Allow empty bio
     };
+
+    if (username.trim()) {
+      updateData.username = username.trim();
+    }
 
     if (profileImageFile) {
       updateData.profileImageFile = profileImageFile;
@@ -293,6 +366,62 @@ export default function EditProfileModal({ isOpen, explorerName, explorerBio, ex
 
                   <div className="space-y-2">
                     <label className="block font-bold text-black uppercase text-sm">
+                      Username
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        className={`w-full px-4 py-3 bg-white border-3 rounded-2xl font-body text-black placeholder-slate-400 focus:outline-none focus:ring-0 shadow-hard transition-colors ${
+                          usernameStatus === "available"
+                            ? "border-green-500 focus:bg-mint"
+                            : usernameStatus === "taken"
+                            ? "border-red-500 focus:bg-red-50"
+                            : usernameStatus === "invalid"
+                            ? "border-yellow-500 focus:bg-yellow"
+                            : "border-black focus:bg-mint"
+                        }`}
+                        placeholder="username (3-30 karakter)"
+                      />
+                      {isCheckingUsername && (
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                          <Loader className="w-4 h-4 animate-spin text-slate-400" />
+                        </div>
+                      )}
+                      {usernameStatus === "available" && (
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                          <Check className="w-5 h-5 text-green-500" strokeWidth={3} />
+                        </div>
+                      )}
+                      {usernameStatus === "taken" && (
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                          <AlertCircle className="w-5 h-5 text-red-500" strokeWidth={2} />
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-xs text-slate-600 font-medium">
+                      Format: huruf, angka, underscore, dash. Min 3 karakter
+                    </p>
+                    {usernameStatus === "taken" && (
+                      <p className="text-xs text-red-600 font-bold">
+                        Username sudah digunakan orang lain
+                      </p>
+                    )}
+                    {usernameStatus === "available" && (
+                      <p className="text-xs text-green-500 font-bold">
+                        Username tersedia!
+                      </p>
+                    )}
+                    {usernameStatus === "invalid" && (
+                      <p className="text-xs text-yellow-600 font-bold">
+                        Format username tidak valid
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="block font-bold text-black uppercase text-sm">
                       Bio / Tentang Kamu
                     </label>
                     <textarea
@@ -387,6 +516,7 @@ export default function EditProfileModal({ isOpen, explorerName, explorerBio, ex
                         type="button"
                         onClick={() => {
                           // Delete profile image with name and bio to keep them
+                          setIsDeletingImage(true);
                           const updateData = {
                             name: name.trim(),
                             bio: bio.trim() || "",
@@ -398,21 +528,23 @@ export default function EditProfileModal({ isOpen, explorerName, explorerBio, ex
                             {
                               onSuccess: () => {
                                 setProfileImagePreview(null);
+                                setIsDeletingImage(false);
                                 toast.success(
                                   "Berhasil dihapus!",
                                   "Foto profil kembali ke default!",
                                 );
                               },
                               onError: (err) => {
+                                setIsDeletingImage(false);
                                 toast.error("Gagal dihapus!", `Terjadi kesalahan: ${err.message}`);
                               },
                             },
                           );
                         }}
-                        disabled={updateProfileMutation.isPending}
+                        disabled={isDeletingImage}
                         className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-500 hover:bg-red-600 border-3 border-black text-white font-bold uppercase rounded-2xl shadow-hard disabled:opacity-50 transition-all"
                       >
-                        {updateProfileMutation.isPending ? (
+                        {isDeletingImage ? (
                           <>
                             <Loader className="w-4 h-4 animate-spin" />
                             Menghapus...
@@ -634,7 +766,7 @@ export default function EditProfileModal({ isOpen, explorerName, explorerBio, ex
                   <button
                     type="button"
                     onClick={onClose}
-                    disabled={updateProfileMutation.isPending || cropPending}
+                    disabled={updateProfileMutation.isPending || cropPending || isDeletingImage}
                     className="flex-1 py-3 px-4 bg-white border-3 border-black text-black font-bold uppercase rounded-2xl shadow-hard hover:bg-gray-100 disabled:opacity-50 active:translate-x-1 active:translate-y-1 active:shadow-none transition-all"
                   >
                     Batal
@@ -642,7 +774,7 @@ export default function EditProfileModal({ isOpen, explorerName, explorerBio, ex
                   <button
                     type="button"
                     onClick={handleProfileFormSubmit}
-                    disabled={updateProfileMutation.isPending || cropPending}
+                    disabled={updateProfileMutation.isPending || cropPending || isDeletingImage}
                     className="flex-1 py-3 px-4 bg-green border-3 border-black text-black font-bold uppercase rounded-2xl shadow-hard hover:bg-mint disabled:opacity-50 active:translate-x-1 active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-2"
                   >
                     {updateProfileMutation.isPending ? (

@@ -107,7 +107,7 @@ export default function ProvinceHero({ province, progress, onBack }) {
               trackColor="#0f0f0f20"
             >
               <div className="flex flex-col items-center">
-                <span className="text-3xl font-display font-black text-black">
+                <span className={`${Math.round(progress) >= 100 ? 'text-xl' : 'text-2xl'} font-display font-black text-black`}>
                   {Math.round(progress)}%
                 </span>
               </div>

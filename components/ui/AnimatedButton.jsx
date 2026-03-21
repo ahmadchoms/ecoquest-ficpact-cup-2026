@@ -24,7 +24,8 @@ export default function AnimatedButton({
       "border-2 border-primary-500 text-primary-600 hover:bg-primary-50 cursor-pointer",
     brutal:
       "bg-yellow border-3 border-black text-black font-bold uppercase shadow-hard hover:bg-orange active:translate-x-[2px] active:translate-y-[2px] active:shadow-none cursor-pointer",
-    auth: "w-full py-4 text-base font-semibold bg-linear-to-r from-primary-500 to-primary-600 shadow-lg hover:shadow-primary-500/30 cursor-pointer"
+    auth: "w-full py-4 text-base font-semibold bg-linear-to-r from-primary-500 to-primary-600 shadow-lg hover:shadow-primary-500/30 cursor-pointer",
+    back: "text-gray-700 border border-gray-200 hover:bg-gray-50 hover:border-gray-300 shadow-sm cursor-pointer"
   };
 
   return (

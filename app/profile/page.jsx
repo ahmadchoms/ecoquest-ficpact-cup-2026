@@ -104,6 +104,9 @@ export default function ProfilePage() {
     );
   }
 
+  // Check jika ada kata individual yang panjang (> 15 karakter)
+  const hasLongWord = explorerName?.split(' ').some(word => word.length > 10);
+
   return (
     <PageWrapper className="min-h-screen bg-slate-50 bg-grid-pattern pt-20 md:pb-12 pb-24">
       <div className="max-w-4xl mx-auto px-4 py-6">
@@ -172,7 +175,7 @@ export default function ProfilePage() {
 
           {/* Info & Stats */}
           <div className={`flex-1 text-center md:text-left z-10 ${infoPanelClass}`}>
-            <h1 className={`text-4xl font-display font-black uppercase tracking-wide mb-2 ${headingTextClass}`}>
+            <h1 className={`text-3xl md:text-4xl font-display font-black uppercase tracking-wide mb-2 ${hasLongWord ? 'break-all' : 'wrap-break-word'} ${headingTextClass}`}>
               {explorerName || "Explorer"}
             </h1>
             <p className={`text-sm font-bold mb-4 ${subTextClass}`}>

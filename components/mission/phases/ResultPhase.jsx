@@ -22,7 +22,7 @@ export default function ResultPhase({
       key="result"
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="max-w-lg mx-auto px-4 py-8 sm:py-12 text-center"
+      className="max-w-lg mx-auto px-4 pt-20 pb-8 sm:pt-16 sm:pb-12 text-center"
     >
       <div className="bg-white border-3 border-black shadow-hard px-6 py-8 sm:p-10 rounded-3xl sm:rounded-4xl mb-6 sm:mb-8">
         <div className="text-5xl sm:text-6xl mb-3 sm:mb-4 animate-wiggle inline-block">

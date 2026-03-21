@@ -43,6 +43,11 @@ export default function MangroveSimulator({
   const [grid, setGrid] = useState(() => generateGrid());
   const [budget, setBudget] = useState(30);
   const [phase, setPhase] = useState("planting"); // planting | result
+  const [showTutorial, setShowTutorial] = useState(true);
+
+  const handleStartGame = () => {
+    setShowTutorial(false);
+  };
 
   const totalDamaged = useMemo(() => {
     let count = 0;
@@ -110,6 +115,96 @@ export default function MangroveSimulator({
     return cellStyles[cell.type];
   };
 
+  if (showTutorial) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      >
+        <motion.div
+          className="bg-white rounded-3xl p-10 max-w-lg w-full shadow-2xl max-h-[90vh] overflow-y-auto"
+          initial={{ y: 20 }}
+          animate={{ y: 0 }}
+        >
+          <div className="text-center space-y-6">
+            <div>
+              <p className="text-6xl mb-2">🌿</p>
+              <h2 className="font-heading text-2xl font-bold text-gray-800">
+                Mangrove Simulator
+              </h2>
+            </div>
+
+            <div className="space-y-4 bg-green-50 p-4 rounded-xl text-left">
+              <div className="flex gap-3">
+                <span className="text-2xl flex-shrink-0">🎯</span>
+                <div>
+                  <p className="font-semibold text-gray-800">Tujuan Game:</p>
+                  <p className="text-sm text-gray-600">
+                    Tanam mangrove untuk memulihkan pantai yang rusak!
+                  </p>
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <p className="font-semibold text-gray-800 mb-3">📖 Cara Main:</p>
+                <div className="space-y-2 text-sm">
+                  <div className="flex gap-2">
+                    <span className="font-bold text-green-600 flex-shrink-0">1.</span>
+                    <p className="text-gray-700">Klik area rusak (🟫) untuk menanam mangrove</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="font-bold text-green-600 flex-shrink-0">2.</span>
+                    <p className="text-gray-700">Setiap penanaman menggunakan 1 bibit dari budget</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="font-bold text-green-600 flex-shrink-0">3.</span>
+                    <p className="text-gray-700">Target: Pulihkan setidaknya 50% area rusak</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="font-bold text-green-600 flex-shrink-0">4.</span>
+                    <p className="text-gray-700">Klik "Selesai" setelah puas dengan hasil</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <p className="font-semibold text-gray-800 mb-2">🗺️ Legenda:</p>
+                <div className="space-y-2 text-xs">
+                  <p><span className="inline-block w-4 h-4 bg-blue-400 rounded mr-2"></span>Laut (🌊)</p>
+                  <p><span className="inline-block w-4 h-4 bg-amber-200 rounded mr-2"></span>Pantai (🏖️)</p>
+                  <p><span className="inline-block w-4 h-4 bg-amber-700 rounded mr-2"></span>Area Rusak (🟫)</p>
+                  <p><span className="inline-block w-4 h-4 bg-green-500 rounded mr-2"></span>Mangrove (🌿)</p>
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <p className="text-sm text-gray-700">
+                  💡 <strong>Fakta Seru:</strong> Mangrove menyerap karbon 10x lebih cepat dari pohon biasa!
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={onBack}
+                className="flex-1 py-3 bg-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-300 transition-all"
+              >
+                Kembali
+              </button>
+              <button
+                onClick={handleStartGame}
+                className="flex-1 py-3 bg-gradient-to-r from-green-400 to-green-500 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
+              >
+                Mulai Game 🚀
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      </motion.div>
+    );
+  }
+
   if (phase === "result") return null;
 
   return (
@@ -131,7 +226,7 @@ export default function MangroveSimulator({
         </div>
       </div>
 
-      <div className="eco-card p-4">
+      <div className="eco-card p-4 border-4">
         <h3 className="font-heading font-bold text-gray-800 mb-1">
           🌊 Pantai {province.name}
         </h3>

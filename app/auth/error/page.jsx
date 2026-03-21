@@ -88,6 +88,16 @@ function ErrorContent() {
                 Kembali ke Login
               </AnimatedButton>
             </Link>
+            <Link href="/">
+              <AnimatedButton
+                type="button"
+                variant="back"
+                className="w-full py-3 font-medium text-slate-700 bg-slate-200 hover:bg-slate-300"
+                icon={<ArrowLeft size={18} />}
+              >
+                Kembali ke Beranda
+              </AnimatedButton>
+            </Link>
           </div>
         </motion.div>
       </div>

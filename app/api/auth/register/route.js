@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { registerSchema } from "@/lib/validations/auth";
-import { getUserByEmail, getUserByUsername, createUser } from "@/lib/server/services/admin/user.service";
+import { getUserByEmail, getUserByUsername, createUser } from "@/lib/server/services/user.service";
 import { generateUniqueUsername } from "@/lib/server/utils/username-generator";
 
 export async function POST(req) {

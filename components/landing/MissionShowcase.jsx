@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, Zap } from "lucide-react";
@@ -9,14 +10,25 @@ import { difficultyLabel } from "@/utils/formatters";
 
 export default function MissionShowcase() {
   const { data: missionsResponse, isLoading } = useMissions({ limit: 3 });
-  const missions = missionsResponse?.data || [];
+  
+  // Randomize and limit missions to 3
+  const missions = React.useMemo(() => {
+    const allMissions = missionsResponse?.data || [];
+    if (allMissions.length === 0) return [];
+    
+    // Shuffle array
+    const shuffled = [...allMissions].sort(() => Math.random() - 0.5);
+    
+    // Return only first 3
+    return shuffled.slice(0, 3);
+  }, [missionsResponse?.data]);
   return (
     <section className="bg-black py-[100px] border-t-[2.5px] border-black relative overflow-hidden">
       <div className="absolute -top-20 -left-20 w-[320px] h-[320px] rounded-full bg-yellow opacity-[0.12] blur-3xl" />
       <div className="absolute -bottom-20 -right-20 w-[280px] h-[280px] rounded-full bg-green opacity-[0.1] blur-3xl" />
 
       <div className="max-w-[1100px] mx-auto px-6 relative">
-        <div className="flex justify-between items-end mb-12">
+        <div className="flex justify-between items-end mb-12 gap-2">
           <div>
             <EcoBadge
               variant="neutral"

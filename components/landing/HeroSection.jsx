@@ -16,7 +16,7 @@ const EcoGlobe = lazy(() => import("../3d/EcoGlobe"));
 export default function HeroSection({ firstVisit }) {
   return (
     <section className="bg-white overflow-hidden font-body">
-      <div className="max-w-7xl mx-auto px-6 pt-[60px]">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 pt-[60px]">
         <div className="flex justify-center mb-8">
           <EcoBadge variant="yellow" className="shadow-hard">
             <span className="w-2 h-2 rounded-full bg-black inline-block mr-2" />
@@ -24,7 +24,7 @@ export default function HeroSection({ firstVisit }) {
           </EcoBadge>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-12 items-center">
+        <div className="grid md:grid-cols-2 gap-6 md:gap-12 items-center">
           <motion.div
             variants={staggerContainer()}
             initial="hidden"
@@ -93,9 +93,9 @@ export default function HeroSection({ firstVisit }) {
             initial={{ opacity: 0, scale: 0.85, rotate: 3 }}
             animate={{ opacity: 1, scale: 1, rotate: 0 }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="relative"
+            className="relative flex justify-center mx-auto w-full"
           >
-            <div className="border-3 border-black rounded-[32px] shadow-hard-xl bg-[#0b1a2e] overflow-hidden aspect-square w-full">
+            <div className="border-3 border-black rounded-[32px] shadow-hard-xl bg-[#0b1a2e] overflow-hidden aspect-square w-full max-w-sm md:max-w-full">
               <ErrorBoundary
                 fallback={
                   <div className="w-full h-full bg-green rounded-3xl flex items-center justify-center">
@@ -109,12 +109,12 @@ export default function HeroSection({ firstVisit }) {
               </ErrorBoundary>
             </div>
 
-            <div className="absolute -bottom-5 -left-6 bg-yellow border-3 border-black rounded-2xl px-5 py-3 font-display font-extrabold text-sm flex items-center gap-2 shadow-hard">
-              <Globe size={18} /> +1M Dampak Nyata
+            <div className="absolute -bottom-2 -left-2 sm:-bottom-5 sm:-left-6 bg-yellow border-3 border-black rounded-2xl px-3 sm:px-5 py-2 sm:py-3 font-display font-extrabold text-xs sm:text-sm flex items-center gap-2 shadow-hard">
+              <Globe size={16} className="sm:size-[18px]" /> +1M Dampak Nyata
             </div>
 
-            <div className="absolute -top-4 -right-4 w-[52px] h-[52px] bg-green border-3 border-black rounded-full flex items-center justify-center shadow-hard animate-wiggle">
-              <Star size={22} fill="#0f0f0f" />
+            <div className="absolute -top-2 -right-2 sm:-top-4 sm:-right-4 w-[44px] sm:w-[52px] h-[44px] sm:h-[52px] bg-green border-3 border-black rounded-full flex items-center justify-center shadow-hard animate-wiggle">
+              <Star size={18} className="sm:size-[22px]" fill="#0f0f0f" />
             </div>
           </motion.div>
         </div>

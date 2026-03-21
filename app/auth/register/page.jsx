@@ -9,7 +9,7 @@ import PageWrapper from "@/components/layout/PageWrapper";
 import AnimatedButton from "@/components/ui/AnimatedButton";
 import { useRegister } from "@/hooks/useAuth";
 import { toast } from "@/lib/toast";
-import { Leaf, User, Lock, Mail, ArrowRight, Eye, EyeOff, Loader2 } from "lucide-react";
+import { Leaf, User, Lock, Mail, ArrowRight, Eye, EyeOff, Loader2, ArrowLeft } from "lucide-react";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -276,6 +276,19 @@ export default function RegisterPage() {
                 Masuk di sini
               </Link>
             </p>
+          </div>
+
+          <div className="mt-4">
+            <Link href="/">
+              <AnimatedButton
+                type="button"
+                variant="back"
+                className="w-full py-3 font-medium text-slate-700 bg-slate-200 hover:bg-slate-300"
+                icon={<ArrowLeft size={18} />}
+              >
+                Kembali ke Beranda
+              </AnimatedButton>
+            </Link>
           </div>
         </motion.div>
       </div>

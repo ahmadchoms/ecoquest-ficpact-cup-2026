@@ -2,6 +2,7 @@
 const nextConfig = {
   // Enable React Compiler for automatic optimization
   reactCompiler: true,
+  output: "standalone",
 
   // Image optimization settings
   images: {

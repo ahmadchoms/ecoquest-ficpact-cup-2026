@@ -106,9 +106,9 @@ export default function ImageCropper({ imageSrc, onCropComplete, onCancel }) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-2">
       {/* Crop Area */}
-      <div className="relative bg-white border-4 border-black rounded-3xl overflow-hidden shadow-hard w-full" style={{ height: "400px" }}>
+      <div className="relative bg-white border-4 border-black rounded-3xl overflow-hidden shadow-hard w-full md:h-95 h-70">
         <Crop
           image={imageSrc}
           crop={crop}

@@ -14,6 +14,10 @@ export const leaderboardKeys = {
   all: ["user", "leaderboard"],
 };
 
+export const userRankKeys = {
+  all: ["user", "rank"],
+};
+
 // Helper
 const invalidateUserQueries = (queryClient, userId = null) => {
   queryClient.invalidateQueries({ queryKey: adminUserKeys.lists() });
@@ -65,5 +69,31 @@ export const useUserRanks = () => {
   return useQuery({
     queryKey: leaderboardKeys.all,
     queryFn: () => API.getLeaderboard(),
+  });
+};
+
+/** Check username availability with debounce */
+const usernameCheckKeys = {
+  all: ["user", "check-username"],
+  check: (username) => [...usernameCheckKeys.all, username],
+};
+
+export const useCheckUsername = (username, enabled = true) => {
+  return useQuery({
+    queryKey: usernameCheckKeys.check(username),
+    queryFn: () => API.checkUsername(username),
+    enabled: enabled && !!username && username.length >= 3,
+    staleTime: 1000 * 60 * 5, // 5 menit
+    gcTime: 1000 * 60 * 10, // 10 menit
+  });
+};
+
+/** Get user's rank in leaderboard */
+export const useUserRank = () => {
+  return useQuery({
+    queryKey: userRankKeys.all,
+    queryFn: () => API.getUserRank(),
+    staleTime: 1000 * 60 * 5, // 5 menit
+    gcTime: 1000 * 60 * 10, // 10 menit
   });
 };

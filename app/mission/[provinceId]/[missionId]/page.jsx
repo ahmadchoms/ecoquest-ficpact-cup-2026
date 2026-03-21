@@ -31,6 +31,7 @@ export default function MissionPage() {
   const [missionResult, setMissionResult] = useState(null);
   const [showCelebration, setShowCelebration] = useState(false);
   const [newBadge, setNewBadge] = useState(null);
+  const [isLoadingResult, setIsLoadingResult] = useState(false);
 
   if (isMissionLoading || isProvinceLoading) {
     return <StatusCard emoji="🔍" title="Memuat Misi..." variant="loading" />;
@@ -48,12 +49,17 @@ export default function MissionPage() {
     );
   }
 
+  if (isLoadingResult) {
+    return <StatusCard emoji="🔍" title="Memproses Reward..." variant="loading" />;
+  }
+
   const alreadyDone = isMissionDone(missionId, provinceId);
   const MissionComponent = missionComponents[mission.category];
 
   const handleMissionComplete = async (resultData) => {
     // Reset previous badge state so old badge does not reappear on next win.
     setNewBadge(null);
+    setIsLoadingResult(true);
 
     try {
       const response = await completeMissionMutation.mutateAsync({
@@ -109,12 +115,19 @@ export default function MissionPage() {
       } else {
         console.error("Gagal menyelesaikan misi:", error);
       }
+    } finally {
+      setIsLoadingResult(false);
     }
   };
 
   return (
     <PageWrapper className="min-h-screen bg-white bg-grid-pattern pt-16 md:pt-20 pb-24 md:pb-8 text-black">
-      <AnimatePresence mode="wait">
+      {/* {isLoadingResult && (
+        <StatusCard emoji="🔍" title="Memproses Reward..." variant="loading" />
+      )} */}
+
+      {!isLoadingResult && (
+        <AnimatePresence mode="wait">
         {phase === "briefing" && (
           <BriefingPhase
             key="briefing"
@@ -154,6 +167,7 @@ export default function MissionPage() {
           />
         )}
       </AnimatePresence>
+      )}
 
       <CelebrationOverlay
         show={showCelebration}

@@ -5,8 +5,8 @@ import IlluMap from "./illustrations/IlluMap";
 export default function StatsSection() {
   return (
     <section className="bg-green border-y-[2.5px] border-black py-[80px]">
-      <div className="max-w-[1100px] mx-auto px-6">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
+      <div className="max-w-[1100px] mx-auto px-3 sm:px-6 lg:px-6">
+        <div className="grid md:grid-cols-2 gap-6 md:gap-12 items-center">
           <div>
             <div className="border-3 border-black rounded-[32px] shadow-hard-xl overflow-hidden bg-white">
               <IlluMap className="w-full block" />
@@ -17,7 +17,7 @@ export default function StatsSection() {
             <EcoBadge variant="yellow" className="mb-5 shadow-hard">
               Dampak EcoQuest
             </EcoBadge>
-            <h2 className="font-display font-extrabold text-[clamp(28px,4vw,46px)] text-black mb-9 leading-[1.2]">
+            <h2 className="font-display font-extrabold text-[clamp(24px,5vw,46px)] text-black mb-9 leading-[1.2] break-words">
               EcoQuest Memberdayakan{" "}
               <span className="underline decoration-yellow decoration-[5px]">
                 Pelajar Indonesia

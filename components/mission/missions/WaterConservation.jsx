@@ -40,6 +40,11 @@ export default function WaterConservation({
   });
   const [result, setResult] = useState(null);
   const [step, setStep] = useState(0);
+  const [showTutorial, setShowTutorial] = useState(true);
+
+  const handleStartGame = () => {
+    setShowTutorial(false);
+  };
 
   const steps = [
     {
@@ -144,6 +149,99 @@ export default function WaterConservation({
       tips,
     });
   };
+
+  if (showTutorial) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      >
+        <motion.div
+          className="bg-white rounded-3xl p-10 max-w-lg w-full shadow-2xl max-h-[90vh] overflow-y-auto"
+          initial={{ y: 20 }}
+          animate={{ y: 0 }}
+        >
+          <div className="text-center space-y-6">
+            <div>
+              <p className="text-6xl mb-2">💧</p>
+              <h2 className="font-heading text-2xl font-bold text-gray-800">
+                Water Conservation
+              </h2>
+            </div>
+
+            <div className="space-y-4 bg-blue-50 p-4 rounded-xl text-left">
+              <div className="flex gap-3">
+                <span className="text-2xl flex-shrink-0">🎯</span>
+                <div>
+                  <p className="font-semibold text-gray-800">Tujuan Game:</p>
+                  <p className="text-sm text-gray-600">
+                    Cek penggunaan air harianmu dan pelajari cara menghemat!
+                  </p>
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <p className="font-semibold text-gray-800 mb-3">📖 Cara Main:</p>
+                <div className="space-y-2 text-sm">
+                  <div className="flex gap-2">
+                    <span className="font-bold text-blue-600 flex-shrink-0">1.</span>
+                    <p className="text-gray-700">Isi data penggunaan air harianmu</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="font-bold text-blue-600 flex-shrink-0">2.</span>
+                    <p className="text-gray-700">Gunakan slider untuk setiap aktivitas</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="font-bold text-blue-600 flex-shrink-0">3.</span>
+                    <p className="text-gray-700">Pilih tipe penggunaan (shower/ember, kran/wastafel)</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="font-bold text-blue-600 flex-shrink-0">4.</span>
+                    <p className="text-gray-700">Klik "Hitung Konsumsi Air" untuk hasil</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="font-bold text-blue-600 flex-shrink-0">5.</span>
+                    <p className="text-gray-700">Dapatkan tips hemat air!</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <p className="font-semibold text-gray-800 mb-2">🚿 Kategori:</p>
+                <div className="space-y-2 text-xs">
+                  <p>🚿 <strong>Mandi & Toilet:</strong> Durasi & frekuensi</p>
+                  <p>🍳 <strong>Dapur & Cuci:</strong> Memasak, cuci piring, mesin</p>
+                  <p>🌱 <strong>Kebutuhan Lain:</strong> Siram tanaman</p>
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <p className="text-sm text-gray-700">
+                  💡 <strong>Rata-rata:</strong> Penggunaan air ideal 100 L/hari
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={onBack}
+                className="flex-1 py-3 bg-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-300 transition-all"
+              >
+                Kembali
+              </button>
+              <button
+                onClick={handleStartGame}
+                className="flex-1 py-3 bg-gradient-to-r from-blue-400 to-blue-500 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
+              >
+                Mulai Game 🚀
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      </motion.div>
+    );
+  }
 
   if (result && result.total !== undefined && result.breakdown) {
     const chartData = Object.entries(result.breakdown)

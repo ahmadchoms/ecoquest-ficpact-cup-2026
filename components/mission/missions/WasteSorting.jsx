@@ -188,6 +188,11 @@ export default function WasteSorting({
   const [answers, setAnswers] = useState([]);
   const [feedback, setFeedback] = useState(null);
   const [isFinished, setIsFinished] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(true);
+
+  const handleStartGame = () => {
+    setShowTutorial(false);
+  };
 
   const currentItem = items[currentIndex];
 
@@ -238,6 +243,95 @@ export default function WasteSorting({
       onComplete,
     ],
   );
+
+  if (showTutorial) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      >
+        <motion.div
+          className="bg-white rounded-3xl p-10 max-w-lg w-full shadow-2xl max-h-[90vh] overflow-y-auto"
+          initial={{ y: 20 }}
+          animate={{ y: 0 }}
+        >
+          <div className="text-center space-y-6">
+            <div>
+              <p className="text-6xl mb-2">♻️</p>
+              <h2 className="font-heading text-2xl font-bold text-gray-800">
+                Waste Sorting
+              </h2>
+            </div>
+
+            <div className="space-y-4 bg-blue-50 p-4 rounded-xl text-left">
+              <div className="flex gap-3">
+                <span className="text-2xl flex-shrink-0">🎯</span>
+                <div>
+                  <p className="font-semibold text-gray-800">Tujuan Game:</p>
+                  <p className="text-sm text-gray-600">
+                    Pilah 10 sampah ke kategori yang benar!
+                  </p>
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <p className="font-semibold text-gray-800 mb-3">📖 Cara Main:</p>
+                <div className="space-y-2 text-sm">
+                  <div className="flex gap-2">
+                    <span className="font-bold text-blue-600 flex-shrink-0">1.</span>
+                    <p className="text-gray-700">Lihat sampah yang ditampilkan</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="font-bold text-blue-600 flex-shrink-0">2.</span>
+                    <p className="text-gray-700">Klik tong sampah yang sesuai kategorinya</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="font-bold text-blue-600 flex-shrink-0">3.</span>
+                    <p className="text-gray-700">Dapatkan poin jika benar ✅</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="font-bold text-blue-600 flex-shrink-0">4.</span>
+                    <p className="text-gray-700">Lanjut ke sampah berikutnya</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <p className="font-semibold text-gray-800 mb-2">🗑️ Kategori Sampah:</p>
+                <div className="space-y-2 text-xs">
+                  <p><span className="inline-block w-4 h-4 bg-green-400 rounded mr-2"></span><strong>Organik:</strong> Makanan, daun, tulang</p>
+                  <p><span className="inline-block w-4 h-4 bg-blue-400 rounded mr-2"></span><strong>Anorganik:</strong> Plastik, kertas, kaca</p>
+                  <p><span className="inline-block w-4 h-4 bg-red-400 rounded mr-2"></span><strong>B3:</strong> Baterai, obat, cat</p>
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <p className="text-sm text-gray-700">
+                  💡 <strong>Info:</strong> Jawab dengan benar untuk poin maksimal!
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={onBack}
+                className="flex-1 py-3 bg-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-300 transition-all"
+              >
+                Kembali
+              </button>
+              <button
+                onClick={handleStartGame}
+                className="flex-1 py-3 bg-gradient-to-r from-blue-400 to-blue-500 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
+              >
+                Mulai Game 🚀
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      </motion.div>
+    );
+  }
 
   if (isFinished) return null;
 

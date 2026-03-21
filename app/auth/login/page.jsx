@@ -16,6 +16,7 @@ import {
   Eye,
   EyeOff,
   Loader2,
+  ArrowLeft,
 } from "lucide-react";
 
 export default function LoginPage() {
@@ -37,10 +38,6 @@ export default function LoginPage() {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
     if (params.get("success") === "registered") {
-      toast.success(
-        "Registrasi Berhasil",
-        "Akun berhasil dibuat. Silakan masuk.",
-      );
       const url = new URL(window.location.href);
       url.searchParams.delete("success");
       window.history.replaceState({}, "", url.toString());
@@ -265,6 +262,19 @@ export default function LoginPage() {
                 Daftar sekarang
               </Link>
             </p>
+          </div>
+
+          <div className="mt-4">
+            <Link href="/">
+              <AnimatedButton
+                type="button"
+                variant="back"
+                className="w-full py-3 font-medium text-slate-700 bg-slate-200 hover:bg-slate-300"
+                icon={<ArrowLeft size={18} />}
+              >
+                Kembali ke Beranda
+              </AnimatedButton>
+            </Link>
           </div>
         </motion.div>
       </div>
