@@ -23,7 +23,8 @@ const GRID_SIZE = 10;
 const GAME_DURATION = 120;
 
 export default function EcoRoute({ province, mission, onComplete, onBack }) {
-  const [gameState, setGameState] = useState("vehicleSelect"); // vehicleSelect, playing, finished
+  const [gameState, setGameState] = useState("tutorial"); // tutorial, vehicleSelect, playing, finished
+  const [showTutorial, setShowTutorial] = useState(true);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [grid, setGrid] = useState([]);
   const [path, setPath] = useState([]);
@@ -174,6 +175,72 @@ export default function EcoRoute({ province, mission, onComplete, onBack }) {
     );
   }
 
+  // Tutorial Screen
+  if (showTutorial) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      >
+        <motion.div
+          className="bg-white rounded-3xl p-10 max-w-lg w-full shadow-2xl max-h-[90vh] overflow-y-auto"
+          initial={{ y: 20 }}
+          animate={{ y: 0 }}
+        >
+          <div className="text-center space-y-5">
+            <p className="text-5xl">🚗</p>
+            <h2 className="font-display text-2xl font-bold text-black">EcoRoute</h2>
+            <p className="text-gray-600 text-sm">Simulator Perjalanan Ramah Lingkungan</p>
+
+            <div className="space-y-4 text-left">
+              <div className="bg-blue-50 rounded-2xl p-4 border-2 border-blue-200">
+                <h3 className="font-display font-bold text-black mb-2">📌 Cara Bermain</h3>
+                <p className="text-sm text-gray-700">
+                  Pilih kendaraan, lalu temukan rute dari rumah 🏠 ke kantor 🏢. Setiap klik hanya bisa ke kotak yang berdekatan!
+                </p>
+              </div>
+
+              <div className="bg-green-50 rounded-2xl p-4 border-2 border-green-200">
+                <h3 className="font-display font-bold text-black mb-2">🌍 Emisi Karbon</h3>
+                <p className="text-sm text-gray-700">
+                  Kendaraan ramah lingkungan (jalan kaki, sepeda) = 0 emisi ✨<br/>
+                  Kendaraan lainnya melepaskan karbon saat bergerak. Hindari area macet! 🚦
+                </p>
+              </div>
+
+              <div className="bg-yellow-50 rounded-2xl p-4 border-2 border-yellow-200">
+                <h3 className="font-display font-bold text-black mb-2">🗺️ Tipe Area</h3>
+                <p className="text-sm text-gray-700">
+                  🌳 Taman: -10% emisi (hijau!)<br/>
+                  🚦 Macet: +20% emisi (hindari!)<br/>
+                  ⬜ Normal: standar emisi
+                </p>
+              </div>
+
+              <div className="bg-red-50 rounded-2xl p-4 border-2 border-red-200">
+                <h3 className="font-display font-bold text-black mb-2">⏱️ Waktu & Rating</h3>
+                <p className="text-sm text-gray-700">
+                  Selesaikan dalam 120 detik. Semakin sedikit emisi karbon = rating bintang lebih tinggi! ⭐
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => {
+                setShowTutorial(false);
+                setGameState("vehicleSelect");
+              }}
+              className="w-full py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-2xl font-display font-bold hover:shadow-lg transition-all"
+            >
+              Mulai Game ⚡
+            </button>
+          </div>
+        </motion.div>
+      </motion.div>
+    );
+  }
+
   // Vehicle Selection Screen
   if (gameState === "vehicleSelect") {
     return (
@@ -316,12 +383,6 @@ export default function EcoRoute({ province, mission, onComplete, onBack }) {
               >
                 Klaim Reward ⚡
               </button>
-              <button
-                onClick={() => setGameState("vehicleSelect")}
-                className="w-full py-3 bg-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-300 transition-all flex items-center justify-center gap-2"
-              >
-                <RefreshCw size={18} /> Coba Lagi
-              </button>
             </div>
           </div>
         </motion.div>
@@ -333,7 +394,7 @@ export default function EcoRoute({ province, mission, onComplete, onBack }) {
   const currentCarbon = calculateCurrentCarbon();
 
   return (
-    <div className="w-full space-y-3 px-2">
+    <div className="w-full space-y-4 px-3 sm:px-2">
       {/* Header */}
       <div className="flex items-center justify-between gap-2">
         <button
@@ -342,7 +403,7 @@ export default function EcoRoute({ province, mission, onComplete, onBack }) {
         >
           <ArrowLeft size={14} /> Kembali
         </button>
-        <h3 className="font-heading text-base font-bold text-gray-800">
+        <h3 className="font-heading text-sm sm:text-base font-bold text-gray-800">
           🚗 EcoRoute
         </h3>
         <div className="w-6" />
@@ -350,27 +411,27 @@ export default function EcoRoute({ province, mission, onComplete, onBack }) {
 
       {/* Stats Bar */}
       <div className="grid grid-cols-3 gap-2">
-        <div className="eco-card p-2 text-center bg-green-50">
-          <p className="text-xs text-gray-600 mb-0.5">Jarak</p>
-          <p className="font-heading text-xl font-bold text-green-600">{path.length - 1}</p>
+        <div className="eco-card p-3 text-center bg-green-50">
+          <p className="text-xs text-gray-600 mb-1">Jarak</p>
+          <p className="font-heading text-xl sm:text-2xl font-bold text-green-600">{path.length - 1}</p>
         </div>
-        <div className="eco-card p-2 text-center bg-orange-50">
-          <p className="text-xs text-gray-600 mb-0.5">Karbon</p>
-          <p className="font-heading text-xl font-bold text-orange-600">{currentCarbon}</p>
+        <div className="eco-card p-3 text-center bg-orange-50">
+          <p className="text-xs text-gray-600 mb-1">Karbon</p>
+          <p className="font-heading text-xl sm:text-2xl font-bold text-orange-600">{currentCarbon}</p>
         </div>
-        <div className="eco-card p-2 text-center bg-blue-50">
-          <p className="text-xs text-gray-600 mb-0.5">Waktu</p>
-          <p className="font-heading text-xl font-bold text-blue-600">{timeLeft}s</p>
+        <div className="eco-card p-3 text-center bg-blue-50">
+          <p className="text-xs text-gray-600 mb-1">Waktu</p>
+          <p className="font-heading text-xl sm:text-2xl font-bold text-blue-600">{timeLeft}s</p>
         </div>
       </div>
 
       {/* Carbon Meter */}
-      <div className="space-y-1">
+      <div className="space-y-2">
         <div className="flex items-center justify-between">
           <span className="text-xs font-medium text-gray-600">Meter Karbon</span>
           <span className="text-xs font-bold text-gray-700">{currentCarbon} kg CO₂</span>
         </div>
-        <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+        <div className="w-full h-4 bg-gray-200 rounded-full overflow-hidden">
           <motion.div
             className={`h-full ${getCarbonColor(currentCarbon)}`}
             animate={{ width: `${Math.min((currentCarbon / 2) * 100, 100)}%` }}
@@ -382,7 +443,7 @@ export default function EcoRoute({ province, mission, onComplete, onBack }) {
       {/* Vehicle Info */}
       <div className="eco-card p-3 bg-gradient-to-r from-blue-50 to-cyan-50">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-gray-700">
+          <span className="text-sm sm:text-base font-medium text-gray-700">
             {VEHICLES[selectedVehicle].emoji} {VEHICLES[selectedVehicle].name}
           </span>
           <span className="text-xs text-gray-600">
@@ -394,7 +455,7 @@ export default function EcoRoute({ province, mission, onComplete, onBack }) {
       </div>
 
       {/* Grid Map */}
-      <div className="space-y-2 flex flex-col items-center">
+      <div className="space-y-3 flex flex-col items-center">
         <p className="text-xs font-medium text-gray-600">
           Dari 🏠 ke 🏢 (Klik kotak yang berdekatan)
         </p>
@@ -416,7 +477,7 @@ export default function EcoRoute({ province, mission, onComplete, onBack }) {
                     whileHover={canClick ? { scale: 1.1 } : {}}
                     whileTap={canClick ? { scale: 0.95 } : {}}
                     disabled={!canClick}
-                    className={`w-12 h-12 rounded text-sm flex items-center justify-center transition-all border-2 ${
+                    className={`w-9 h-9 sm:w-12 sm:h-12 rounded text-sm sm:text-base flex items-center justify-center transition-all border-2 ${
                       isStart
                         ? "bg-green-500 border-green-700 text-white"
                         : isEnd
@@ -451,7 +512,7 @@ export default function EcoRoute({ province, mission, onComplete, onBack }) {
       </div>
 
       {/* Legend */}
-      <div className="eco-card p-2 bg-gray-50">
+      <div className="eco-card p-3 bg-gray-50">
         <p className="text-xs font-medium text-gray-700 mb-2">Legenda:</p>
         <div className="grid grid-cols-3 gap-2 text-xs">
           <div className="flex items-center gap-1">
@@ -470,18 +531,21 @@ export default function EcoRoute({ province, mission, onComplete, onBack }) {
       </div>
 
       {/* Action Buttons */}
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-3">
         <button
           onClick={handleReset}
-          className="py-2 bg-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-300 transition-all flex items-center justify-center gap-1 text-sm"
+          className="py-3 bg-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-300 transition-all flex items-center justify-center gap-1 text-sm"
         >
-          <RefreshCw size={16} /> Reset
+          <RefreshCw size={18} /> Reset
         </button>
         <button
-          onClick={() => setGameState("vehicleSelect")}
-          className="py-2 bg-red-200 text-red-700 rounded-xl font-semibold hover:bg-red-300 transition-all flex items-center justify-center gap-1 text-sm"
+          onClick={() => {
+            setShowTutorial(true);
+            setGameState("vehicleSelect");
+          }}
+          className="py-3 bg-red-200 text-red-700 rounded-xl font-semibold hover:bg-red-300 transition-all flex items-center justify-center gap-1 text-sm"
         >
-          <ArrowLeft size={16} /> Ubah Kendaraan
+          <ArrowLeft size={18} /> Ubah
         </button>
       </div>
     </div>
